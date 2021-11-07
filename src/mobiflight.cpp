@@ -156,6 +156,12 @@ MFShifter shiftregisters[MAX_SHIFTERS];
 uint8_t shiftregisterRegistered = 0;
 #endif
 
+#if MF_KEYMATRIX_SUPPORT == 1
+#include "MFKeyMatrix.h"
+MFKeyMatrix keymatrix[MAX_KEYMATRIX];
+uint8_t keymatrixRegistered = 0;
+#endif
+
 // Callbacks define on which received commands we take action
 void attachCommandCallbacks()
 {
@@ -231,6 +237,9 @@ void setup()
   lastAnalogRead = millis() + 4;
   lastButtonUpdate= millis();
   lastEncoderUpdate = millis() +2;
+#if MF_KEYMATRIX_SUPPORT == 1   // Just for testing, delete this!!
+  AddKeymatrix(0x00, "KeyMatrix");
+#endif
 }
 
 void generateSerial(bool force)
@@ -323,6 +332,11 @@ void loop()
 #if MF_SERVO_SUPPORT == 1
   updateServos();
 #endif
+
+#if MF_KEYMATRIX_SUPPORT == 1
+    readKeymatrix();
+#endif
+
 }
 
 bool isPinRegistered(uint8_t pin)
@@ -657,6 +671,27 @@ void ClearShifters()
 }
 #endif
 
+#if MF_KEYMATRIX_SUPPORT == 1
+void AddKeymatrix(uint8_t adress, char const * name = "Keymatrix") {
+  if (keymatrixRegistered == MAX_KEYMATRIX) return;
+  keymatrix[keymatrixRegistered] = MFKeyMatrix(adress, name);
+  keymatrix[keymatrixRegistered].init();
+  keymatrix[keymatrixRegistered].attachHandler(btnOnRelease, handlerKeyMatrixOnChange);
+  keymatrix[keymatrixRegistered].attachHandler(btnOnPress, handlerKeyMatrixOnChange);
+  keymatrixRegistered++;
+//  registerPin(SDA, kTypeKeymatrixI2C);
+//  registerPin(SCL, kTypeKeymatrixI2C);
+}
+
+void ClearKeymatrix() {
+  for(int i=0; i!=keymatrixRegistered; i++) {
+    keymatrix[i].detach();
+  }
+//  clearRegisteredPins(kTypeKeymatrixI2C);
+//  buttonsRegistered = 0;
+}
+#endif
+
 //// EVENT HANDLER /////
 void handlerOnRelease(uint8_t eventId, uint8_t pin, const char *name)
 {
@@ -683,6 +718,18 @@ void handlerOnAnalogChange(int value, uint8_t pin, const char *name)
   cmdMessenger.sendCmdArg(value);
   cmdMessenger.sendCmdEnd();
 };
+
+#if MF_KEYMATRIX_SUPPORT == 1
+//// EVENT HANDLER /////
+void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
+{
+  cmdMessenger.sendCmdStart(kKeyMatrixChange);
+  cmdMessenger.sendCmdArg(name);
+  cmdMessenger.sendCmdArg(pin);
+  cmdMessenger.sendCmdArg(eventId);
+  cmdMessenger.sendCmdEnd();
+};
+#endif
 
 /**
  ** config stuff
@@ -1098,6 +1145,14 @@ void readAnalog()
   for (int i = 0; i != analogRegistered; i++)
   {
     analog[i].update();
+  }
+}
+#endif
+
+#if MF_KEYMATRIX_SUPPORT == 1
+void readKeymatrix() {
+  for(int i=0; i!=keymatrixRegistered; i++) {
+    keymatrix[i].update();
   }
 }
 #endif

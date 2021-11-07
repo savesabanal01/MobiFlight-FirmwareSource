@@ -19,6 +19,9 @@
 #ifndef MF_SHIFTER_SUPPORT
 #define MF_SHIFTER_SUPPORT 1
 #endif
+#ifndef MF_KEYMATRIX_SUPPORT
+#define MF_KEYMATRIX_SUPPORT 1
+#endif
 
 #define MODULE_MAX_PINS 13
 #define MAX_OUTPUTS 8
@@ -30,6 +33,7 @@
 #define MAX_MFLCD_I2C 2
 #define MAX_ANALOG_INPUTS 0
 #define MAX_SHIFTERS 0
+#define MAX_KEYMATRIX 1
 
 #define STEPS 64
 #define STEPPER_SPEED 400 // 300 already worked, 467, too?

@@ -57,7 +57,9 @@ enum
   kSetLcdDisplayI2C,     // 25
   kSetModuleBrightness,  // 26
   kSetShiftRegisterPins, // 27
-  kAnalogChange          // 28
+  kAnalogChange,         // 28
+
+  kKeyMatrixChange       // 30
 };
 
 void attachCommandCallbacks();
@@ -125,5 +127,9 @@ void OnInitShiftRegister();
 void OnSetShiftRegisterPins();
 void AddShifter(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name);
 
+void AddKeymatrix(uint8_t adress, char const * name);
+void ClearKeymatrix();
+void readKeymatrix();
+void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name);
 
 #endif
