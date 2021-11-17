@@ -20,7 +20,7 @@ extern "C"
 };
 
 
-class MFKeyMatrix
+class MFKeymatrix
 {
 private:
     bool                _initialized = false;
@@ -29,13 +29,12 @@ private:
     MCP23017            _mcp;
     buttonEvent         _handlerList[2];
     const char *        _name;
+    uint8_t             getBitLocation(uint8_t c);
 
 public:
     // Constructor
-    MFKeyMatrix(uint8_t adress = 0, const char * name = "Button");        // address = MCP23017 adress for Keymatrix 8x8
+    MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");        // address = MCP23017 adress for Keymatrix 8x8
     void          init(void);
-    // call this function every some milliseconds or by using an interrupt for handling state changes of the rotary encoder.
-//    void          tick(void);
     void          update(void);
     void          detach(void);
     void          attachHandler(byte eventId, buttonEvent newHandler);
@@ -59,6 +58,6 @@ public:
          ^
         PortB
 
-Column is MCP23017 Port A, must be set to output, all HIGH
+Column is MCP23017 Port A, must be set to output, all LOW to get changed button
 Row is MCP23017 Port B, must be set to input with pullup
 *******************************************************************************************/
