@@ -1,6 +1,15 @@
-/// \version 1.0 Initial release
-/// \author  elral66 DO NOT CONTACT THE AUTHOR DIRECTLY: USE THE LISTS
-// Copyright (C) 2013-2021
+/*
+ * MFKeyMatrix.h
+ *
+ * Created: 17.11.2021
+ * Author: Ralf Kull
+ * version 1.0 Initial release
+ * Copyright (C) 2021
+ * 
+ * see also: https://ww1.microchip.com/downloads/en/AppNotes/01081a.pdf
+ * for using interrupt functionality to get changed button
+ * 
+ */
 
 #ifndef MFKEYMATRIX_h
 #define MFKEYMATRIX_h
@@ -19,21 +28,19 @@ extern "C"
   typedef void (*buttonEvent) (byte, uint8_t, const char *);
 };
 
-
 class MFKeymatrix
 {
 private:
     bool                _initialized = false;
     uint8_t             _adress;
-    uint8_t             old_status[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t             old_status[8] = {0x00};
     MCP23017            _mcp;
     buttonEvent         _handlerList[2];
     const char *        _name;
     uint8_t             getBitLocation(uint8_t c);
 
 public:
-    // Constructor
-    MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");        // address = MCP23017 adress for Keymatrix 8x8
+    MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");
     void          init(void);
     void          update(void);
     void          detach(void);
@@ -61,3 +68,10 @@ public:
 Column is MCP23017 Port A, must be set to output, all LOW to get changed button
 Row is MCP23017 Port B, must be set to input with pullup
 *******************************************************************************************/
+
+/*
+
+Rot  = PA1 und PB4 -> 12
+Grün = PA5 und PB0 -> 40
+
+*/
