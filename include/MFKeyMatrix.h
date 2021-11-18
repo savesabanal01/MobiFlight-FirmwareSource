@@ -16,11 +16,7 @@
 
 #include <Arduino.h>
 #include <MFBoards.h>
-
 #include "MCP23017.h"
-#define REPEAT_START_TIME   50
-#define REPEAT_TIME         15
-
 
 extern "C"
 {
@@ -52,7 +48,7 @@ public:
 
 
 /*******************************************************************************************
-        Column  0   1   2   3   4   5   6   7   -> will be set column by column to 0 (Port A)
+        Column  0   1   2   3   4   5   6   7   -> will be set column by column to output and LOW (Port A)
                 |   |   |   |   |   |   |   |
         Row 0 <-0---8---16--24--32--40--48--56
         Row 1 <-1---9---17--X---X---X---X---57
@@ -68,10 +64,3 @@ public:
 Column is MCP23017 Port A, must be set to output, all LOW to get changed button
 Row is MCP23017 Port B, must be set to input with pullup
 *******************************************************************************************/
-
-/*
-
-Rot  = PA1 und PB4 -> 12
-Grün = PA5 und PB0 -> 40
-
-*/
