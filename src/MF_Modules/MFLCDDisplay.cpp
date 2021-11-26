@@ -33,7 +33,9 @@ void MFLCDDisplay::attach(byte address, byte cols, byte lines)
   _lines = lines;
   _lcdDisplay = new LiquidCrystal_I2C((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
   _initialized = true;
+  Wire.setClock(400000);              // for Raspberry Pico setClock() must be called before begin()! After init() it is not considered
   _lcdDisplay->init();
+  Wire.setClock(400000);              // for Mega/Micro/Uno setClock() must be called after begin()! Before it will be overwritten bei begin()
   _lcdDisplay->backlight();
   test();
 }
