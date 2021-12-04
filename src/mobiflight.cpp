@@ -63,6 +63,7 @@ uint32_t lastAnalogAverage = 0;
 uint32_t lastAnalogRead = 0;
 uint32_t lastButtonUpdate= 0;
 uint32_t lastEncoderUpdate = 0;
+uint32_t lastServoUpdate = 0;
 
 const char type[sizeof(MOBIFLIGHT_TYPE)] = MOBIFLIGHT_TYPE;
 char serial[MEM_LEN_SERIAL] = MOBIFLIGHT_SERIAL;
@@ -219,6 +220,7 @@ void setup()
 #if MF_KEYMATRIX_SUPPORT == 1   // Just for testing, delete this!!
   AddKeymatrix(0x20, "KeyMatrix");
 #endif
+  lastServoUpdate = millis();
 }
 
 void generateSerial(bool force)
@@ -1066,6 +1068,9 @@ void OnSetServo()
 
 void updateServos()
 {
+  if (millis()-lastServoUpdate <= MF_SERVO_DELAY_MS) return;
+  lastServoUpdate = millis();
+
   for (int i = 0; i != servosRegistered; i++)
   {
     servos[i].update();
@@ -1085,7 +1090,7 @@ void OnSetLcdDisplayI2C()
 
 void readButtons()
 {
-  if (millis()-lastButtonUpdate <= MF_BUTTON_DEBOUNCE_MS) return;
+  if (millis()-lastButtonUpdate < MF_BUTTON_DEBOUNCE_MS) return;
   lastButtonUpdate= millis();
   for (int i = 0; i != buttonsRegistered; i++)
   {
@@ -1106,14 +1111,14 @@ void readEncoder()
 #if MF_ANALOG_SUPPORT == 1
 void readAnalog()
 {
-  if (millis()-lastAnalogAverage > 10) {
+  if (millis()-lastAnalogAverage > MF_ANALOGAVERAGE_DELAY_MS - 1) {
     for (int i = 0; i != analogRegistered; i++)
     {
       analog[i].readBuffer();
     }
     lastAnalogAverage = millis();
   }
-  if (millis()-lastAnalogRead < 50) return;
+  if (millis()-lastAnalogRead < MF_ANALOGREAD_DELAY_MS) return;
   lastAnalogRead = millis();
   for (int i = 0; i != analogRegistered; i++)
   {
