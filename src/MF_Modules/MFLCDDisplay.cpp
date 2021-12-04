@@ -13,14 +13,14 @@ void MFLCDDisplay::display(const char *string)
 {
   if (!_initialized)
     return;
-/*    Fallback solution if line wrapping does not work on all LCD's (but should)
+/*    Fallback solution if line wrapping does not work on all LCD's (but should) */
  for (uint8_t line = 0; line != _lines; line++)
   {
     _lcdDisplay->setCursor(0, line);
     _lcdDisplay->writeString(&string[line*_cols], _cols);
   }
-*/
-_lcdDisplay->writeString(string);
+
+//_lcdDisplay->writeString(string);
 
 }
 
@@ -32,7 +32,7 @@ void MFLCDDisplay::attach(byte address, byte cols, byte lines)
   _lcdDisplay = new LiquidCrystal_I2C();
   _initialized = true;
   Wire.setClock(400000);              // for Raspberry Pico setClock() must be called before begin()! After init() it is not considered
-  _lcdDisplay->init();
+  _lcdDisplay->init((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
   Wire.setClock(400000);              // for Mega/Micro/Uno setClock() must be called after begin()! Before it will be overwritten bei begin()
   _lcdDisplay->backlight();
   Wire.setClock(400000);
