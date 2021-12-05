@@ -35,7 +35,6 @@
 #define MAX_SHIFTERS 2
 #define MAX_KEYMATRIX 1
 
-
 #define STEPS 64
 #define STEPPER_SPEED 400 // 300 already worked, 467, too?
 #define STEPPER_ACCEL 800
