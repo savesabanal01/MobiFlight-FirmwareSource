@@ -13,12 +13,10 @@ void MFLCDDisplay::display(const char *string)
 {
   if (!_initialized)
     return;
-  char readBuffer[21] = "";
-  for (byte l = 0; l != _lines; l++)
+  for (uint8_t line = 0; line != _lines; line++)
   {
-    _lcdDisplay->setCursor(0, l);
-    memcpy(readBuffer, string + _cols * l, _cols);
-    _lcdDisplay->print(readBuffer);
+    _lcdDisplay->setCursor(0, line);
+    _lcdDisplay->writeString(&string[line*_cols], _cols);
   }
 }
 
@@ -27,10 +25,11 @@ void MFLCDDisplay::attach(byte address, byte cols, byte lines)
   _address = address;
   _cols = cols;
   _lines = lines;
-  _lcdDisplay = new LiquidCrystal_I2C((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
+  _lcdDisplay = new LiquidCrystal_I2C();
   _initialized = true;
-  _lcdDisplay->init();
+  _lcdDisplay->init((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
   _lcdDisplay->backlight();
+  Wire.setClock(400000);
   test();
 }
 

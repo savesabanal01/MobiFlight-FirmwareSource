@@ -31,8 +31,8 @@
 #define MAX_STEPPERS 10
 #define MAX_MFSERVOS 10
 #define MAX_MFLCD_I2C 2
-#define MAX_ANALOG_INPUTS 5
-#define MAX_SHIFTERS 10
+#define MAX_ANALOG_INPUTS 16
+#define MAX_SHIFTERS 4
 #define MAX_KEYMATRIX 2
 
 #define STEPS 64
@@ -43,6 +43,6 @@
 #define MOBIFLIGHT_SERIAL "1234567890"
 #define MOBIFLIGHT_NAME "MobiFlight Mega"
 #define EEPROM_SIZE 4096 // EEPROMSizeMega
-#define MEMLEN_CONFIG 1024
+#define MEMLEN_CONFIG 1496
 
 #endif

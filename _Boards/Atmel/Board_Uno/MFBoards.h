@@ -27,12 +27,12 @@
 #define MAX_OUTPUTS 8
 #define MAX_BUTTONS 8
 #define MAX_LEDSEGMENTS 1
-#define MAX_ENCODERS 2
+#define MAX_ENCODERS 3
 #define MAX_STEPPERS 2
 #define MAX_MFSERVOS 2
 #define MAX_MFLCD_I2C 2
-#define MAX_ANALOG_INPUTS 0
-#define MAX_SHIFTERS 0
+#define MAX_ANALOG_INPUTS 3
+#define MAX_SHIFTERS 2
 #define MAX_KEYMATRIX 1
 
 #define STEPS 64
@@ -43,6 +43,6 @@
 #define MOBIFLIGHT_SERIAL "0987654321"
 #define MOBIFLIGHT_NAME "MobiFlight Uno"
 #define EEPROM_SIZE 1024 // EEPROMSizeUno
-#define MEMLEN_CONFIG 256
+#define MEMLEN_CONFIG 286
 
 #endif
