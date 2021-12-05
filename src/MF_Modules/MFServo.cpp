@@ -27,6 +27,36 @@ void MFServo::update() {
 		return; 
 	}
 
+	uint8_t delta = abs(_currentPos - _targetPos);
+	if (delta > 20) {
+		if (_step < 5) _step++;
+	} else {
+		if (_step > 1) _step--;
+	}
+
+    if (_currentPos > _targetPos) {
+		_currentPos-= _step;
+	} else {
+		_currentPos+= _step;
+	}
+  cmdMessenger.sendCmdStart(0xFF);
+  cmdMessenger.sendCmdArg("Position");
+  cmdMessenger.sendCmdArg(_currentPos);
+  cmdMessenger.sendCmdArg(_step);
+  cmdMessenger.sendCmdEnd();
+
+    _servo.write(_currentPos);
+}
+
+/*
+void MFServo::update() {
+	// after reaching final position
+	// detach the servo to prevent continuous noise
+    if (_currentPos == _targetPos) { 
+		// detach(); 
+		return; 
+	}
+
 	uint8_t step = abs(_currentPos - _targetPos);
 	if (step > 20) {
 		step = 5;
@@ -42,6 +72,7 @@ void MFServo::update() {
         
     _servo.write(_currentPos);
 }
+*/
 
 void MFServo::detach() { 
   if (_initialized) {

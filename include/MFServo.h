@@ -39,6 +39,7 @@ private:
     Servo   _servo;
     uint8_t _targetPos;
     uint8_t _currentPos;    
+    uint8_t _step = 0;
 //    int     speed;
 };
 #endif 
