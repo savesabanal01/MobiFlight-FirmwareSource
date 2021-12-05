@@ -3,6 +3,8 @@
 // Copyright (C) 2013-2014
 
 #include "MFServo.h"
+#include "CmdMessenger.h"
+extern CmdMessenger cmdMessenger;
 
 void MFServo::moveTo(int absolute)
 {
@@ -24,9 +26,19 @@ void MFServo::update() {
 		// detach(); 
 		return; 
 	}
-    
-    if (_currentPos > _targetPos) _currentPos--;
-    else _currentPos++;
+
+	uint8_t step = abs(_currentPos - _targetPos);
+	if (step > 20) {
+		step = 5;
+	} else {
+		step = 1;
+	}
+
+    if (_currentPos > _targetPos) {
+		_currentPos-= step;
+	} else {
+		_currentPos+= step;
+	}
         
     _servo.write(_currentPos);
 }

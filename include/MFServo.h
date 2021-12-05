@@ -37,8 +37,8 @@ private:
 		int			_mapRange[4];
     bool    _initialized;
     Servo   _servo;
-    long    _targetPos;
-    long    _currentPos;    
-    int     speed;
+    uint8_t _targetPos;
+    uint8_t _currentPos;    
+//    int     speed;
 };
 #endif 
