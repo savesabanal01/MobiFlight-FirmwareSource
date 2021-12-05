@@ -125,7 +125,7 @@ uint8_t shiftregisterRegistered = 0;
 
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
-MFKeyMatrix keymatrix[MAX_KEYMATRIX];
+MFKeymatrix keymatrix[MAX_KEYMATRIX];
 uint8_t keymatrixRegistered = 0;
 #endif
 
@@ -218,7 +218,7 @@ void setup()
   lastButtonUpdate= millis();
   lastEncoderUpdate = millis() +2;
 #if MF_KEYMATRIX_SUPPORT == 1   // Just for testing, delete this!!
-  AddKeymatrix(0x00, "KeyMatrix");
+  AddKeymatrix(0x20, "KeyMatrix");
 #endif
   lastServoUpdate = millis();
 }
@@ -649,21 +649,21 @@ void ClearShifters()
 #if MF_KEYMATRIX_SUPPORT == 1
 void AddKeymatrix(uint8_t adress, char const * name = "Keymatrix") {
   if (keymatrixRegistered == MAX_KEYMATRIX) return;
-  keymatrix[keymatrixRegistered] = MFKeyMatrix(adress, name);
+  keymatrix[keymatrixRegistered] = MFKeymatrix(adress, name);
   keymatrix[keymatrixRegistered].init();
   keymatrix[keymatrixRegistered].attachHandler(btnOnRelease, handlerKeyMatrixOnChange);
   keymatrix[keymatrixRegistered].attachHandler(btnOnPress, handlerKeyMatrixOnChange);
   keymatrixRegistered++;
-//  registerPin(SDA, kTypeKeymatrixI2C);
-//  registerPin(SCL, kTypeKeymatrixI2C);
+  registerPin(SDA, kTypeKeymatrixI2C);
+  registerPin(SCL, kTypeKeymatrixI2C);
 }
 
 void ClearKeymatrix() {
   for(int i=0; i!=keymatrixRegistered; i++) {
     keymatrix[i].detach();
   }
-//  clearRegisteredPins(kTypeKeymatrixI2C);
-//  buttonsRegistered = 0;
+  clearRegisteredPins(kTypeKeymatrixI2C);
+  keymatrixRegistered = 0;
 }
 #endif
 

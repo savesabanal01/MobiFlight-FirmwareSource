@@ -22,7 +22,8 @@ enum
   kTypeEncoder,             // 8
   kTypeStepper,             // 9 (new stepper type with auto zero support if btnPin is > 0)
   kShiftRegister,           // 10 Shift register support (example: 74HC595, TLC592X)
-  kTypeAnalogInput          // 11 Analog Device with 1 pin
+  kTypeAnalogInput,         // 11 Analog Device with 1 pin
+  kTypeKeymatrixI2C         // 12 Keymatrix with MCP23017
 };
 
 // This is the list of recognized commands. These can be commands that can either be sent or received.
@@ -61,7 +62,7 @@ enum
   kSetModuleBrightness,  // 26
   kSetShiftRegisterPins, // 27
   kAnalogChange,         // 28
-
+  kInputShifterChange,   // 29
   kKeyMatrixChange       // 30
 };
 

@@ -1,17 +1,22 @@
-/// \version 1.0 Initial release
-/// \author  elral66 DO NOT CONTACT THE AUTHOR DIRECTLY: USE THE LISTS
-// Copyright (C) 2013-2021
+/*
+ * MFKeyMatrix.h
+ *
+ * Created: 17.11.2021
+ * Author: Ralf Kull
+ * version 1.0 Initial release
+ * Copyright (C) 2021
+ * 
+ * see also: https://ww1.microchip.com/downloads/en/AppNotes/01081a.pdf
+ * for using interrupt functionality to get changed button
+ * 
+ */
 
 #ifndef MFKEYMATRIX_h
 #define MFKEYMATRIX_h
 
 #include <Arduino.h>
 #include <MFBoards.h>
-
 #include "MCP23017.h"
-#define REPEAT_START_TIME   50
-#define REPEAT_TIME         15
-
 
 extern "C"
 {
@@ -19,23 +24,20 @@ extern "C"
   typedef void (*buttonEvent) (byte, uint8_t, const char *);
 };
 
-
-class MFKeyMatrix
+class MFKeymatrix
 {
 private:
     bool                _initialized = false;
     uint8_t             _adress;
-    uint8_t             old_status[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t             old_status[8] = {0x00};
     MCP23017            _mcp;
     buttonEvent         _handlerList[2];
     const char *        _name;
+    uint8_t             getBitLocation(uint8_t c);
 
 public:
-    // Constructor
-    MFKeyMatrix(uint8_t adress = 0, const char * name = "Button");        // address = MCP23017 adress for Keymatrix 8x8
+    MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");
     void          init(void);
-    // call this function every some milliseconds or by using an interrupt for handling state changes of the rotary encoder.
-//    void          tick(void);
     void          update(void);
     void          detach(void);
     void          attachHandler(byte eventId, buttonEvent newHandler);
@@ -46,7 +48,7 @@ public:
 
 
 /*******************************************************************************************
-        Column  0   1   2   3   4   5   6   7   -> will be set column by column to 0 (Port A)
+        Column  0   1   2   3   4   5   6   7   -> will be set column by column to output and LOW (Port A)
                 |   |   |   |   |   |   |   |
         Row 0 <-0---8---16--24--32--40--48--56
         Row 1 <-1---9---17--X---X---X---X---57
@@ -59,6 +61,6 @@ public:
          ^
         PortB
 
-Column is MCP23017 Port A, must be set to output, all HIGH
+Column is MCP23017 Port A, must be set to output, all LOW to get changed button
 Row is MCP23017 Port B, must be set to input with pullup
 *******************************************************************************************/
