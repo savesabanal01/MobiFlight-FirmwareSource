@@ -28,8 +28,8 @@ void MFServo::update() {
 	}
 
 	uint8_t delta = abs(_currentPos - _targetPos);
-	if (delta > 20) {
-		if (_step < 5) _step++;
+	if (delta > 30) {
+		if (_step < 4) _step+=2;
 	} else {
 		if (_step > 1) _step--;
 	}
