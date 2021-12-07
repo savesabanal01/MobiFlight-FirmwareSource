@@ -3,8 +3,6 @@
 // Copyright (C) 2013-2014
 
 #include "MFServo.h"
-#include "CmdMessenger.h"
-extern CmdMessenger cmdMessenger;
 
 void MFServo::moveTo(int absolute)
 {
@@ -16,6 +14,13 @@ void MFServo::moveTo(int absolute)
 			  _servo.attach(_pin);
 				_initialized = true;
 			}
+			_max_step = abs(_currentPos - _targetPos)/4;
+			if (_max_step > 7) _max_step = 7;
+			_max_step_limit = ((_max_step * _max_step) + _max_step) / 2;	// gaussian sum formula, calculates the steps if decreased by one each update()
+																			// if acceleration should be used, the required numbers of steps have to be calculated and added
+			_max_step_limit++;												// for safety be at step=1 one position step before target position
+			_step = _max_step;												// start with max. calculated steps
+			if (!_step) _step = 1;											// at least stepwidth of one is required
     }
 }
 
@@ -27,52 +32,19 @@ void MFServo::update() {
 		return; 
 	}
 
-	uint8_t delta = abs(_currentPos - _targetPos);
-	if (delta > 30) {
-		if (_step < 4) _step+=2;
-	} else {
-		if (_step > 1) _step--;
+	int16_t delta = _currentPos - _targetPos;
+	if (abs(delta) < _max_step_limit) {						// if delta position is less than the steps which are required to slow down
+		if (_step > 1) _step--;								// reduce speed by decreasing the steps by one
 	}
 
-    if (_currentPos > _targetPos) {
+    if (delta > 0) {
 		_currentPos-= _step;
 	} else {
 		_currentPos+= _step;
 	}
-  cmdMessenger.sendCmdStart(0xFF);
-  cmdMessenger.sendCmdArg("Position");
-  cmdMessenger.sendCmdArg(_currentPos);
-  cmdMessenger.sendCmdArg(_step);
-  cmdMessenger.sendCmdEnd();
 
     _servo.write(_currentPos);
 }
-
-/*
-void MFServo::update() {
-	// after reaching final position
-	// detach the servo to prevent continuous noise
-    if (_currentPos == _targetPos) { 
-		// detach(); 
-		return; 
-	}
-
-	uint8_t step = abs(_currentPos - _targetPos);
-	if (step > 20) {
-		step = 5;
-	} else {
-		step = 1;
-	}
-
-    if (_currentPos > _targetPos) {
-		_currentPos-= step;
-	} else {
-		_currentPos+= step;
-	}
-        
-    _servo.write(_currentPos);
-}
-*/
 
 void MFServo::detach() { 
   if (_initialized) {
