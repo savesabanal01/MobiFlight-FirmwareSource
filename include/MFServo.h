@@ -42,5 +42,6 @@ private:
     uint8_t _step;
     uint8_t _max_step;
     uint8_t _max_step_limit;
+uint32_t _millis_start;
 };
 #endif 

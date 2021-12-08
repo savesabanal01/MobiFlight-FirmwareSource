@@ -14,12 +14,14 @@ void MFServo::moveTo(int absolute)
 			  _servo.attach(_pin);
 				_initialized = true;
 			}
-			_max_step = abs(_currentPos - _targetPos)/4;
+//			_max_step = abs(_currentPos - _targetPos)/4;
+			_max_step = abs(_currentPos - _targetPos)/16;
 			if (_max_step > 7) _max_step = 7;
 			_max_step_limit = ((_max_step * _max_step) + _max_step) / 2;	// gaussian sum formula, calculates the steps if decreased by one each update()
 			_max_step_limit++;												// for safety to be at step=1 one position step before target position
 			_step = _max_step;												// start with max. calculated steps
 			if (!_step) _step = 1;											// at least stepwidth of one is required
+_millis_start=millis();
     }
 }
 
@@ -40,7 +42,8 @@ void MFServo::update()
 	} else {
 		_currentPos+= _step;
 	}
-
+Serial.print("Step: "); Serial.println(_step);
+Serial.print("Millis: "); Serial.println(millis()-_millis_start);
     _servo.write(_currentPos);
 }
 
