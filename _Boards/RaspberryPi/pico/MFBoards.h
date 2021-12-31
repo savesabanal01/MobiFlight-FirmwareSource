@@ -40,7 +40,7 @@
 #define MOBIFLIGHT_SERIAL   "0987654321"
 #define MOBIFLIGHT_NAME     "MobiFlight RaspiPico"
 #define EEPROM_SIZE         2048    // EEPROMSizeRaspberryPico
-#define MEMLEN_CONFIG       1024    // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
+#define MEMLEN_CONFIG       1496    // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
 #define RANDOM_SEED_INPUT   A0      // better to have randomSeed(analogRead(RANDOM_SEED_INPUT)); in generateSerial(), "0" is not valid for all HW platforms
 #define SDA                 PIN_WIRE0_SDA
 #define SCL                 PIN_WIRE0_SCL

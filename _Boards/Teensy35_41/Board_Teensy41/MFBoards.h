@@ -32,7 +32,7 @@
 #define MOBIFLIGHT_SERIAL       "1234567890"           // must it be renamed for connector?
 #define MOBIFLIGHT_NAME         "MobiFlight Teensy41"
 #define EEPROM_SIZE             4248                   // EEPROMSizeTeensy4 is not part of the EEPROMex lib!?
-#define MEMLEN_CONFIG           1024     // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
+#define MEMLEN_CONFIG           1496     // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
 #define RANDOM_SEED_INPUT       A0
 
 #endif

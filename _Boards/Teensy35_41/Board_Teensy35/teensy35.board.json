@@ -11,7 +11,7 @@
       "ConnectionDelay": 1750,
       "DelayAfterFirmwareUpdate": 1250,
       "DtrEnable": true,
-      "EEPROMSize": 1024,
+      "EEPROMSize": 1496,
       "ExtraConnectionRetry": true,
       "ForceResetOnFirmwareUpdate": false,
       "MessageSize": 64
