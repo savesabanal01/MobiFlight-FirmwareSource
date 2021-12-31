@@ -1,10 +1,11 @@
 {
     "$schema": "./mfboard.schema.json",
     "AvrDudeSettings": {
-      "Device": "atmega328p",
+      "Device": "Teensy41",
       "BaudRate": "115200",
       "Programmer": "arduino",
-      "FirmwareBaseName": "mobiflight_raspberrypico"
+      "FirmwareBaseName": "mobiflight_teensy41",
+      "Timeout": 15000
     },
     "Connection": {
       "ConnectionDelay": 1750,
@@ -22,7 +23,7 @@
     "Info": {
       "CanInstallFirmware": true,
       "FriendlyName": "Teensy41",
-      "LatestFirmwareVersion": "1.13.1",
+      "LatestFirmwareVersion": "2.0.0",
       "MobiFlightType": "MobiFlight Teensy41"
     },
     "ModuleLimits": {
@@ -47,7 +48,7 @@
         "isI2C": false,
         "isPWM": true,
         "Pin": 1
-      }
+      },
       {
         "isAnalog": false,
         "isI2C": false,
@@ -275,7 +276,7 @@
         "isI2C": false,
         "isPWM": false,
         "Pin": 49
-      }
+      },
       {
         "isAnalog": false,
         "isI2C": false,

@@ -1,25 +1,26 @@
 {
     "$schema": "./mfboard.schema.json",
     "AvrDudeSettings": {
-      "Device": "atmega328p",
+      "Device": "RaspiPico",
       "BaudRate": "115200",
       "Programmer": "arduino",
-      "FirmwareBaseName": "mobiflight_raspberrypico"
+      "FirmwareBaseName": "mobiflight_raspberrypico",
+      "Timeout": 15000
     },
     "Connection": {
-      "ConnectionDelay": 1750,
+      "ConnectionDelay": 1250,
       "DelayAfterFirmwareUpdate": 1250,
       "DtrEnable": true,
-      "EEPROMSize": 1024,
-      "ExtraConnectionRetry": true,
-      "ForceResetOnFirmwareUpdate": false,
+      "EEPROMSize": 2048,
+      "ExtraConnectionRetry": false,
+      "ForceResetOnFirmwareUpdate": true,
       "MessageSize": 64
     },
     "HardwareIds": ["^VID_2E8A&PID_000A"],
     "Info": {
       "CanInstallFirmware": true,
       "FriendlyName": "RaspiPico",
-      "LatestFirmwareVersion": "1.13.1",
+      "LatestFirmwareVersion": "2.0.0",
       "MobiFlightType": "MobiFlight RaspiPico"
     },
     "ModuleLimits": {
