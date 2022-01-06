@@ -4,10 +4,10 @@
 #include <MFEncoder.h>
 #include <MFAnalog.h>
 
-#define MF_BUTTON_DEBOUNCE_MS   10      // time between updating the buttons
-#define MF_SERVO_DELAY_MS       5       // Time between servo updates
-#define MF_ANALOGAVERAGE_DELAY_MS 10    // time between updating the analog average calculation
-#define MF_ANALOGREAD_DELAY_MS  50      // time between sending analog values
+#define MF_BUTTON_DEBOUNCE_MS 10     // time between updating the buttons
+#define MF_SERVO_DELAY_MS 5          // Time between servo updates
+#define MF_ANALOGAVERAGE_DELAY_MS 10 // time between updating the analog average calculation
+#define MF_ANALOGREAD_DELAY_MS 50    // time between sending analog values
 
 enum
 {
@@ -23,7 +23,8 @@ enum
   kTypeStepper,             // 9 (new stepper type with auto zero support if btnPin is > 0)
   kShiftRegister,           // 10 Shift register support (example: 74HC595, TLC592X)
   kTypeAnalogInput,         // 11 Analog Device with 1 pin
-  kTypeKeymatrixI2C         // 12 Keymatrix with MCP23017
+  kTypeInputShifter,        // 12 Input shift register support (example: 74HC165)
+  kTypeKeymatrixI2C         // 13 Keymatrix with MCP23017
 };
 
 // This is the list of recognized commands. These can be commands that can either be sent or received.
@@ -130,6 +131,11 @@ void handlerOnAnalogChange(int value, uint8_t pin, const char *name);
 void OnInitShiftRegister();
 void OnSetShiftRegisterPins();
 void AddShifter(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name);
+
+void AddInputShifter(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name);
+void ClearInputShifters();
+void readInputShifters();
+void handlerInputShifterOnChange(uint8_t eventId, uint8_t pin, const char *name);
 
 void AddKeymatrix(uint8_t adress, char const * name);
 void ClearKeymatrix();
