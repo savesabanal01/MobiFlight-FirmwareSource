@@ -223,7 +223,7 @@ void setup()
   cmdMessenger.printLfCr();
   OnResetBoard();
   // Time Gap between Inputs, do not read at the same loop
-#if MF_INPUTSHIFTER_SUPPORT == 1
+#if MF_INPUT_SHIFTER_SUPPORT == 1
   lastInputShifterUpdate = millis() + 6;
 #endif
   lastAnalogAverage = millis() + 4;
@@ -1293,8 +1293,10 @@ void OnTrigger()
 
   // Retrigger all the input shifters. This automatically sends
   // the release events first followed by press events.
+  #if MF_INPUT_SHIFTER_SUPPORT == 1
   for (int i = 0; i != inputShiftersRegistered; i++)
   {
     inputShifters[i].retrigger();
   }
+  #endif
 }
