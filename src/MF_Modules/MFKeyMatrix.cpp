@@ -52,6 +52,11 @@ void MFKeymatrix::update(void) {
     portB= _mcp.readRegister(MCP23017Register::INTF_B);             // read interrupt register from portB to check if an interrupt has occur and from which row
     if (!portB) return;                                             // if no interrupt occur do not check Keymatrix for changed button
 
+    if (_calculate == false)                                        // on interrupt do not calculate the button but wait one loop for debouncing
+    {
+        _calculate = true;                                          // set status to "calculating" to calculate the button on the next loop
+        return;                                                     // and in this loop do nothing
+    }
     for (uint8_t column=0; column<8; column++) {                    // Scan each column for pressed/released key
         _mcp.portMode(MCP23017Port::A, ~(1<<column), 0xFF, 0xFF);   // set columns separate to output (no diodes needed), LOW due to inverted mode
         actual_status = _mcp.readPort(MCP23017Port::B);             // and read the row
@@ -76,6 +81,7 @@ void MFKeymatrix::update(void) {
     }
     _mcp.portMode(MCP23017Port::A, 0x00, 0xFF, 0xFF);               // Port A as output, inverted mode
     _mcp.clearInterrupts();                                         // and clear the interrupt to capture the next
+    _calculate = false;                                             // on next interrupt do not calculate the button but wait one loop for debouncing
 }
 
 

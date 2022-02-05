@@ -34,6 +34,7 @@ private:
     buttonEvent         _handlerList[2];
     const char *        _name;
     uint8_t             getBitLocation(uint8_t c);
+    uint8_t             _calculate = false;
 
 public:
     MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");
