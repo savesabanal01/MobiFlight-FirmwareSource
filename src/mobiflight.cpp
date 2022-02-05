@@ -785,8 +785,9 @@ void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
   cmdMessenger.sendCmdStart(kKeyMatrixChange);
   cmdMessenger.sendCmdArg(name);
   cmdMessenger.sendArg("-");
-  cmdMessenger.sendArg(pin);
-  cmdMessenger.sendCmdArg(eventId);     // send name and pin w/ delimiter "-"
+  cmdMessenger.sendArg(pin);            // send name and pin w/ delimiter "-"
+//  cmdMessenger.sendCmdArg(pin);       // send name and pin w/ delimiter "," -> uncomment both above (sendArg())
+  cmdMessenger.sendCmdArg(eventId);
   cmdMessenger.sendCmdEnd();
 };
 #endif
