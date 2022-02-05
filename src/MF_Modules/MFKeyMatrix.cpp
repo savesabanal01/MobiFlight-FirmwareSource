@@ -17,11 +17,13 @@
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
 
-enum
+enum KeyMatrixState
 {
   btnOnPress,
   btnOnRelease,
 };
+
+keymatrixEvent   MFKeymatrix::_handler = NULL;
 
 MFKeymatrix::MFKeymatrix (uint8_t address, const char * name) {
     _adress = address;
@@ -68,11 +70,11 @@ void MFKeymatrix::update(void) {
 //    in this case next both if() are not required here, would be done in button routine
 //    must be substituted by un-/setting the virtual button
 // *********************************************************************************************
-            if ((actual_status&portB) && _handlerList[btnOnPress]!= NULL) {    // check for pressed or released
-                (*_handlerList[btnOnPress])(btnOnPress, (column4bit + getBitLocation(portB)), _name);   // and send event
+            if ((actual_status&portB) && _handler!= NULL) {    // check for pressed or released
+                (*_handler)(KeyMatrixState::btnOnPress, (column4bit + getBitLocation(portB)), _name);   // and send event
             }
-            if (!(actual_status&portB) && _handlerList[btnOnRelease] != NULL) {
-                (*_handlerList[btnOnRelease])(btnOnRelease, (column4bit + getBitLocation(portB)), _name);
+            if (!(actual_status&portB) && _handler != NULL) {
+                (*_handler)(KeyMatrixState::btnOnRelease, (column4bit + getBitLocation(portB)), _name);
             }
 // *****************************************************************************************
             old_status[column] = actual_status;                     // store actual status as old status to detect next button change
@@ -90,9 +92,9 @@ void MFKeymatrix::detach()
   _initialized = false;
 }
 
-void MFKeymatrix::attachHandler(byte eventId, buttonEvent newHandler)
+void MFKeymatrix::attachHandler(keymatrixEvent newHandler)
 {
-  _handlerList[eventId] = newHandler;
+  _handler = newHandler;
 }
 
 /* **************************************************************************************************

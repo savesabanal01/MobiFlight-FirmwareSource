@@ -21,27 +21,27 @@
 extern "C"
 {
   // callback functions always follow the signature: void cmd(void);
-  typedef void (*buttonEvent) (byte, uint8_t, const char *);
+  typedef void (*keymatrixEvent) (byte, uint8_t, const char *);
 };
 
 class MFKeymatrix
 {
 private:
-    bool                _initialized = false;
-    uint8_t             _adress;
-    uint8_t             old_status[8] = {0x00};
-    MCP23017            _mcp;
-    buttonEvent         _handlerList[2];
-    const char *        _name;
-    uint8_t             getBitLocation(uint8_t c);
-    uint8_t             _calculate = false;
+    bool                  _initialized = false;
+    uint8_t               _adress;
+    uint8_t               old_status[8] = {0x00};
+    MCP23017              _mcp;
+    static keymatrixEvent _handler;
+    const char *          _name;
+    uint8_t               getBitLocation(uint8_t c);
+    uint8_t               _calculate = false;
 
 public:
     MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");
     void          init(void);
     void          update(void);
     void          detach(void);
-    void          attachHandler(byte eventId, buttonEvent newHandler);
+    static void   attachHandler(keymatrixEvent newHandler);
 };
 
 

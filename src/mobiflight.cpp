@@ -207,6 +207,9 @@ void attachEventCallbacks()
 #if MF_ANALOG_SUPPORT == 1
   MFAnalog::attachHandler(handlerOnAnalogChange);
 #endif
+#if MF_KEYMATRIX_SUPPORT == 1
+  MFKeymatrix::attachHandler(handlerKeyMatrixOnChange);
+#endif
 }
 
 void OnResetBoard()
@@ -722,8 +725,6 @@ void AddKeymatrix(uint8_t adress, char const * name = "Keymatrix") {
   if (keymatrixRegistered == MAX_KEYMATRIX) return;
   keymatrix[keymatrixRegistered] = MFKeymatrix(adress, name);
   keymatrix[keymatrixRegistered].init();
-  keymatrix[keymatrixRegistered].attachHandler(btnOnRelease, handlerKeyMatrixOnChange);
-  keymatrix[keymatrixRegistered].attachHandler(btnOnPress, handlerKeyMatrixOnChange);
   keymatrixRegistered++;
   registerPin(SDA, kTypeKeymatrixI2C);
   registerPin(SCL, kTypeKeymatrixI2C);
@@ -783,8 +784,9 @@ void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
 {
   cmdMessenger.sendCmdStart(kKeyMatrixChange);
   cmdMessenger.sendCmdArg(name);
-  cmdMessenger.sendCmdArg(pin);
-  cmdMessenger.sendCmdArg(eventId);
+  cmdMessenger.sendArg("-");
+  cmdMessenger.sendArg(pin);
+  cmdMessenger.sendCmdArg(eventId);     // send name and pin w/ delimiter "-"
   cmdMessenger.sendCmdEnd();
 };
 #endif
