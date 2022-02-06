@@ -82,7 +82,7 @@ void MFKeymatrix::update(void) {
         column4bit += 8;                                            // for calculating button number on next column
     }
     _mcp.portMode(MCP23017Port::A, 0x00, 0xFF, 0xFF);               // Port A as output, inverted mode
-    _mcp.clearInterrupts();                                         // and clear the interrupt to capture the next
+    _mcp.clearInterrupts();                                         // and clear the interrupt to capture the next interrupt -> this must be done, otherwise a key release is not detected!??
     _calculate = false;                                             // on next interrupt do not calculate the button but wait one loop for debouncing
 }
 
