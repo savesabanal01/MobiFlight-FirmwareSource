@@ -145,6 +145,7 @@ uint8_t inputShiftersRegistered = 0;
 #include "MFKeyMatrix.h"
 MFKeymatrix keymatrix[MAX_KEYMATRIX];
 uint8_t keymatrixRegistered = 0;
+uint32_t lastKexmatrixRead = 0;
 #endif
 
 // Callbacks define on which received commands we take action
@@ -1256,6 +1257,8 @@ void readAnalog()
 
 #if MF_KEYMATRIX_SUPPORT == 1
 void readKeymatrix() {
+  if (millis() - lastKexmatrixRead < MF_BUTTON_DEBOUNCE_MS)
+    return;
   for(int i=0; i!=keymatrixRegistered; i++) {
     keymatrix[i].update();
   }
