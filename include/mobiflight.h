@@ -3,6 +3,7 @@
 
 #include <MFEncoder.h>
 #include <MFAnalog.h>
+#include <CmdMessenger.h>
 
 #define MF_BUTTON_DEBOUNCE_MS 10     // time between updating the buttons
 #define MF_SERVO_DELAY_MS 5          // Time between servo updates
@@ -64,7 +65,8 @@ enum
   kSetShiftRegisterPins, // 27
   kAnalogChange,         // 28
   kInputShifterChange,   // 29
-  kKeyMatrixChange       // 30
+  kKeyMatrixChange,      // 30
+  kDebug = 0xFF          // 255 -> for Debug print later, changes in UI are required
 };
 
 void attachCommandCallbacks();
@@ -74,11 +76,6 @@ void loadConfig();
 void _storeConfig();
 void SetPowerSavingMode(bool state);
 void updatePowerSaving();
-bool isPinRegistered(uint8_t pin);
-bool isPinRegisteredForType(uint8_t pin, uint8_t type);
-void registerPin(uint8_t pin, uint8_t type);
-void clearRegisteredPins(uint8_t type);
-void clearRegisteredPins();
 void AddOutput(uint8_t pin, char const *name);
 void ClearOutputs();
 void AddButton(uint8_t pin, char const *name, bool repeat);
@@ -140,5 +137,7 @@ void AddKeymatrix(uint8_t adress, char const * name);
 void ClearKeymatrix();
 void readKeymatrix();
 void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name);
+
+extern CmdMessenger cmdMessenger;
 
 #endif
