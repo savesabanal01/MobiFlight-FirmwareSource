@@ -3,6 +3,8 @@
 // Copyright (C) 2013-2014
 
 #include "MFLCDDisplay.h"
+#include "allocateMem.h"
+#include "mobiflight.h"
 
 MFLCDDisplay::MFLCDDisplay()
 {
@@ -25,7 +27,15 @@ void MFLCDDisplay::attach(byte address, byte cols, byte lines)
   _address = address;
   _cols = cols;
   _lines = lines;
-  _lcdDisplay = new LiquidCrystal_I2C();
+  if (!FitInMemory(sizeof(LiquidCrystal_I2C)))
+	{
+		// Error Message to Connector
+    cmdMessenger.sendCmdStart(kDebug);
+    cmdMessenger.sendCmdArg(F("LCD does not fit in Memory!"));
+    cmdMessenger.sendCmdEnd();
+		return;
+	}
+  _lcdDisplay = new (allocateMemory(sizeof(LiquidCrystal_I2C))) LiquidCrystal_I2C;
   _initialized = true;
   Wire.setClock(400000);              // for Raspberry Pico setClock() must be called before begin()! After init() it is not considered
   _lcdDisplay->init((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
@@ -39,7 +49,6 @@ void MFLCDDisplay::detach()
 {
   if (!_initialized)
     return;
-  delete _lcdDisplay;
   _initialized = false;
 }
 
@@ -60,7 +69,7 @@ void MFLCDDisplay::test()
 
   if (_lines > 2)
   {
-    preLines = floor(_lines / 2) - 1;
+    preLines = (_lines / 2) - 1;    // floor needs much Flash and for integer it's the same
   }
 
   _printCentered("MF wishes", preLines++);
