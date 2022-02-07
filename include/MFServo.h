@@ -36,12 +36,12 @@ private:
 		uint8_t _pin;
 		int			_mapRange[4];
     bool    _initialized;
-    Servo   _servo;
+    Servo   *_servo;
     uint8_t _targetPos;
     uint8_t _currentPos;    
     uint8_t _step;
     uint8_t _max_step;
     uint8_t _max_step_limit;
-uint32_t _millis_start;
+    uint32_t _millis_start;
 };
 #endif 
