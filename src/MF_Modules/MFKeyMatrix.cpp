@@ -37,8 +37,8 @@ void MFKeymatrix::init(void) {
     Wire.begin();
     Wire.setClock(400000);
     _mcp.init(_adress);
-    _mcp.portMode(MCP23017Port::A, 0x00);                           // Port A as output, columns
-    _mcp.portMode(MCP23017Port::B, 0xFF, 0xFF, 0xFF);               // Port B as input w/ PullUps, rows, inverted mode
+    _mcp.portMode(MCP23017Port::A, 0x00);                           // Port A (columns) as output
+    _mcp.portMode(MCP23017Port::B, 0xFF, 0xFF, 0xFF);               // Port B (rows) as input, w/ PullUps, inverted mode
     _mcp.interruptMode(MCP23017InterruptMode::Or);                  // Interrupt on one line, not really needed here as only Port B is input
     _mcp.interrupt(MCP23017Port::B, CHANGE);                        // interrupt on changing
     _mcp.writeRegister(MCP23017Register::GPIO_A, 0x00);             // Reset port A
@@ -59,6 +59,7 @@ void MFKeymatrix::update(void) {
         _calculate = true;                                          // set status to "calculating" to calculate the button on the next loop
         return;                                                     // and in this loop do nothing
     }
+
     for (uint8_t column=0; column<8; column++) {                    // Scan each column for pressed/released key
         _mcp.portMode(MCP23017Port::A, ~(1<<column), 0xFF, 0xFF);   // set columns separate to output (no diodes needed), LOW due to inverted mode
         actual_status = _mcp.readPort(MCP23017Port::B);             // and read the row
@@ -81,8 +82,9 @@ void MFKeymatrix::update(void) {
         }
         column4bit += 8;                                            // for calculating button number on next column
     }
-    _mcp.portMode(MCP23017Port::A, 0x00, 0xFF, 0xFF);               // Port A as output, inverted mode
-    _mcp.clearInterrupts();                                         // and clear the interrupt to capture the next interrupt -> this must be done, otherwise a key release is not detected!??
+//    _mcp.portMode(MCP23017Port::A, 0x00, 0xFF, 0xFF);               // Port A as output, inverted mode
+    _mcp.portMode(MCP23017Port::A, 0x00);                           // Port A (columns) as output
+    _mcp.readRegister(MCP23017Register::INTCAP_B);                  // and clear the interrupt to capture the next interrupt
     _calculate = false;                                             // on next interrupt do not calculate the button but wait one loop for debouncing
 }
 
