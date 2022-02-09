@@ -746,11 +746,12 @@ void handlerOnAnalogChange(int value, uint8_t pin, const char *name)
 //// EVENT HANDLER /////
 void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
 {
-  cmdMessenger.sendCmdStart(kKeyMatrixChange);
+//  cmdMessenger.sendCmdStart(kKeyMatrixChange);
+  cmdMessenger.sendCmdStart(kButtonChange);
   cmdMessenger.sendCmdArg(name);
-  cmdMessenger.sendArg("-");
-  cmdMessenger.sendArg(pin);            // send name and pin w/ delimiter "-"
-//  cmdMessenger.sendCmdArg(pin);       // send name and pin w/ delimiter "," -> uncomment both above (sendArg())
+  cmdMessenger.sendArg("-");                          // send name and pin w/ delimiter "-"
+  cmdMessenger.sendArg(pin + KEYMATRIX_BASE_BUTTON);  // send name and pin w/ delimiter "-"
+//  cmdMessenger.sendCmdArg(pin);                     // send name and pin w/ delimiter "," -> uncomment both above (sendArg())
   cmdMessenger.sendCmdArg(eventId);
   cmdMessenger.sendCmdEnd();
 };

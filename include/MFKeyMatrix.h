@@ -18,6 +18,8 @@
 #include <MFBoards.h>
 #include "MCP23017.h"
 
+#define KEYMATRIX_BASE_BUTTON   100     // first button from matrix '0' will be reported as 100
+
 extern "C"
 {
   // callback functions always follow the signature: void cmd(void);
