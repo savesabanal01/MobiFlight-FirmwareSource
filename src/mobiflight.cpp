@@ -98,7 +98,7 @@ MFEEPROM MFeeprom;
 MFOutput *outputs[MAX_OUTPUTS];
 uint8_t outputsRegistered = 0;
 
-MFButton *buttons[MAX_BUTTONS];
+MFButton *buttons[MAX_BUTTONS + (MAX_KEYMATRIX * 64)];
 uint8_t buttonsRegistered = 0;
 
 #if MF_SEGMENT_SUPPORT == 1
@@ -141,9 +141,11 @@ uint8_t inputShiftersRegistered = 0;
 
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
+#include "MFBitarray.h"
 MFKeymatrix keymatrix[MAX_KEYMATRIX];
 uint8_t keymatrixRegistered = 0;
 uint32_t lastKexmatrixRead = 0;
+MFBitArray BitArray;
 #endif
 
 // Callbacks define on which received commands we take action
@@ -207,9 +209,11 @@ void attachEventCallbacks()
 #if MF_ANALOG_SUPPORT == 1
   MFAnalog::attachHandler(handlerOnAnalogChange);
 #endif
+/*
 #if MF_KEYMATRIX_SUPPORT == 1
   MFKeymatrix::attachHandler(handlerKeyMatrixOnChange);
 #endif
+*/
 }
 
 void ResetBoard()
@@ -354,6 +358,11 @@ void loop()
   if (!configActivated)
     return;
 
+  for (int i = 0; i != buttonsRegistered; i++)
+  {
+    buttons[i]->readPin();
+  }
+
   readButtons();
   readEncoder();
 
@@ -409,7 +418,7 @@ void ClearOutputs()
 //// BUTTONS /////
 void AddButton(uint8_t pin = 1, char const *name = "Button")
 {
-  if (buttonsRegistered == MAX_BUTTONS)
+  if (buttonsRegistered == MAX_BUTTONS + (MAX_KEYMATRIX * 64))
     return;
   if (!FitInMemory(sizeof(MFButton)))
   {
@@ -417,7 +426,7 @@ void AddButton(uint8_t pin = 1, char const *name = "Button")
     cmdMessenger.sendCmd(kStatus, F("Button does not fit in Memory"));
     return;
   }
-  buttons[buttonsRegistered] = new (allocateMemory(sizeof(MFButton))) MFButton(pin, name);
+  buttons[buttonsRegistered] = new (allocateMemory(sizeof(MFButton))) MFButton(pin, name,buttonsRegistered);
   buttonsRegistered++;
 #ifdef DEBUG
   cmdMessenger.sendCmd(kStatus, F("Added button ") /* + name */);
@@ -741,7 +750,7 @@ void handlerOnAnalogChange(int value, uint8_t pin, const char *name)
   cmdMessenger.sendCmdArg(value);
   cmdMessenger.sendCmdEnd();
 };
-
+/*
 #if MF_KEYMATRIX_SUPPORT == 1
 //// EVENT HANDLER /////
 void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
@@ -756,6 +765,7 @@ void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name)
   cmdMessenger.sendCmdEnd();
 };
 #endif
+*/
 
 /**
  ** config stuff

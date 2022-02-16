@@ -26,7 +26,7 @@
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
 
-//#define MODULE_MAX_PINS 13
+#define MODULE_MAX_PINS 13
 #define MAX_OUTPUTS 8
 #define MAX_BUTTONS 8
 #define MAX_LEDSEGMENTS 1

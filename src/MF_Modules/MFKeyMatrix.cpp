@@ -13,7 +13,7 @@
 
 #include "Arduino.h"
 #include "MFBoards.h"
-#include "bitarray.h"
+#include "mobiflight.h"
 
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
@@ -35,6 +35,7 @@ MFKeymatrix::MFKeymatrix (uint8_t address, const char * name) {
 void MFKeymatrix::init(void) {
     if (_initialized) return;
     _initialized = true;
+    Wire.setClock(400000);                                          // For Raspberry Pico setting speed must be before Wire.begin(), but check with newest framework
     Wire.begin();
     Wire.setClock(400000);
     _mcp.init(_adress);
@@ -45,6 +46,10 @@ void MFKeymatrix::init(void) {
     _mcp.writeRegister(MCP23017Register::GPIO_A, 0x00);             // Reset port A
     _mcp.writeRegister(MCP23017Register::GPIO_B, 0x00);             // Reset port B
     _mcp.clearInterrupts();                                         // And clear all interrupts which could come from initialization
+    for (uint8_t i = 0; i < 64; i++)
+    {
+        BitArray.setBit(MODULE_MAX_PINS + 1 + i);                    // set all bits to HIGH as reversed polarity compares to buttons
+    }
 }
 
 void MFKeymatrix::update(void) {
@@ -72,14 +77,19 @@ void MFKeymatrix::update(void) {
 //    in this case next both if() are not required here, would be done in button routine
 //    must be substituted by un-/setting the virtual button
 // *********************************************************************************************
-            if ((actual_status&portB) && _handler!= NULL) {    // check for pressed or released
+/*
+            if ((actual_status&portB) && _handler!= NULL) {         // check for pressed or released
                 (*_handler)(KeyMatrixState::btnOnPress, (column4bit + getBitLocation(portB)), _name);   // and send event
             }
             if (!(actual_status&portB) && _handler != NULL) {
                 (*_handler)(KeyMatrixState::btnOnRelease, (column4bit + getBitLocation(portB)), _name);
             }
+*/
 // *****************************************************************************************
-            setBit(column4bit + getBitLocation(portB));
+            if (actual_status&portB)                                // check for pressed or released and save in array
+                BitArray.clearBit(column4bit + getBitLocation(portB) + MODULE_MAX_PINS + 1);    // status is reserved compared to buttons -> clearBit() and NOT setBit()
+            else
+                BitArray.setBit(column4bit + getBitLocation(portB) + MODULE_MAX_PINS + 1);
 // *****************************************************************************************
             old_status[column] = actual_status;                     // store actual status as old status to detect next button change
         }
@@ -95,12 +105,12 @@ void MFKeymatrix::detach()
 {
   _initialized = false;
 }
-
+/*
 void MFKeymatrix::attachHandler(keymatrixEvent newHandler)
 {
   _handler = newHandler;
 }
-
+*/
 /* **************************************************************************************************
     see https://stackoverflow.com/questions/14429661/determine-which-single-bit-in-the-byte-is-set
         http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog

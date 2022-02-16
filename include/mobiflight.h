@@ -4,6 +4,7 @@
 #include <MFEncoder.h>
 #include <MFAnalog.h>
 #include <CmdMessenger.h>
+#include "MFBitarray.h"
 
 #define MF_BUTTON_DEBOUNCE_MS 10     // time between updating the buttons
 #define MF_SERVO_DELAY_MS 5          // Time between servo updates
@@ -139,5 +140,6 @@ void readKeymatrix();
 void handlerKeyMatrixOnChange(uint8_t eventId, uint8_t pin, const char *name);
 
 extern CmdMessenger cmdMessenger;
+extern MFBitArray BitArray;
 
 #endif
