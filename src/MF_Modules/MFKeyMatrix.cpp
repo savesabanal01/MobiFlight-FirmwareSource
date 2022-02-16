@@ -13,6 +13,7 @@
 
 #include "Arduino.h"
 #include "MFBoards.h"
+#include "bitarray.h"
 
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
@@ -76,6 +77,8 @@ void MFKeymatrix::update(void) {
             if (!(actual_status&portB) && _handler != NULL) {
                 (*_handler)(KeyMatrixState::btnOnRelease, (column4bit + getBitLocation(portB)), _name);
             }
+// *****************************************************************************************
+            setBit(column4bit + getBitLocation(portB));
 // *****************************************************************************************
             old_status[column] = actual_status;                     // store actual status as old status to detect next button change
         }
