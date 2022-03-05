@@ -4,7 +4,7 @@
 #include "MFBoards.h"
 #include "config.h"
 #include "Button.h"
-#include "Encoder.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif

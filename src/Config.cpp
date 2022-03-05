@@ -4,7 +4,7 @@
 #include "MFEEPROM.h"
 #include "commandmessenger.h"
 #include "Button.h"
-#include "Encoder.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
