@@ -49,6 +49,12 @@ const unsigned long POWER_SAVING_TIME = 60 * 15; // in seconds
 #if MF_MUX_SUPPORT == 1
 MFMuxDriver MUX;
 #endif
+
+#if MF_KEYMATRIX_SUPPORT == 1
+uint32_t lastKexmatrixRead = 0;
+MFBitArray BitArray;
+#endif  
+
 // ==================================================
 //   Polling interval counters
 // ==================================================
@@ -95,8 +101,7 @@ void         initPollIntervals(void)
     lastUpdate.DigInMux = millis() + 8;
 #endif
 #if MF_KEYMATRIX_SUPPORT == 1
-uint32_t lastKexmatrixRead = 0;
-MFBitArray BitArray;
+  lastUpdate.KeyMatrix  = millis();
 #endif  
 }
 
@@ -175,7 +180,7 @@ void loop()
     // to prevent mangling input for config (shared buffers)
     if (getStatusConfig()) {
 
-        timedUpdate(Button::read, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
+        timedUpdate(Button::readPin, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
 
         timedUpdate(Encoder::read, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
 
