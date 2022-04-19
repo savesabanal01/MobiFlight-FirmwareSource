@@ -1,8 +1,14 @@
+//
+// MFButton.cpp
+//
+// (C) MobiFlight Project 2022
+//
+
 #include "MFButton.h"
 #include "mobiflight.h"
 #include "MFBitarray.h"
 
-buttonEvent   MFButton::_handler = NULL;
+buttonEvent MFButton::_handler = NULL;
 
 MFButton::MFButton(uint8_t pin, const char * name, uint8_t arrayPosition)
 {   
@@ -30,24 +36,26 @@ void MFButton::readPin()            // copy the status of input pin to position 
 
 void MFButton::trigger(uint8_t state)
 {
-    (state==LOW) ? triggerOnPress() : triggerOnRelease();
+    (state == LOW) ? triggerOnPress() : triggerOnRelease();
 }
 
 void MFButton::triggerOnPress()
 {
-    if (_handler && _state==LOW) {
+    if (_handler && _state == LOW) {
         (*_handler)(btnOnPress, _pin, _name);
     }
 }
 
 void MFButton::triggerOnRelease()
 {
-    if (_handler && _state==HIGH) {
+    if (_handler && _state == HIGH) {
         (*_handler)(btnOnRelease, _pin, _name);
     }
 }
 
 void MFButton::attachHandler(buttonEvent newHandler)
 {
-  _handler = newHandler;
+    _handler = newHandler;
 }
+
+// MFButton.cpp
