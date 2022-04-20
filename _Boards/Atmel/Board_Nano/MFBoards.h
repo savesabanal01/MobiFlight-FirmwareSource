@@ -1,5 +1,11 @@
-#ifndef MFBoardUno_h
-#define MFBoardUno_h
+//
+// MFBoards.h (Arduino Uno/Nano)
+//
+// (C) MobiFlight Project 2022
+//
+
+#ifndef MFBoardNano_h
+#define MFBoardNano_h
 
 #ifndef MF_SEGMENT_SUPPORT
 #define MF_SEGMENT_SUPPORT 1
@@ -22,18 +28,25 @@
 #ifndef MF_INPUT_SHIFTER_SUPPORT
 #define MF_INPUT_SHIFTER_SUPPORT 1
 #endif
+#ifndef MF_MUX_SUPPORT
+#define MF_MUX_SUPPORT 1
+#endif
+#ifndef MF_DIGIN_MUX_SUPPORT
+#define MF_MUX_SUPPORT       1
+#define MF_DIGIN_MUX_SUPPORT 1
+#endif
 
-//#define MODULE_MAX_PINS 13
-#define MAX_OUTPUTS 8
-#define MAX_BUTTONS 8
-#define MAX_LEDSEGMENTS 1
-#define MAX_ENCODERS 3
-#define MAX_STEPPERS 2
-#define MAX_MFSERVOS 2
-#define MAX_MFLCD_I2C 2
-#define MAX_ANALOG_INPUTS 3
+#define MAX_OUTPUTS         18
+#define MAX_BUTTONS         18
+#define MAX_LEDSEGMENTS     1
+#define MAX_ENCODERS        3
+#define MAX_STEPPERS        2
+#define MAX_MFSERVOS        2
+#define MAX_MFLCD_I2C       2
+#define MAX_ANALOG_INPUTS   6
 #define MAX_OUTPUT_SHIFTERS 2
-#define MAX_INPUT_SHIFTERS 2
+#define MAX_INPUT_SHIFTERS  2
+#define MAX_DIGIN_MUX       2
 
 #define STEPS 64
 #define STEPPER_SPEED 400 // 300 already worked, 467, too?
@@ -44,7 +57,7 @@
 #define MOBIFLIGHT_NAME         "MobiFlight Nano"
 #define EEPROM_SIZE             1024    // EEPROMSizeNano
 #define MEMLEN_CONFIG           286     // max. size for config which wil be stored in EEPROM
-#define MEMLEN_CONFIG_BUFFER    220     // max. size for configBuffer, contains only names from inputs
+#define MEMLEN_NAMES_BUFFER     220     // max. size for configBuffer, contains only names from inputs
 #define MF_MAX_DEVICEMEM        300     // max. memory size for devices
 
 #define RANDOM_SEED_INPUT A0

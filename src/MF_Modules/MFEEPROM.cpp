@@ -7,9 +7,13 @@
 #include <Arduino.h>
 #include "MFEEPROM.h"
 #include <EEPROM.h>
+#include "MFBoards.h"
 
 MFEEPROM::MFEEPROM()
 {
+#if defined(ARDUINO_ARCH_RP2040)
+    EEPROM.begin(EEPROM_SIZE);
+#endif
     eepromLength = EEPROM.length();
 }
 
@@ -31,6 +35,9 @@ void MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
     for (uint16_t i = 0; i < len; i++) {
         EEPROM.put(adr + i, data[i]);
     }
+#if defined(ARDUINO_ARCH_RP2040)
+    EEPROM.commit();
+#endif
 }
 
 char MFEEPROM::read_char(uint16_t adr)
@@ -43,6 +50,9 @@ void MFEEPROM::write_byte(uint16_t adr, char data)
 {
     if (adr >= eepromLength) return;
     EEPROM.put(adr, data);
+#if defined(ARDUINO_ARCH_RP2040)
+    EEPROM.commit();
+#endif
 }
 
 // MFEEPROM.cpp
