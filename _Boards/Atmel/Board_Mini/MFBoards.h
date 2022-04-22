@@ -52,9 +52,9 @@
 #define STEPPER_SPEED 400 // 300 already worked, 467, too?
 #define STEPPER_ACCEL 800
 
-#define MOBIFLIGHT_TYPE         "MobiFlight Mini"
+#define MOBIFLIGHT_TYPE         "Mobiflight Mini"
 #define MOBIFLIGHT_SERIAL       "0987654321"
-#define MOBIFLIGHT_NAME         "MobiFlight Mini"
+#define MOBIFLIGHT_NAME         "Mobiflight Mini"
 #define EEPROM_SIZE             1024    // EEPROMSizeNano
 #define MEMLEN_CONFIG           286     // max. size for config which wil be stored in EEPROM
 #define MEMLEN_NAMES_BUFFER     220     // max. size for configBuffer, contains only names from inputs
