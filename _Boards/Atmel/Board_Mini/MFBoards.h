@@ -1,5 +1,5 @@
 //
-// MFBoards.h (Arduino Uno/Nano)
+// MFBoards.h (Arduino Mini)
 //
 // (C) MobiFlight Project 2022
 //

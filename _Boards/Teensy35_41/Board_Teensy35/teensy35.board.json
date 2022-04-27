@@ -27,14 +27,17 @@
       "MobiFlightType": "MobiFlight Teensy35"
     },
     "ModuleLimits": {
-      "MaxAnalogInputs": 5,
-      "MaxButtons": 56,
-      "MaxEncoders": 15,
+      "MaxAnalogInputs": 16,
+      "MaxInputShifters": 4,
+      "MaxButtons": 68,
+      "MaxEncoders": 20,
       "MaxLcdI2C": 2,
       "MaxLedSegments": 4,
       "MaxOutputs": 40,
       "MaxServos": 10,
-      "MaxSteppers": 10
+      "MaxShifters": 4,
+      "MaxSteppers": 10,
+      "MaxDigInputMuxes": 2
     },
     "Pins": [
       {
