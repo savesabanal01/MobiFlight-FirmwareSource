@@ -8,6 +8,9 @@
 #include "mobiflight.h"
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
+#if defined(ARDUINO_ARCH_RP2040)
+#include "MFEEPROM.h"
+#endif
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
@@ -41,6 +44,10 @@
 
 bool                powerSavingMode   = false;
 const unsigned long POWER_SAVING_TIME = 60 * 15; // in seconds
+
+#if defined(ARDUINO_ARCH_RP2040)
+extern MFEEPROM MFeeprom;
+#endif
 
 #if MF_MUX_SUPPORT == 1
 MFMuxDriver MUX;
@@ -144,6 +151,9 @@ void ResetBoard()
 // ************************************************************
 void setup()
 {
+#if defined(ARDUINO_ARCH_RP2040)
+    MFeeprom.init();
+#endif
     Serial.begin(115200);
     attachCommandCallbacks();
     cmdMessenger.printLfCr();

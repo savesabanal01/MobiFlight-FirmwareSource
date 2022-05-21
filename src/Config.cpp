@@ -42,7 +42,7 @@
 // The build version comes from an environment variable
 #define STRINGIZER(arg) #arg
 #define STR_VALUE(arg)  STRINGIZER(arg)
-#define VERSION         STR_VALUE(BUILD_VERSION)
+#define VERSION         "2.1.3" //STR_VALUE(BUILD_VERSION)
 MFEEPROM MFeeprom;
 
 #if MF_MUX_SUPPORT == 1
@@ -96,6 +96,7 @@ void loadConfig()
     cmdMessenger.sendCmd(kStatus, F("Load config"));
 #endif
     if (readConfigLength()) {
+Serial.print("Lese Config mit Länge: "); Serial.println(readConfigLength());
         readConfig();
         _activateConfig();
     }

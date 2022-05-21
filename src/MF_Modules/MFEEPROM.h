@@ -13,6 +13,9 @@ class MFEEPROM
 
 public:
     MFEEPROM();
+#if defined(ARDUINO_ARCH_RP2040)
+    void init(void);
+#endif
     uint16_t get_length(void);
     void     read_block(uint16_t addr, char data[], uint16_t len);
     void     write_block(uint16_t addr, char data[], uint16_t len);

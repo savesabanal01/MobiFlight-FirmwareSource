@@ -9,13 +9,21 @@
 #include <EEPROM.h>
 #include "MFBoards.h"
 
+
 MFEEPROM::MFEEPROM()
 {
-#if defined(ARDUINO_ARCH_RP2040)
-    EEPROM.begin(EEPROM_SIZE);
+#if !defined(ARDUINO_ARCH_RP2040)
+    eepromLength = EEPROM.length();
 #endif
+}
+
+#if defined(ARDUINO_ARCH_RP2040)
+void MFEEPROM::init(void)
+{
+    EEPROM.begin(EEPROM_SIZE);
     eepromLength = EEPROM.length();
 }
+#endif
 
 uint16_t MFEEPROM::get_length(void)
 {
