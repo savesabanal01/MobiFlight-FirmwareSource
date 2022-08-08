@@ -8,7 +8,7 @@
 #include "MFEEPROM.h"
 
 #include "Button.h"
-#include "Encoder.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
 
 #if MF_ANALOG_SUPPORT == 1
@@ -96,6 +96,7 @@ void loadConfig()
     cmdMessenger.sendCmd(kDebug, F("Load config"));
 #endif
     if (readConfigLength()) {
+Serial.print("Lese Config mit Länge: "); Serial.println(readConfigLength());
         readConfig();
         _activateConfig();
     }
