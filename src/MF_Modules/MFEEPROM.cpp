@@ -18,6 +18,7 @@ void MFEEPROM::init(void)
     EEPROM.begin(EEPROM_SIZE);
 #endif
     _eepromLength = EEPROM.length();
+Serial.print("EEPROM Länge: "); Serial.println(_eepromLength);
 }
 
 uint16_t MFEEPROM::get_length(void)
@@ -40,10 +41,10 @@ bool MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
     for (uint16_t i = 0; i < len; i++) {
         EEPROM.put(adr + i, data[i]);
     }
-    return true;
 #if defined(ARDUINO_ARCH_RP2040)
     EEPROM.commit();
 #endif
+    return true;
 }
 
 char MFEEPROM::read_char(uint16_t adr)
@@ -56,10 +57,10 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
 {
     if (adr >= _eepromLength) return false;
     EEPROM.put(adr, data);
-    return true;
 #if defined(ARDUINO_ARCH_RP2040)
     EEPROM.commit();
 #endif
+    return true;
 }
 
 // MFEEPROM.cpp
