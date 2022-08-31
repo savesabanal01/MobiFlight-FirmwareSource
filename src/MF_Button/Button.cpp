@@ -25,13 +25,16 @@ namespace Button
     {
         if (buttonsRegistered == MAX_BUTTONS)
             return;
-
+#if defined(STANDARD_NEW)
+        buttons[buttonsRegistered] = new MFButton(pin, name);
+#else
         if (!FitInMemory(sizeof(MFButton))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Button does not fit in Memory"));
             return;
         }
         buttons[buttonsRegistered] = new (allocateMemory(sizeof(MFButton))) MFButton(pin, name);
+#endif  
         MFButton::attachHandler(handlerOnButton);
         buttonsRegistered++;
 #ifdef DEBUG2CMDMESSENGER
@@ -41,6 +44,12 @@ namespace Button
 
     void Clear(void)
     {
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=buttonsRegistered; i++) 
+        {
+            delete buttons[i];
+        } 
+#endif  
         buttonsRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared buttons"));

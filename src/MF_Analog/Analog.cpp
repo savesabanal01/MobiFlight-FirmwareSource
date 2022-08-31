@@ -26,13 +26,16 @@ namespace Analog
     {
         if (analogRegistered == MAX_ANALOG_INPUTS)
             return;
-
+#if defined(STANDARD_NEW)
+        analog[analogRegistered] = new MFAnalog(pin, name);
+#else
         if (!FitInMemory(sizeof(MFAnalog))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("AnalogIn does not fit in Memory"));
             return;
         }
         analog[analogRegistered] = new (allocateMemory(sizeof(MFAnalog))) MFAnalog(pin, name, sensitivity);
+#endif
         MFAnalog::attachHandler(handlerOnAnalogChange);
         analogRegistered++;
     #ifdef DEBUG2CMDMESSENGER
@@ -42,6 +45,12 @@ namespace Analog
 
     void Clear(void)
     {
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=analogRegistered; i++) 
+        {
+            delete analog[i];
+        } 
+#endif  
         analogRegistered = 0;
     #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared analog devices"));

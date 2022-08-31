@@ -17,13 +17,16 @@ namespace LCDDisplay
     {
         if (lcd_12cRegistered == MAX_MFLCD_I2C)
             return;
-
+#if defined(STANDARD_NEW)
+        lcd_I2C[lcd_12cRegistered] = new MFLCDDisplay;
+#else
         if (!FitInMemory(sizeof(MFLCDDisplay))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("LCD does not fit in Memory!"));
             return;
         }
         lcd_I2C[lcd_12cRegistered] = new (allocateMemory(sizeof(MFLCDDisplay))) MFLCDDisplay;
+#endif
         lcd_I2C[lcd_12cRegistered]->attach(address, cols, lines);
         lcd_12cRegistered++;
 #ifdef DEBUG2CMDMESSENGER
@@ -36,6 +39,12 @@ namespace LCDDisplay
         for (uint8_t i = 0; i < lcd_12cRegistered; i++) {
             lcd_I2C[i]->detach();
         }
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=lcd_12cRegistered; i++) 
+        {
+            delete lcd_I2C[i];
+        } 
+#endif  
         lcd_12cRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared lcdDisplays"));

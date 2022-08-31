@@ -25,13 +25,16 @@ namespace Encoder
     {
         if (encodersRegistered == MAX_ENCODERS)
             return;
-
+#if defined(STANDARD_NEW)
+        encoders[encodersRegistered] = new MFEncoder;
+#else
         if (!FitInMemory(sizeof(MFEncoder))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Encoders does not fit in Memory"));
             return;
         }
         encoders[encodersRegistered] = new (allocateMemory(sizeof(MFEncoder))) MFEncoder;
+#endif 
         encoders[encodersRegistered]->attach(pin1, pin2, encoder_type, name);
         MFEncoder::attachHandler(handlerOnEncoder);
         encodersRegistered++;
@@ -42,6 +45,12 @@ namespace Encoder
 
     void Clear()
     {
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=encodersRegistered; i++) 
+        {
+            delete encoders[i];
+        } 
+#endif  
         encodersRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared encoders"));

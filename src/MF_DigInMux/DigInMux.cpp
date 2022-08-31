@@ -29,7 +29,11 @@ namespace DigInMux
         if (digInMuxRegistered == MAX_DIGIN_MUX)
             return;
         MFDigInMux *dip;
+#if defined(STANDARD_NEW)
+        digInMux[digInMuxRegistered] = new MFDigInMux(&MUX, name);
+#else
         dip                          = new (allocateMemory(sizeof(MFDigInMux))) MFDigInMux(&MUX, name);
+#endif
         digInMux[digInMuxRegistered] = dip;
         dip->attach(dataPin, (nRegs == 1), name);
         dip->clear();
@@ -48,6 +52,12 @@ namespace DigInMux
         for (uint8_t i = 0; i < digInMuxRegistered; i++) {
             digInMux[digInMuxRegistered]->detach();
         }
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=digInMuxRegistered; i++) 
+        {
+            delete digInMux[i];
+        } 
+#endif  
         digInMuxRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared dig. input Muxes"));

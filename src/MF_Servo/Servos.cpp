@@ -17,13 +17,16 @@ namespace Servos
     {
         if (servosRegistered == MAX_MFSERVOS)
             return;
-
+#if defined(STANDARD_NEW)
+        servos[servosRegistered] = new MFServo;
+#else
         if (!FitInMemory(sizeof(MFServo))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Servo does not fit in Memory!"));
             return;
         }
         servos[servosRegistered] = new (allocateMemory(sizeof(MFServo))) MFServo;
+#endif
         servos[servosRegistered]->attach(pin, true);
         servosRegistered++;
 #ifdef DEBUG2CMDMESSENGER
@@ -36,6 +39,12 @@ namespace Servos
         for (uint8_t i = 0; i < servosRegistered; i++) {
             servos[i]->detach();
         }
+#if defined(STANDARD_NEW)
+        for (int i=0; i!=servosRegistered; i++) 
+        {
+            delete servos[i];
+        } 
+#endif  
         servosRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared servos"));
