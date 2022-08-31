@@ -152,7 +152,9 @@ void resetConfig()
 #endif
     configLength    = 0;
     configActivated = false;
+#if !defined(STANDARD_NEW)
     ClearMemory();
+#endif
 }
 
 void OnResetConfig()

@@ -6,6 +6,8 @@
 
 #include "mobiflight.h"
 
+#if !defined(STANDARD_NEW)
+
 char     deviceBuffer[MF_MAX_DEVICEMEM] = {0};
 uint16_t nextPointer                    = 0;
 
@@ -42,5 +44,7 @@ bool FitInMemory(uint8_t size)
         return false;
     return true;
 }
+
+#endif
 
 // allocatemem.cpp

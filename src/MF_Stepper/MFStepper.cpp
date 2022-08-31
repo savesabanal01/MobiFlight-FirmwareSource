@@ -14,11 +14,13 @@ MFStepper::MFStepper()
 
 void MFStepper::attach(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint8_t btnPin5)
 {
+#if !defined(STANDARD_NEW)
     if (!FitInMemory(sizeof(AccelStepper))) {
         // Error Message to Connector
         cmdMessenger.sendCmd(kStatus, F("MFStepper does not fit in Memory"));
         return;
     }
+#endif
     if (pin2 == pin4 && pin1 == pin3) // if pin1/2 are identical to pin3/4
     {                                 // init new stepper with external driver (step and direction)
 #if defined(STANDARD_NEW)
