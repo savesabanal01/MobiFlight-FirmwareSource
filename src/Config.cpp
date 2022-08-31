@@ -96,7 +96,6 @@ void loadConfig()
     cmdMessenger.sendCmd(kDebug, F("Load config"));
 #endif
     if (readConfigLength()) {
-Serial.print("Lese Config mit Länge: "); Serial.println(readConfigLength());
         readConfig();
         _activateConfig();
     }
