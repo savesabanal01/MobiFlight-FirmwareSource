@@ -18,7 +18,6 @@ void MFEEPROM::init(void)
     EEPROM.begin(EEPROM_SIZE);
 #endif
     _eepromLength = EEPROM.length();
-Serial.print("EEPROM Länge: "); Serial.println(_eepromLength);
 }
 
 uint16_t MFEEPROM::get_length(void)
