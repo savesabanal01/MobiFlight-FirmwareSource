@@ -17,9 +17,6 @@ namespace Output
     {
         if (outputsRegistered == MAX_OUTPUTS)
             return;
-#if defined(STANDARD_NEW)
-        outputs[outputsRegistered] = new MFOutput(pin);
-#else
         if (!FitInMemory(sizeof(MFOutput))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Output does not fit in Memory"));
@@ -27,7 +24,6 @@ namespace Output
         }
         outputs[outputsRegistered] = new (allocateMemory(sizeof(MFOutput))) MFOutput(pin);
         outputsRegistered++;
-#endif  
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added output"));
 #endif
@@ -35,12 +31,6 @@ namespace Output
 
     void Clear()
     {
-#if defined(STANDARD_NEW)
-        for (int i=0; i!=outputsRegistered; i++) 
-        {
-            delete outputs[i];
-        } 
-#endif  
         outputsRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared outputs"));

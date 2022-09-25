@@ -17,16 +17,12 @@ namespace OutputShifter
     {
         if (outputShifterRegistered == MAX_OUTPUT_SHIFTERS)
             return;
-#if defined(STANDARD_NEW)
-        outputShifters[outputShifterRegistered] = new MFOutputShifter;
-#else
         if (!FitInMemory(sizeof(MFOutputShifter))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("OutputShifter does not fit in Memory"));
             return;
         }
         outputShifters[outputShifterRegistered] = new (allocateMemory(sizeof(MFOutputShifter))) MFOutputShifter;
-#endif
         outputShifters[outputShifterRegistered]->attach(latchPin, clockPin, dataPin, modules);
         outputShifters[outputShifterRegistered]->clear();
         outputShifterRegistered++;
@@ -41,12 +37,6 @@ namespace OutputShifter
         for (uint8_t i = 0; i < outputShifterRegistered; i++) {
             outputShifters[i]->detach();
         }
-#if defined(STANDARD_NEW)
-        for (int i=0; i!=outputShifterRegistered; i++) 
-        {
-            delete outputShifters[i];
-        } 
-#endif 
         outputShifterRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared Output Shifter"));

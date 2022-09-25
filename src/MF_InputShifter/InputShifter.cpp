@@ -26,16 +26,12 @@ namespace InputShifter
     {
         if (inputShiftersRegistered == MAX_INPUT_SHIFTERS)
             return;
-#if defined(STANDARD_NEW)
-        inputShifters[inputShiftersRegistered] = new MFInputShifter;
-#else
         if (!FitInMemory(sizeof(MFInputShifter))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("InputShifter does not fit in Memory"));
             return;
         }
         inputShifters[inputShiftersRegistered] = new (allocateMemory(sizeof(MFInputShifter))) MFInputShifter;
-#endif
         inputShifters[inputShiftersRegistered]->attach(latchPin, clockPin, dataPin, modules, name);
         inputShifters[inputShiftersRegistered]->clear();
         MFInputShifter::attachHandler(handlerInputShifterOnChange);
@@ -50,12 +46,6 @@ namespace InputShifter
         for (uint8_t i = 0; i < inputShiftersRegistered; i++) {
             inputShifters[i]->detach();
         }
-#if defined(STANDARD_NEW)
-        for (int i=0; i!=inputShiftersRegistered; i++) 
-        {
-            delete inputShifters[i];
-        } 
-#endif  
         inputShiftersRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared input shifter"));

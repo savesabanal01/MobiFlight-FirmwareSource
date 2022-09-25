@@ -17,16 +17,12 @@ namespace Stepper
     {
         if (steppersRegistered == MAX_STEPPERS)
             return;
-#if defined(STANDARD_NEW)
-        steppers[steppersRegistered] = new MFStepper;
-#else
         if (!FitInMemory(sizeof(MFStepper))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Stepper does not fit in Memory!"));
             return;
         }
         steppers[steppersRegistered] = new (allocateMemory(sizeof(MFStepper))) MFStepper;
-#endif 
         steppers[steppersRegistered]->attach(pin1, pin2, pin3, pin4, btnPin1);
         steppers[steppersRegistered]->setMaxSpeed(STEPPER_SPEED);
         steppers[steppersRegistered]->setAcceleration(STEPPER_ACCEL);
@@ -49,12 +45,6 @@ namespace Stepper
         for (uint8_t i = 0; i < steppersRegistered; i++) {
             steppers[i]->detach();
         }
-#if defined(STANDARD_NEW)
-        for (int i=0; i!=steppersRegistered; i++) 
-        {
-            delete steppers[i];
-        } 
-#endif  
         steppersRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared steppers"));

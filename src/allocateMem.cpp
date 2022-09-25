@@ -6,12 +6,18 @@
 
 #include "mobiflight.h"
 
-#if !defined(STANDARD_NEW)
-
-char     deviceBuffer[MF_MAX_DEVICEMEM] = {0};
+#ifdef ARDUINO_ARCH_RP2040
+uint16_t    deviceBuffer[MF_MAX_DEVICEMEM] = {0};
+#else
+uint8_t     deviceBuffer[MF_MAX_DEVICEMEM] = {0};
+#endif
 uint16_t nextPointer                    = 0;
 
-char    *allocateMemory(uint8_t size)
+#ifdef ARDUINO_ARCH_RP2040
+uint16_t    *allocateMemory(uint8_t size)
+#else
+uint8_t     *allocateMemory(uint8_t size)
+#endif
 {
     uint16_t actualPointer = nextPointer;
     nextPointer            = actualPointer + size;
@@ -44,7 +50,5 @@ bool FitInMemory(uint8_t size)
         return false;
     return true;
 }
-
-#endif
 
 // allocatemem.cpp
