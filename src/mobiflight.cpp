@@ -151,9 +151,7 @@ void ResetBoard()
 // ************************************************************
 void setup()
 {
-#if defined(ARDUINO_ARCH_RP2040)
     MFeeprom.init();
-#endif
     Serial.begin(115200);
     MFeeprom.init();
     attachCommandCallbacks();
