@@ -7,14 +7,14 @@
 #include "mobiflight.h"
 
 #ifdef ARDUINO_ARCH_RP2040
-uint16_t    deviceBuffer[MF_MAX_DEVICEMEM] = {0};
+std::size_t    deviceBuffer[MF_MAX_DEVICEMEM] = {0};
 #else
 uint8_t     deviceBuffer[MF_MAX_DEVICEMEM] = {0};
 #endif
 uint16_t nextPointer                    = 0;
 
 #ifdef ARDUINO_ARCH_RP2040
-uint16_t    *allocateMemory(uint8_t size)
+std::size_t    *allocateMemory(uint8_t size)
 #else
 uint8_t     *allocateMemory(uint8_t size)
 #endif

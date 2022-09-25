@@ -9,7 +9,7 @@
 #include <new>
 
 #ifdef ARDUINO_ARCH_RP2040
-uint16_t    *allocateMemory(uint8_t size);
+std::size_t    *allocateMemory(uint8_t size);
 #else
 uint8_t     *allocateMemory(uint8_t size);
 #endif
