@@ -8,10 +8,12 @@
 
 #include <new>
 
-#ifdef ARDUINO_ARCH_RP2040
+#if defined (ARDUINO_ARCH_AVR)
+uint8_t     *allocateMemory(uint8_t size);
+#elif defined(ARDUINO_ARCH_RP2040)
 std::size_t    *allocateMemory(uint8_t size);
 #else
-uint8_t     *allocateMemory(uint8_t size);
+std::size_t    *allocateMemory(uint8_t size);
 #endif
 void        ClearMemory();
 uint16_t    GetAvailableMemory();
