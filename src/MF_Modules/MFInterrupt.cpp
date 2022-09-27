@@ -3,6 +3,11 @@
 #ifndef USE_INTERRUPT
 
 static long TimePrev_10ms = 0;
+static long TimePrev_100ms = 0;
+
+void setup_interrupt(void) {
+    return;
+}
 
 bool get_10ms_flag(void) {
     if (millis() - TimePrev_10ms > 10) {
@@ -12,8 +17,12 @@ bool get_10ms_flag(void) {
     return false;
 }
 
-void setup_interrupt(void) {
-    return;
+bool get_100ms_flag() {
+if (millis() - TimePrev_100ms > 100) {
+        TimePrev_10ms = millis();
+        return true;
+    }
+    return false;      
 }
 
 #else
@@ -21,8 +30,8 @@ void setup_interrupt(void) {
 #include "MFBoards.h"
 #include "MFInterrupt.h"
 #include "mobiflight.h"
-#if MF_JOYSTICK_SUPPORT == 1
-    #include "MFJoystick.h"
+#if MF_ANALOG_SUPPORT == 1
+    #include "MFAnalog.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
@@ -82,12 +91,7 @@ void timerIsr(void) {
     static uint32_t	seconds = 0;
 #if !defined(ARDUINO_ARCH_AVR)
     static uint8_t Timer_1ms=0;
-    for (int i=0; i!=encodersRegistered; i++) {
-        encoders[i].readInput();
-    }
-#if MF_JOYSTICK_SUPPORT == 1
-    sample_adc();
-#endif
+    Encoder::read();
     flag_1ms = true;
     Timer_1ms++;
     if (Timer_1ms==10) {
