@@ -151,7 +151,6 @@ void ResetBoard()
 // ************************************************************
 void setup()
 {
-    MFeeprom.init();
     Serial.begin(115200);
     MFeeprom.init();
     attachCommandCallbacks();
