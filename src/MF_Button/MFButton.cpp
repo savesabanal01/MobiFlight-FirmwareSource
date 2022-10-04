@@ -14,9 +14,9 @@ MFButton::MFButton(uint8_t pin, const char * name, uint8_t arrayPosition)
 {   
   _pin  = pin;
   _name = name;
-  _state = 1;
-  _arrayPosition = arrayPosition;       // save the x.te device for location in bitarray (buttonsRegistered)
+  _arrayPosition = arrayPosition;   // save the x.te device for location in bitarray (buttonsRegistered)
   pinMode(_pin, INPUT_PULLUP);      // set pin to input
+  _state = digitalRead(_pin);       // initialize on actual status
 }
 
 void MFButton::update()
