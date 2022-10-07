@@ -53,6 +53,13 @@ namespace Encoder
             encoders[i]->update();
         }
     }
+
+    void tick()
+    {
+        for (uint8_t i = 0; i < encodersRegistered; i++) {
+            encoders[i]->tick();
+        }
+    }
 } // namespace encoder
 
 // Encoder.cpp

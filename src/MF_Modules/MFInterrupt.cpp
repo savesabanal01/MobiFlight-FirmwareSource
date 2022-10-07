@@ -1,137 +1,91 @@
 #include <Arduino.h>
 
-#ifndef USE_INTERRUPT
-
-static long TimePrev_10ms = 0;
-static long TimePrev_100ms = 0;
-
-void setup_interrupt(void) {
-    return;
-}
-
-bool get_10ms_flag(void) {
-    if (millis() - TimePrev_10ms > 10) {
-        TimePrev_10ms = millis();
-        return true;
-    }
-    return false;
-}
-
-bool get_100ms_flag() {
-if (millis() - TimePrev_100ms > 100) {
-        TimePrev_10ms = millis();
-        return true;
-    }
-    return false;      
-}
-
-#else
+//#ifdef USE_INTERRUPT
 
 #include "MFBoards.h"
-#include "MFInterrupt.h"
-#include "mobiflight.h"
+#include "Button.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #if MF_ANALOG_SUPPORT == 1
-    #include "MFAnalog.h"
+#include "Analog.h"
+#endif
+#if MF_SERVO_SUPPORT == 1
+#include "Servos.h"
+#endif
+#if MF_INPUT_SHIFTER_SUPPORT == 1
+#include "InputShifter.h"
+#endif
+#if MF_DIGIN_MUX_SUPPORT == 1
+#include "DigInMux.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
 #include <TimerOne.h>
 void timerIsr(void);
-void setup_interrupt() {
+void setup_interrupt()
+{
     Timer1.initialize(10000);
     Timer1.attachInterrupt(timerIsr);
     return;
 }
 #elif defined(ARDUINO_ARCH_RP2040)
 #include <pico/time.h>
-bool timerIsr(struct repeating_timer *t);
+bool                   timerIsr(struct repeating_timer *t);
 struct repeating_timer timer;
-void setup_interrupt() {
+void                   setup_interrupt()
+{
     add_repeating_timer_ms(-1, timerIsr, NULL, &timer);
     return;
-}
-#elif defined(ARDUINO_ARCH_STM32)
-void timerIsr(void);
-void setup_interrupt(void) {
-#if defined(TIM1)
-  TIM_TypeDef *Instance = TIM1;
-#else
-  TIM_TypeDef *Instance = TIM2;
-#endif
-  // Instantiate HardwareTimer object. Thanks to 'new' instanciation, HardwareTimer is not destructed when setup() function is finished.
-  HardwareTimer *MyTim = new HardwareTimer(Instance);
-  MyTim->setOverflow(1000, MICROSEC_FORMAT);
-  MyTim->attachInterrupt(timerIsr);
-  MyTim->resume();
 }
 #elif defined(CORE_TEENSY)
 IntervalTimer myTimer;
 
 void timerIsr(void);
-void setup_interrupt(void) {
+void setup_interrupt(void)
+{
     myTimer.begin(timerIsr, 1000);
 }
-#elif defined(ARDUINO_ARCH_ESP8266)
-//TBD
-    #error interrupt not implemented yet
 #endif
-
-bool seconds_flag = false;
-bool flag_1ms = false;
-bool flag_10ms = false;
-bool flag_100ms = false;
 
 #if defined(ARDUINO_ARCH_RP2040)
-bool timerIsr(struct repeating_timer *t) {
+bool timerIsr(struct repeating_timer *t)
+{
 #else
-void timerIsr(void) {
+void timerIsr(void)
+{
 #endif
-    static uint8_t Timer_10ms=0;
-    static uint8_t Timer_100ms=0;
-    static uint32_t	seconds = 0;
-#if !defined(ARDUINO_ARCH_AVR)
-    static uint8_t Timer_1ms=0;
-    Encoder::read();
-    flag_1ms = true;
+    static uint8_t  Timer_1ms   = 0;
+
+    Encoder::tick();
     Timer_1ms++;
-    if (Timer_1ms==10) {
-        Timer_1ms=0;
-        Timer_10ms++;
-        flag_10ms = true;
+    if (!(Timer_1ms % 10)) {
+        Button::read();
     }
-    if (Timer_10ms==10) {
-        Timer_10ms=0;
-        Timer_100ms++;
-        flag_100ms = true;
+#if MF_SERVO_SUPPORT == 1
+    if ((Timer_1ms - 2) % 5 == 0) {
+        Servos::update();
     }
-#else
-    flag_10ms = true;
-    Timer_10ms++;
 #endif
-    if (Timer_100ms==10) {
-        Timer_100ms=0;
-        seconds++;
-        seconds_flag = true;
+#if MF_ANALOG_SUPPORT == 1
+    if ((Timer_1ms - 4) % 10 == 0) {
+        Analog::readAverage();
+    }
+#endif
+#if MF_INPUT_SHIFTER_SUPPORT == 1
+    if ((Timer_1ms - 6) % 10 == 0) {
+        // InputShifter read in, tbd.
+    }
+#endif
+#if MF_DIGIN_MUX_SUPPORT == 1
+    if ((Timer_1ms - 6) % 10 == 0) {
+        // Mux read in, tbd.
+    }
+#endif
+    if (Timer_1ms == 10) {
+        Timer_1ms = 0;
     }
 #if defined(ARDUINO_ARCH_RP2040)
     return true;
 #endif
 }
 
-bool get_100ms_flag() {
-  if (flag_100ms) {
-      flag_100ms = false;
-      return true;
-  }
-  return false;        
-}
-
-bool get_10ms_flag() {
-  if (flag_10ms) {
-      flag_10ms = false;
-      return true;
-  }
-  return false;        
-}
-
-#endif
+//#endif

@@ -84,9 +84,9 @@ void MFEncoder::update()
 {
     if (!_initialized)
         return;
-
-    tick();
-
+#ifndef USE_INTERRUPT
+    //tick();
+#endif
     int16_t pos = getPosition();
     if (pos == _pos) {
         // nothing happened

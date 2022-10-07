@@ -9,6 +9,7 @@
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "MFEEPROM.h"
+#include "MFInterrupt.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
@@ -157,6 +158,9 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
+#ifdef USE_INTERRUPT
+    setup_interrupt();
+#endif
 }
 
 // ************************************************************
@@ -172,30 +176,37 @@ void loop()
     // do not perform updates
     // to prevent mangling input for config (shared buffers)
     if (getStatusConfig()) {
-
+#ifndef USE_INTERRUPT
         timedUpdate(Button::read, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
-
-        timedUpdate(Encoder::read, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
+#endif
+#ifndef USE_INTERRUPT
+        timedUpdate(Encoder::tick, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
+#endif
+        Encoder::read();
 
 #if MF_STEPPER_SUPPORT == 1
         Stepper::update();
 #endif
 
-#if MF_SERVO_SUPPORT == 1
+#if MF_SERVO_SUPPORT == 1 && !defined(USE_INTERRUPT)
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
 #endif
 
 #if MF_ANALOG_SUPPORT == 1
         timedUpdate(Analog::read, &lastUpdate.Analog, MF_ANALOGREAD_DELAY_MS);
+#ifndef USE_INTERRUPT
         timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
+#endif
 #endif
 
 #if MF_INPUT_SHIFTER_SUPPORT == 1
         timedUpdate(InputShifter::read, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
+        // split into read() and tick(), tick() needs to be called every 1ms for encoder extension
 #endif
 
 #if MF_DIGIN_MUX_SUPPORT == 1
         timedUpdate(DigInMux::read, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
+        // split into read() and tick(), tick() needs to be called every 10ms
 #endif
         // lcds, outputs, outputshifters, segments do not need update
     }
