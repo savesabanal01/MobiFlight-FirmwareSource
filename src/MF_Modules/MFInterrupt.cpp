@@ -4,12 +4,9 @@
 
 #include "MFBoards.h"
 #include "Button.h"
-#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
+#include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
-#endif
-#if MF_SERVO_SUPPORT == 1
-#include "Servos.h"
 #endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
 #include "InputShifter.h"
@@ -53,18 +50,13 @@ bool timerIsr(struct repeating_timer *t)
 void timerIsr(void)
 {
 #endif
-    static uint8_t  Timer_1ms   = 0;
+    static uint8_t Timer_1ms = 0;
 
     Encoder::poll();
     Timer_1ms++;
     if (!(Timer_1ms % 10)) {
-        Button::read();
+        Button::poll();
     }
-#if MF_SERVO_SUPPORT == 1
-    if ((Timer_1ms - 2) % 5 == 0) {
-        Servos::update();
-    }
-#endif
 #if MF_ANALOG_SUPPORT == 1
     if ((Timer_1ms - 4) % 10 == 0) {
         Analog::readAverage();
