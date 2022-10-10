@@ -5,9 +5,6 @@
 #include "MFBoards.h"
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
-#if MF_ANALOG_SUPPORT == 1
-#include "Analog.h"
-#endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
 #include "InputShifter.h"
 #endif
@@ -57,11 +54,6 @@ void timerIsr(void)
     if (!(Timer_1ms % 10)) {
         Button::poll();
     }
-#if MF_ANALOG_SUPPORT == 1
-    if ((Timer_1ms - 4) % 10 == 0) {
-        Analog::readAverage();
-    }
-#endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
     if ((Timer_1ms - 6) % 10 == 0) {
         InputShifter::poll();
