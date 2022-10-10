@@ -24,7 +24,7 @@
   "Info": {
     "CanInstallFirmware": true,
     "FriendlyName": "Arduino Nano",
-    "LatestFirmwareVersion": "2.1.0",
+    "LatestFirmwareVersion": "2.2.2",
     "MobiFlightType": "Mobiflight Nano"
   },
   "ModuleLimits": {
