@@ -177,19 +177,19 @@ void loop()
     // to prevent mangling input for config (shared buffers)
     if (getStatusConfig()) {
 #ifndef USE_INTERRUPT
-        timedUpdate(Button::read, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
+        timedUpdate(Button::poll, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
         timedUpdate(Encoder::poll, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
-#if MF_ANALOG_SUPPORT == 1
+    #if MF_ANALOG_SUPPORT == 1
         timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
-#endif
-#if MF_INPUT_SHIFTER_SUPPORT == 1
+    #endif
+    #if MF_INPUT_SHIFTER_SUPPORT == 1
         timedUpdate(InputShifter::poll, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
+    #endif
 #endif
-#endif
+        Button::read();
         Encoder::read();
 #if MF_ANALOG_SUPPORT == 1
-        // to be sure just to send every 50ms, stay for the analogIn w/ timeUpdate()
-        timedUpdate(Analog::read, &lastUpdate.Analog, MF_ANALOGREAD_DELAY_MS);
+        Analog::read();     // unless AnalogAverage() is not called, no new value is available -> new values not faster than 50ms
 #endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
         InputShifter::read();
@@ -197,13 +197,15 @@ void loop()
 #if MF_DIGIN_MUX_SUPPORT == 1
         timedUpdate(DigInMux::read, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
         // split into read() and poll(), poll() needs to be called every 10ms
+        // then move poll() to upper part (#ifndef USE_INTERRUPT) and add inISR
 #endif
 
 #if MF_STEPPER_SUPPORT == 1
         Stepper::update();
 #endif
 
-#if MF_SERVO_SUPPORT == 1 && !defined(USE_INTERRUPT)
+#if MF_SERVO_SUPPORT == 1
+        // Servo smoothing depends on the time between calling update(), so it must be done every 5ms
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
 #endif
 
