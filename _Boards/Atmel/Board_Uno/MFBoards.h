@@ -50,7 +50,7 @@
 #define MAX_ANALOG_INPUTS   6
 #define MAX_OUTPUT_SHIFTERS 2
 #define MAX_INPUT_SHIFTERS  2
-#define MAX_DIGIN_MUX       2
+#define MAX_DIGIN_MUX       3
 #define MAX_KEYMATRIX       1
 
 #define STEPS         64
