@@ -179,9 +179,6 @@ void loop()
 #ifndef USE_INTERRUPT
         timedUpdate(Button::poll, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
         timedUpdate(Encoder::poll, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
-    #if MF_ANALOG_SUPPORT == 1
-        timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
-    #endif
     #if MF_INPUT_SHIFTER_SUPPORT == 1
         timedUpdate(InputShifter::poll, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
     #endif
@@ -193,7 +190,9 @@ void loop()
         Button::read();
         Encoder::read();
 #if MF_ANALOG_SUPPORT == 1
-        Analog::read();     // unless AnalogAverage() is not called, no new value is available -> new values not faster than 50ms
+        timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
+        timedUpdate(Analog::read, &lastUpdate.Analog, MF_ANALOGREAD_DELAY_MS);
+        //Analog::read();     // unless AnalogAverage() is not called, no new value is available -> new values not faster than 50ms
 #endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
         InputShifter::read();
