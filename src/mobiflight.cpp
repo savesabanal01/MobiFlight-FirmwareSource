@@ -185,6 +185,10 @@ void loop()
     #if MF_INPUT_SHIFTER_SUPPORT == 1
         timedUpdate(InputShifter::poll, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
     #endif
+    #if MF_DIGIN_MUX_SUPPORT == 1
+        // timedUpdate(DigInMux::poll, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
+        // uncomment this once read() is splitted into read() and poll(), see below
+    #endif
 #endif
         Button::read();
         Encoder::read();
@@ -196,8 +200,9 @@ void loop()
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1
         timedUpdate(DigInMux::read, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
+        // DigInMux::read();
         // split into read() and poll(), poll() needs to be called every 10ms
-        // then move poll() to upper part (#ifndef USE_INTERRUPT) and add inISR
+        // then uncomment read() here and poll() in the upper part (#ifndef USE_INTERRUPT) and uncomment poll() in ISR
 #endif
 
 #if MF_STEPPER_SUPPORT == 1
