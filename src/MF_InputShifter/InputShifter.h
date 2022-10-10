@@ -14,6 +14,7 @@ namespace InputShifter
     // void OnInit();        // this is defined but not used!?
     void read();
     void OnTrigger();
+    void poll();
 }
 
 // InputShifter.h

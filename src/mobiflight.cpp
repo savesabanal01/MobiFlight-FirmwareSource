@@ -178,11 +178,26 @@ void loop()
     if (getStatusConfig()) {
 #ifndef USE_INTERRUPT
         timedUpdate(Button::read, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
+        timedUpdate(Encoder::poll, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
+#if MF_ANALOG_SUPPORT == 1
+        timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
 #endif
-#ifndef USE_INTERRUPT
-        timedUpdate(Encoder::tick, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
+#if MF_INPUT_SHIFTER_SUPPORT == 1
+        timedUpdate(InputShifter::poll, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
+#endif
 #endif
         Encoder::read();
+#if MF_ANALOG_SUPPORT == 1
+        // to be sure just to send every 50ms, stay for the analogIn w/ timeUpdate()
+        timedUpdate(Analog::read, &lastUpdate.Analog, MF_ANALOGREAD_DELAY_MS);
+#endif
+#if MF_INPUT_SHIFTER_SUPPORT == 1
+        InputShifter::read();
+#endif
+#if MF_DIGIN_MUX_SUPPORT == 1
+        timedUpdate(DigInMux::read, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
+        // split into read() and poll(), poll() needs to be called every 10ms
+#endif
 
 #if MF_STEPPER_SUPPORT == 1
         Stepper::update();
@@ -192,22 +207,6 @@ void loop()
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
 #endif
 
-#if MF_ANALOG_SUPPORT == 1
-        timedUpdate(Analog::read, &lastUpdate.Analog, MF_ANALOGREAD_DELAY_MS);
-#ifndef USE_INTERRUPT
-        timedUpdate(Analog::readAverage, &lastUpdate.AnalogAverage, MF_ANALOGAVERAGE_DELAY_MS);
-#endif
-#endif
-
-#if MF_INPUT_SHIFTER_SUPPORT == 1
-        timedUpdate(InputShifter::read, &lastUpdate.InputShifters, MF_INSHIFTER_POLL_MS);
-        // split into read() and tick(), tick() needs to be called every 1ms for encoder extension
-#endif
-
-#if MF_DIGIN_MUX_SUPPORT == 1
-        timedUpdate(DigInMux::read, &lastUpdate.DigInMux, MF_INMUX_POLL_MS);
-        // split into read() and tick(), tick() needs to be called every 10ms
-#endif
         // lcds, outputs, outputshifters, segments do not need update
     }
 }

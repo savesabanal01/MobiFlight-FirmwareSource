@@ -55,7 +55,7 @@ void timerIsr(void)
 #endif
     static uint8_t  Timer_1ms   = 0;
 
-    Encoder::tick();
+    Encoder::poll();
     Timer_1ms++;
     if (!(Timer_1ms % 10)) {
         Button::read();
@@ -72,12 +72,12 @@ void timerIsr(void)
 #endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
     if ((Timer_1ms - 6) % 10 == 0) {
-        // InputShifter read in, tbd.
+        InputShifter::poll();
     }
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1
-    if ((Timer_1ms - 6) % 10 == 0) {
-        // Mux read in, tbd.
+    if ((Timer_1ms - 8) % 10 == 0) {
+        // DigInMux::poll(); -> tbd.
     }
 #endif
     if (Timer_1ms == 10) {
