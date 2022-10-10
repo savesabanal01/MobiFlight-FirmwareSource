@@ -53,6 +53,13 @@ namespace Button
         }
     }
 
+    void poll(void)
+    {
+        for (uint8_t i = 0; i < buttonsRegistered; i++) {
+            buttons[i]->poll();
+        }
+    }
+
     void OnTrigger(void)
     {
         // Trigger all button release events first...
