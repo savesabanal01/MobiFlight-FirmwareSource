@@ -17,7 +17,7 @@
 void timerIsr(void);
 void setup_interrupt()
 {
-    Timer1.initialize(10000);
+    Timer1.initialize(1000);
     Timer1.attachInterrupt(timerIsr);
     return;
 }
