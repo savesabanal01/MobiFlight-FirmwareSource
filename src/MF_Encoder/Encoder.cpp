@@ -54,10 +54,10 @@ namespace Encoder
         }
     }
 
-    void tick()
+    void poll()
     {
         for (uint8_t i = 0; i < encodersRegistered; i++) {
-            encoders[i]->tick();
+            encoders[i]->poll();
         }
     }
 } // namespace encoder
