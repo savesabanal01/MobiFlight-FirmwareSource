@@ -1,7 +1,7 @@
+
+#ifdef USE_INTERRUPT
+
 #include <Arduino.h>
-
-//#ifdef USE_INTERRUPT
-
 #include "MFBoards.h"
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
@@ -72,4 +72,4 @@ void timerIsr(void)
 #endif
 }
 
-//#endif
+#endif
