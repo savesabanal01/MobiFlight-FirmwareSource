@@ -56,8 +56,10 @@ MFMuxDriver MUX;
 // ==================================================
 
 typedef struct {
+#ifndef USE_INTERRUPT
     uint32_t Buttons  = 0;
     uint32_t Encoders = 0;
+#endif
 #if MF_SERVO_SUPPORT == 1
     uint32_t Servos = 0;
 #endif
@@ -65,10 +67,10 @@ typedef struct {
     uint32_t AnalogAverage = 0;
     uint32_t Analog        = 0;
 #endif
-#if MF_INPUT_SHIFTER_SUPPORT == 1
+#if MF_INPUT_SHIFTER_SUPPORT == 1 && !defined(USE_INTERRUPT)
     uint32_t InputShifters = 0;
 #endif
-#if MF_DIGIN_MUX_SUPPORT == 1
+#if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     uint32_t DigInMux = 0;
 #endif
 } lastUpdate_t;
@@ -80,8 +82,10 @@ extern MFEEPROM MFeeprom;
 void initPollIntervals(void)
 {
     // Init Time Gap between Inputs, do not read at the same loop
+#ifndef USE_INTERRUPT
     lastUpdate.Buttons  = millis();
     lastUpdate.Encoders = millis();
+#endif
 #if MF_SERVO_SUPPORT == 1
     lastUpdate.Servos = millis() + 2;
 #endif
@@ -89,10 +93,10 @@ void initPollIntervals(void)
     lastUpdate.AnalogAverage = millis() + 4;
     lastUpdate.Analog        = millis() + 4;
 #endif
-#if MF_INPUT_SHIFTER_SUPPORT == 1
+#if MF_INPUT_SHIFTER_SUPPORT == 1 && !defined(USE_INTERRUPT)
     lastUpdate.InputShifters = millis() + 6;
 #endif
-#if MF_DIGIN_MUX_SUPPORT == 1
+#if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     lastUpdate.DigInMux = millis() + 8;
 #endif
 }
