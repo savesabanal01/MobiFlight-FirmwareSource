@@ -8,6 +8,9 @@
 #include "MFEEPROM.h"
 #include <EEPROM.h>
 #include "MFBoards.h"
+#if defined(ARDUINO_ARCH_RP2040)
+#include "core2.h"
+#endif
 
 MFEEPROM::MFEEPROM() {}
 
@@ -40,7 +43,10 @@ bool MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
         EEPROM.put(adr + i, data[i]);
     }
 #if defined(ARDUINO_ARCH_RP2040)
+    multicore_fifo_push_blocking(CORE1_CMD_STOP);
+    multicore_lockout_start_blocking();
     EEPROM.commit();
+    multicore_lockout_end_blocking();
 #endif
     return true;
 }
@@ -56,7 +62,10 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
     if (adr >= _eepromLength) return false;
     EEPROM.put(adr, data);
 #if defined(ARDUINO_ARCH_RP2040)
+    multicore_fifo_push_blocking(CORE1_CMD_STOP);
+    multicore_lockout_start_blocking();
     EEPROM.commit();
+    multicore_lockout_end_blocking();
 #endif
     return true;
 }

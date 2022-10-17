@@ -31,6 +31,9 @@
 #if MF_DIGIN_MUX_SUPPORT == 1
 #include "DigInMux.h"
 #endif
+#if defined(ARDUINO_ARCH_RP2040)
+#include "core2.h"
+#endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
 #define MF_ENCODER_DEBOUNCE_MS    1  // time between encoder updates
@@ -153,6 +156,10 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
+#if defined(ARDUINO_ARCH_RP2040)
+    init_TFT();
+    multicore_launch_core1(loop_core2);
+#endif
 }
 
 // ************************************************************
