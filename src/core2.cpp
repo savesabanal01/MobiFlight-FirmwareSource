@@ -115,7 +115,7 @@ void loop_core2()
         if (counter % interval == 0) {
             long millisSinceUpdate = millis() - startMillis;
             fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
-            //        Serial.println(fps);
+//Serial.println(fps);
             startMillis = millis();
         }
         // #########################################################################
