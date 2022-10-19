@@ -43,6 +43,10 @@ bool MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
         EEPROM.put(adr + i, data[i]);
     }
 #if defined(ARDUINO_ARCH_RP2040)
+// #########################################################################
+// Communication with Core1
+// see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
+// #########################################################################
     multicore_fifo_push_blocking(CORE1_CMD_STOP);
     multicore_lockout_start_blocking();
     EEPROM.commit();
@@ -62,6 +66,10 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
     if (adr >= _eepromLength) return false;
     EEPROM.put(adr, data);
 #if defined(ARDUINO_ARCH_RP2040)
+// #########################################################################
+// Communication with Core1
+// see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
+// #########################################################################
     multicore_fifo_push_blocking(CORE1_CMD_STOP);
     multicore_lockout_start_blocking();
     EEPROM.commit();

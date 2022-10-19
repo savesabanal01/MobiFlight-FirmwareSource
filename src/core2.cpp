@@ -136,6 +136,7 @@ void loop_core2()
         }
         // #########################################################################
         // Communication with Core0
+        // see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
         // #########################################################################
         if (multicore_fifo_rvalid()) {
             uint32_t dataCore0 = multicore_fifo_pop_blocking();
