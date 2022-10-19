@@ -25,58 +25,8 @@
 #include <TFT_eSPI.h>
 #include <SD.h>
 #include "core2.h"
-/*
-#include "hardware/pll.h" // don't forget to add hardware_pll to your Cmakelists.txt
-void gset_sys_clock_pll(uint32_t vco_freq, uint post_div1, uint post_div2) 
-{
-    if (!running_on_fpga()) 
-    {
-        clock_configure(clk_sys,
-                        CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
-                        CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
-                        48 * MHZ,
-                        48 * MHZ);
+#include "pico/stdlib.h"
 
-        pll_init(pll_sys, 1, vco_freq, post_div1, post_div2);
-        uint32_t freq = vco_freq / (post_div1 * post_div2);
-
-        // Configure clocks
-        // CLK_REF = XOSC (12MHz) / 1 = 12MHz
-        clock_configure(clk_ref,
-                        CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC,
-                        0, // No aux mux
-                        12 * MHZ,
-                        12 * MHZ);
-
-        // CLK SYS = PLL SYS (125MHz) / 1 = 125MHz
-        clock_configure(clk_sys,
-                        CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
-                        CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
-                        freq, freq);
-
-    //    clock_configure(clk_peri,
-    //                    0, // Only AUX mux on ADC
-    //                    CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
-    //                    48 * MHZ,
-    //                    48 * MHZ);
-    }
-}
-
- static inline bool gset_sys_clock_khz(uint32_t freq_khz, bool required) 
- {
-     uint vco, postdiv1, postdiv2;
-     if (check_sys_clock_khz(freq_khz, &vco, &postdiv1, &postdiv2)) 
-     {
-         gset_sys_clock_pll(vco, postdiv1, postdiv2);
-         return true;
-     } 
-     else if (required) 
-     {
-         panic("System clock of %u kHz cannot be exactly achieved", freq_khz);
-     }
-     return false;
- }
-*/
 uint16_t rainbow(byte value);
 void     drawUpdate(bool sel);
 
@@ -113,13 +63,13 @@ circle_t *circle = new circle_param;
 // #########################################################################
 void init_TFT()
 {
-    // Changing SPI frequency to 133MHz/2
-    uint32_t  freq = clock_get_hz(clk_sys);
+    // reduce systemfrequency to 125MHz to get max SPI speed (max. 62.5 MHz)
+    // higher systemfrequency will reduce SPI speed as it's limited to 62.5MHz
+    set_sys_clock_khz(125000, false);
+    // Changing SPI frequency to clk_sys/2
+    //uint32_t  freq = clock_get_hz(clk_sys);
     // clk_peri does not have a divider, so in and out frequencies must be the same
-    clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS, freq, freq);
-    // change systemfrequency
-    clock_configure(clk_sys, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS, 125 * MHZ, 125 * MHZ);
-    //gset_sys_clock_khz(125000, false);
+    //clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS, freq, freq);
 
     tft.init();
     tft.initDMA();
