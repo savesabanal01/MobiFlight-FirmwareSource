@@ -64,9 +64,16 @@ circle_t *circle = new circle_param;
 void init_TFT()
 {
 // #########################################################################
-//  reduce systemfrequency to 125MHz to get max SPI speed (max. 62.5 MHz)
-//  higher systemfrequency will reduce SPI speed as it's limited to 62.5MHz
-//  BUT! changing to 125MHz or using PIO for SPI disables servo functionality
+//  reduce systemfrequency to 125MHz to get max SPI speed for 62.5 MHz
+//  which is the maximum for most displays.
+//  The SPI clock rate can only be set to an integer division of the processor clock.
+//  The library will drop the clock to the next lower nearest SPI frequency.
+//  So, when the processor frequency is increased to say 133MHz, 
+//  then the maximum SPI rate is now 66500000. This means if you specify 62500000
+//  as the frequency then the library will drop the rate to the next lowest value of 33250000,
+//  so you will see a speed drop.
+//  REMERK!! Changing to 125MHz or using PIO for SPI disables servo functionality
+//  as the servo implementation uses also the PIO
 //  if servo is not needed, uncomment the following function
 //  this will speed up SPI transfer
 //  For this example 24.7fps will be increased to 40fps
@@ -131,7 +138,7 @@ void loop_core2()
         if (counter % interval == 0) {
             long millisSinceUpdate = millis() - startMillis;
             fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
-//Serial.println(fps);
+Serial.println(fps);
             startMillis = millis();
         }
         // #########################################################################
