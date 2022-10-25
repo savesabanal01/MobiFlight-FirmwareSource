@@ -131,7 +131,12 @@ void updateHorizon(int roll, int pitch)
 // #########################################################################
 // Draw the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
-
+void swap(int16_t *a, int16_t *b)
+{
+  int16_t temp = *b;
+  *b = *a;
+  *a = temp;
+}
 void drawHorizon(int roll, int pitch)
 {
     tft.setAddrWindow(XC - 100, YC - 100, 200, 200);
@@ -177,6 +182,8 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
+        if (drawXS > drawXE) swap(&drawXS, &drawXE);
+        if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
@@ -190,6 +197,8 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
+        if (drawXS > drawXE) swap(&drawXS, &drawXE);
+        if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
@@ -203,6 +212,8 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
+        if (drawXS > drawXE) swap(&drawXS, &drawXE);
+        if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
@@ -216,6 +227,8 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
+        if (drawXS > drawXE) swap(&drawXS, &drawXE);
+        if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
@@ -230,6 +243,8 @@ int16_t drawYE = 0;
     drawYS = YC - y0 - ydn - pitch;
     drawXE = XC + x0 - xdn;
     drawYE = YC + y0 - ydn - pitch;
+    if (drawXS > drawXE) swap(&drawXS, &drawXE);
+    if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
@@ -241,6 +256,8 @@ int16_t drawYE = 0;
     drawYS = YC - y0 - yd - pitch;
     drawXE = XC + x0 - xd;
     drawYE = YC + y0 - yd - pitch;
+    if (drawXS > drawXE) swap(&drawXS, &drawXE);
+    if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
@@ -252,6 +269,8 @@ int16_t drawYE = 0;
     drawYS = YC - y0 - pitch;
     drawXE = XC + x0;
     drawYE = YC + y0 - pitch;
+    if (drawXS > drawXE) swap(&drawXS, &drawXE);
+    if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
