@@ -14,7 +14,7 @@
 #define DARK_GREY    0x39C7
 #define XC           120 //
 #define YC           160 //
-#define HOR          150 //400 // Horizon vector line length ### was 172
+#define HOR          130 //400 // Horizon vector line length ### was 172
 #define DEG2RAD      0.0174532925
 
 void updateHorizon(int roll, int pitch);
@@ -40,6 +40,8 @@ uint32_t redrawTime = 0;
 void init_AttitudeIndicator(void)
 {
     randomSeed(analogRead(A0));
+    tft.startWrite(); // TFT chip select held low permanently
+    
 }
 
 // #########################################################################
@@ -50,6 +52,7 @@ int pitch = 0;
 
 void loop_AttitudeIndicator()
 {
+/*
     tft.fillRect(XC - 100, YC - 100, 200, 100, SKY_BLUE);
     tft.fillRect(XC - 100, YC, 200, 100, BROWN);
     for (uint16_t i = 99; i < 150; i++)
@@ -59,7 +62,7 @@ void loop_AttitudeIndicator()
     // Draw the horizon graphic
     drawHorizon(0, 0);
     drawInfo();
-
+*/
     // Test roll and pitch
     testRoll();
     testPitch();
@@ -129,25 +132,19 @@ void updateHorizon(int roll, int pitch)
 // Draw the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
 
-void drawPieSlice(int x, int y, int radius, int color, int startAngle, int EndAngle)
-{
-  for (int i=startAngle; i<EndAngle; i++)
-  {
-    double radians = i * PI / 180;
-    double px = x + radius * cos(radians);
-    double py = y + radius * sin(radians);
-    tft.drawPixel(px, py, color);
-  }
-}
-
 void drawHorizon(int roll, int pitch)
 {
+    tft.setAddrWindow(XC - 100, YC - 100, 200, 200);
     // Calculate coordinates for line start
     float sx = cos(roll * DEG2RAD);
     float sy = sin(roll * DEG2RAD);
 
     int16_t x0  = sx * HOR;
     int16_t y0  = sy * HOR;
+int16_t pitchX = 0;
+int16_t pitchY = 0;
+//pitchX = sx * pitch;
+//pitchY = sx * pitch;
     int16_t xd  = 0;
     int16_t yd  = 1;
     int16_t xdn = 0;
@@ -156,10 +153,12 @@ void drawHorizon(int roll, int pitch)
     if (roll > 45 && roll < 135) {
         xd = -1;
         yd = 0;
+        pitchX *= 1;
     }
     if (roll >= 135) {
         xd = 0;
         yd = -1;
+        pitchY *= 1;
     }
     if (roll < -45 && roll > -135) {
         xd = 1;
@@ -168,6 +167,7 @@ void drawHorizon(int roll, int pitch)
     if (roll <= -135) {
         xd = 0;
         yd = -1;
+        pitchY *= 1;
     }
 
     if ((roll != last_roll) || (pitch != last_pitch)) {
@@ -192,7 +192,7 @@ void drawHorizon(int roll, int pitch)
 
     xdn = 2 * xd;
     ydn = 2 * yd;
-
+    
     tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
     tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
 
@@ -201,6 +201,38 @@ void drawHorizon(int roll, int pitch)
 
     tft.drawLine(XC - x0, YC - y0 - pitch,   XC + x0, YC + y0 - pitch,   TFT_WHITE);
 
+/*
+    if ((roll != last_roll) || (pitch != last_pitch)) {
+        xdn = 6 * xd;
+        ydn = 6 * yd;
+        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+        xdn = 5 * xd;
+        ydn = 5 * yd;
+        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+        xdn = 4 * xd;
+        ydn = 4 * yd;
+        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+
+        xdn = 3 * xd;
+        ydn = 3 * yd;
+        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+    }
+
+    xdn = 2 * xd;
+    ydn = 2 * yd;
+
+    tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+    tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+
+    tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
+    tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+
+    tft.drawLine(XC - x0 - pitchX, YC - y0 - pitch - pitchY,   XC + x0 + pitchX, YC + y0 - pitch - pitchY,   TFT_WHITE);
+*/
     last_roll  = roll;
     last_pitch = pitch;
 
@@ -209,6 +241,8 @@ void drawHorizon(int roll, int pitch)
       tft.drawCircle(XC, YC, i, ILI9341_BLACK);
       //drawPieSlice(XC, YC, i, ILI9341_BLACK, 0, 180);
     }
+
+    tft.setAddrWindow(0, 0, DWIDTH, DHEIGHT);
 }
 
 // #########################################################################
