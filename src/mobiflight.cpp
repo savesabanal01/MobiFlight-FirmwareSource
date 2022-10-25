@@ -32,7 +32,7 @@
 #include "DigInMux.h"
 #endif
 #if defined(ARDUINO_ARCH_RP2040)
-#include "core2.h"
+#include "Core1.h"
 #endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
@@ -157,8 +157,8 @@ void setup()
     ResetBoard();
     initPollIntervals();
 #if defined(ARDUINO_ARCH_RP2040)
-    init_TFT();
-    multicore_launch_core1(loop_core2);
+    core1_init();
+    multicore_launch_core1(core1_loop);
 #endif
 }
 

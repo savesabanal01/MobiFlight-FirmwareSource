@@ -24,7 +24,7 @@
 
 #include <TFT_eSPI.h>
 #include <SD.h>
-#include "core2.h"
+#include "bouncingCircles.h"
 #include "pico/stdlib.h"
 
 uint16_t rainbow(byte value);
@@ -61,7 +61,7 @@ circle_t *circle = new circle_param;
 // #########################################################################
 // Setup
 // #########################################################################
-void init_TFT()
+void init_bouncingCircles()
 {
 // #########################################################################
 //  reduce systemfrequency to 125MHz to get max SPI speed for 62.5 MHz
@@ -126,7 +126,7 @@ void init_TFT()
 // #########################################################################
 // Loop
 // #########################################################################
-void loop_core2()
+void loop_bouncingCircles()
 {
     //    init_TFT();
     while (1) {
@@ -141,17 +141,7 @@ void loop_core2()
 //Serial.println(fps);
             startMillis = millis();
         }
-        // #########################################################################
-        // Communication with Core0
-        // see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
-        // #########################################################################
-        if (multicore_fifo_rvalid()) {
-            uint32_t dataCore0 = multicore_fifo_pop_blocking();
-            if (dataCore0 == CORE1_CMD_STOP) multicore_lockout_victim_init();
-            if (dataCore0 & CORE1_DATA) {
-              uint32_t receivedData = dataCore0 & 0x00FFFFFF;
-            }
-        }
+        
     }
 }
 
