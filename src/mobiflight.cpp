@@ -151,6 +151,7 @@ void ResetBoard()
 void setup()
 {
     Serial.begin(115200);
+while (!Serial) delay(10);
     MFeeprom.init();
     attachCommandCallbacks();
     cmdMessenger.printLfCr();
