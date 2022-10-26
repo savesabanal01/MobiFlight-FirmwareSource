@@ -117,7 +117,7 @@ void loop_AttitudeIndicator()
         // Maximum pitch shouls be in range +/- 80 with HOR = 172
         // pitch = 10; //random(2 * YC) - YC;
         pitch++;
-        if (pitch == 30) pitch = -30;
+        if (pitch > 40) pitch = -30;
 
         updateHorizon(roll, pitch);
     }
@@ -133,6 +133,7 @@ void updateHorizon(int roll, int pitch)
     int  delta_pitch = 0;
     int  pitch_error = 0;
     int  delta_roll  = 0;
+
     while ((last_pitch != pitch) || (last_roll != roll)) {
         delta_pitch = 0;
         delta_roll  = 0;
@@ -156,6 +157,7 @@ void updateHorizon(int roll, int pitch)
 
         drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 0);
         drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
+
     }
 }
 
@@ -233,11 +235,11 @@ void drawHorizon(int roll, int pitch, bool sel)
         last_roll  = roll;
         last_pitch = pitch;
     }
-/*
-    for (uint16_t i = 99; i < 170; i++) {
-       spr[sel].drawCircle(XC, YC, i, TFT_BLACK);
-    }
-*/
+    /*
+        for (uint16_t i = 99; i < 170; i++) {
+           spr[sel].drawCircle(XC, YC, i, TFT_BLACK);
+        }
+    */
     drawScale(sel);
 
     tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
@@ -289,10 +291,12 @@ void drawScale(bool sel)
     spr[sel].print("20");
 
     // Display justified roll value near bottom of screen
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK); // Text with background
-    tft.setTextDatum(MC_DATUM);              // Centre middle justified
-    tft.setTextPadding(24);                  // Padding width to wipe previous number
-    tft.drawNumber(last_roll, XC, TFT_HEIGTH - 18, 1);
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);                             // Text with background
+    tft.setTextDatum(MC_DATUM);                                          // Centre middle justified
+    tft.setTextPadding(24);                                              // Padding width to wipe previous number
+    char message[40];                                                    // buffer for message
+    sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
+    tft.drawString(message, XC, TFT_HEIGTH - 18, 1);
 }
 
 // #########################################################################
