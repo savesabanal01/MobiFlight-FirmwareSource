@@ -27,7 +27,11 @@ void core1_init()
 
 void core1_loop()
 {
+    uint32_t millisStart = millis();
+    uint8_t  loopCounter = 0;
+
     while (1) {
+
 #ifdef BOUNCING_CIRCLES
         loop_bouncingCircles();
 #endif
@@ -38,7 +42,14 @@ void core1_loop()
 #endif
 #ifdef COMPASS
         loop_Compass();
-#endif//
+#endif
+
+        loopCounter++;
+        if (loopCounter == 10) {
+            Serial.print("Time for 1 loops: "); Serial.print((millis() - millisStart) / 10); Serial.println("ms");
+            millisStart = millis();
+            loopCounter = 0;
+        }
 
         // #########################################################################
         // Communication with Core0
