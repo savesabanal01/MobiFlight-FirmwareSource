@@ -14,7 +14,7 @@
 #define DARK_GREY    0x39C7
 #define XC           120 //
 #define YC           160 //
-#define HOR          130 //400 // Horizon vector line length ### was 172
+#define HOR          400 //130 //400 // Horizon vector line length ### was 172
 #define DEG2RAD      0.0174532925
 
 void updateHorizon(int roll, int pitch);
@@ -62,10 +62,6 @@ void loop_AttitudeIndicator()
     // Define text datum for each Sprite
     spr[0].setTextDatum(MC_DATUM);
     spr[1].setTextDatum(MC_DATUM);
-
-    // Seed the random number generator
-    randomSeed(analogRead(A0));
-
 /*
     tft.fillRect(XC - 100, YC - 100, 200, 100, SKY_BLUE);
     tft.fillRect(XC - 100, YC, 200, 100, BROWN);
@@ -73,10 +69,15 @@ void loop_AttitudeIndicator()
     {
       tft.drawCircle(XC, YC, i, ILI9341_BLACK);
     }
+*/
+
+    tft.fillRect(XC - 120, YC - 160, 240, 160, SKY_BLUE);
+    tft.fillRect(XC - 120, YC, 240, 160, BROWN);
+
     // Draw the horizon graphic
     drawHorizon(0, 0);
     drawInfo();
-*/
+
     // Test roll and pitch
     testRoll();
     testPitch();
@@ -160,12 +161,7 @@ void drawHorizon(int roll, int pitch)
 
     int16_t x0  = sx * HOR;
     int16_t y0  = sy * HOR;
-int16_t clipX = x0;
-int16_t clipY = y0;
-int16_t drawXS = 0;
-int16_t drawYS = 0;
-int16_t drawXE = 0;
-int16_t drawYE = 0;
+
 
     int16_t xd  = 0;
     int16_t yd  = 1;
@@ -188,7 +184,13 @@ int16_t drawYE = 0;
         xd = 0;
         yd = -1;
     }
-
+/*
+    int16_t clipX = x0;
+int16_t clipY = y0;
+int16_t drawXS = 0;
+int16_t drawYS = 0;
+int16_t drawXE = 0;
+int16_t drawYE = 0;
     if ((roll != last_roll) || (pitch != last_pitch)) {
         xdn = 6 * xd;
         ydn = 6 * yd;
@@ -196,14 +198,18 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
-        if (drawXS > drawXE) swap(&drawXS, &drawXE);
-        if (drawYS > drawYE) swap(&drawYS, &drawYE);
+        if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+        //if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
         if (drawYE > YC + 100) drawYE = XC + 100;
         tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
         
         xdn = 5 * xd;
         ydn = 5 * yd;
@@ -211,14 +217,18 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
-        if (drawXS > drawXE) swap(&drawXS, &drawXE);
-        if (drawYS > drawYE) swap(&drawYS, &drawYE);
+        if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+        //if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
         if (drawYE > YC + 100) drawYE = XC + 100;
         tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
         
         xdn = 4 * xd;
         ydn = 4 * yd;
@@ -226,14 +236,18 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
-        if (drawXS > drawXE) swap(&drawXS, &drawXE);
-        if (drawYS > drawYE) swap(&drawYS, &drawYE);
+        if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+        //if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
         if (drawYE > YC + 100) drawYE = XC + 100;
         tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
 
         xdn = 3 * xd;
         ydn = 3 * yd;
@@ -241,14 +255,18 @@ int16_t drawYE = 0;
         drawYS = YC - y0 - ydn - pitch;
         drawXE = XC + x0 - xdn;
         drawYE = YC + y0 - ydn - pitch;
-        if (drawXS > drawXE) swap(&drawXS, &drawXE);
-        if (drawYS > drawYE) swap(&drawYS, &drawYE);
+        if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+        //if (drawYS > drawYE) swap(&drawYS, &drawYE);
         if (drawXS < XC - 100) drawXS = XC - 100;
         if (drawYS < YC - 100) drawXS = YC - 100;
         if (drawXE > XC + 100) drawXE = XC + 100;
         if (drawYE > YC + 100) drawYE = XC + 100;
         tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
     }
 
     xdn = 2 * xd;
@@ -257,73 +275,84 @@ int16_t drawYE = 0;
     drawYS = YC - y0 - ydn - pitch;
     drawXE = XC + x0 - xdn;
     drawYE = YC + y0 - ydn - pitch;
-    if (drawXS > drawXE) swap(&drawXS, &drawXE);
-    if (drawYS > drawYE) swap(&drawYS, &drawYE);
+    if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+    //if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
     if (drawYE > YC + 100) drawYE = XC + 100;
     tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-    tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+    //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
 
     drawXS = XC - x0 - xd;
     drawYS = YC - y0 - yd - pitch;
     drawXE = XC + x0 - xd;
     drawYE = YC + y0 - yd - pitch;
-    if (drawXS > drawXE) swap(&drawXS, &drawXE);
-    if (drawYS > drawYE) swap(&drawYS, &drawYE);
+    if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+    //if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
     if (drawYE > YC + 100) drawYE = XC + 100;
     tft.drawLine(drawXS, drawYS, drawXE, drawYE, SKY_BLUE);
-    tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+    //tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
 
     drawXS = XC - x0;
     drawYS = YC - y0 - pitch;
     drawXE = XC + x0;
     drawYE = YC + y0 - pitch;
-    if (drawXS > drawXE) swap(&drawXS, &drawXE);
-    if (drawYS > drawYE) swap(&drawYS, &drawYE);
+    if (drawXS > drawXE)
+        {
+            swap(&drawXS, &drawXE);
+            swap(&drawYS, &drawYE);
+        }
+    //if (drawYS > drawYE) swap(&drawYS, &drawYE);
     if (drawXS < XC - 100) drawXS = XC - 100;
     if (drawYS < YC - 100) drawXS = YC - 100;
     if (drawXE > XC + 100) drawXE = XC + 100;
     if (drawYE > YC + 100) drawYE = XC + 100;
     tft.drawLine(XC - x0, YC - y0 - pitch,   XC + x0, YC + y0 - pitch,   TFT_WHITE);
-//delay(1000);
-/*
-    if ((roll != last_roll) || (pitch != last_pitch)) {
+*/
+
+    if ((roll != last_roll) || (pitch != last_pitch))
+    {
         xdn = 6 * xd;
         ydn = 6 * yd;
-        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+        tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
         xdn = 5 * xd;
         ydn = 5 * yd;
-        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+        tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
         xdn = 4 * xd;
         ydn = 4 * yd;
-        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
-
+        tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        
         xdn = 3 * xd;
         ydn = 3 * yd;
-        tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-        tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+        tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
+        tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
     }
-
     xdn = 2 * xd;
     ydn = 2 * yd;
+    tft.drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
+    tft.drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
 
-    tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-    tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+    tft.drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE);
+    tft.drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN);
 
-    tft.drawLine(XC - x0 - xdn - pitchX, YC - y0 - ydn - pitch - pitchY, XC + x0 - xdn + pitchX, YC + y0 - ydn - pitch - pitchY, SKY_BLUE);
-    tft.drawLine(XC - x0 + xdn - pitchX, YC - y0 + ydn - pitch - pitchY, XC + x0 + xdn + pitchX, YC + y0 + ydn - pitch - pitchY, BROWN);
+    tft.drawLine(XC - x0, YC - y0 - pitch,   XC + x0, YC + y0 - pitch,   TFT_WHITE);
 
-    tft.drawLine(XC - x0 - pitchX, YC - y0 - pitch - pitchY,   XC + x0 + pitchX, YC + y0 - pitch - pitchY,   TFT_WHITE);
-*/
-    last_roll  = roll;
+    last_roll = roll;
     last_pitch = pitch;
 /*
     for (uint16_t i = 99; i < 160; i++)

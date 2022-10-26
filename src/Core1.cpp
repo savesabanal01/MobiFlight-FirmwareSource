@@ -4,18 +4,22 @@
 #include "TFT.h"
 #include "bouncingCircles.h"
 #include "AttitudeIndicator.h"
+#include "Compass.h"
+
 
 void core1_init()
 {
     tft_init();
     //init_bouncingCircles();
-    init_AttitudeIndicator();
+    //init_AttitudeIndicator();
+    init_Compass();
 }
 
 void core1_loop()
 {
     //loop_bouncingCircles();
-    loop_AttitudeIndicator();
+    //loop_AttitudeIndicator();
+    loop_Compass();
 
     // #########################################################################
     // Communication with Core0

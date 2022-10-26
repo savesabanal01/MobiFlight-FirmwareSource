@@ -50,8 +50,8 @@ void init_bouncingCircles()
     // Initialise circle parameters
     for (uint16_t i = 0; i < CNUMBER; i++) {
         circle->cr[i] = random(12, 24);
-        circle->cx[i] = random(circle->cr[i], DWIDTH - circle->cr[i]);
-        circle->cy[i] = random(circle->cr[i], DHEIGHT - circle->cr[i]);
+        circle->cx[i] = random(circle->cr[i], SPRITE_WIDTH - circle->cr[i]);
+        circle->cy[i] = random(circle->cr[i], SPRITE_HEIGTH - circle->cr[i]);
 
         circle->col[i] = rainbow(4 * i);
         circle->dx[i]  = random(1, 5);
@@ -71,19 +71,16 @@ void init_bouncingCircles()
 void loop_bouncingCircles()
 {
     // Create the 2 sprites, each is half the size of the screen
-    sprPtr[0] = (uint16_t *)spr[0].createSprite(DWIDTH, DHEIGHT / 2);
-    sprPtr[1] = (uint16_t *)spr[1].createSprite(DWIDTH, DHEIGHT / 2);
+    sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
+    sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
 
     // Move the sprite 1 coordinate datum upwards half the screen height
     // so from coordinate point of view it occupies the bottom of screen
-    spr[1].setViewport(0, -DHEIGHT / 2, DWIDTH, DHEIGHT);
+    spr[1].setViewport(0, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
 
     // Define text datum for each Sprite
     spr[0].setTextDatum(MC_DATUM);
     spr[1].setTextDatum(MC_DATUM);
-
-    // Seed the random number generator
-    randomSeed(analogRead(A0));
 
     while (1) {
         drawUpdate(0); // Update top half
@@ -94,12 +91,12 @@ void loop_bouncingCircles()
         if (counter % interval == 0) {
             long millisSinceUpdate = millis() - startMillis;
             fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
-Serial.println(fps);
+//Serial.println(fps);
             startMillis = millis();
         }
     }
-    //sprPtr[0].deleteSprite();
-    //sprPtr[1].deleteSprite();
+    spr[0].deleteSprite();
+    spr[1].deleteSprite();
 }
 
 // #########################################################################
@@ -116,7 +113,7 @@ void drawUpdate(bool sel)
         spr[sel].drawNumber(i + 1, 1 + circle->cx[i], circle->cy[i], 2);
     }
 
-    tft.pushImageDMA(0, sel * DHEIGHT / 2, DWIDTH, DHEIGHT / 2, sprPtr[sel]);
+    tft.pushImageDMA(0, sel * SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
 
     // Update circle positions after bottom half has been drawn
     if (sel) {
@@ -126,15 +123,15 @@ void drawUpdate(bool sel)
             if (circle->cx[i] <= circle->cr[i]) {
                 circle->cx[i] = circle->cr[i];
                 circle->dx[i] = -circle->dx[i];
-            } else if (circle->cx[i] + circle->cr[i] >= DWIDTH - 1) {
-                circle->cx[i] = DWIDTH - circle->cr[i] - 1;
+            } else if (circle->cx[i] + circle->cr[i] >= SPRITE_WIDTH - 1) {
+                circle->cx[i] = SPRITE_WIDTH - circle->cr[i] - 1;
                 circle->dx[i] = -circle->dx[i];
             }
             if (circle->cy[i] <= circle->cr[i]) {
                 circle->cy[i] = circle->cr[i];
                 circle->dy[i] = -circle->dy[i];
-            } else if (circle->cy[i] + circle->cr[i] >= DHEIGHT - 1) {
-                circle->cy[i] = DHEIGHT - circle->cr[i] - 1;
+            } else if (circle->cy[i] + circle->cr[i] >= SPRITE_HEIGTH - 1) {
+                circle->cy[i] = SPRITE_HEIGTH - circle->cr[i] - 1;
                 circle->dy[i] = -circle->dy[i];
             }
         }

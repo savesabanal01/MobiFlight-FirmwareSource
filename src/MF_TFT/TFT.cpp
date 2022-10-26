@@ -41,5 +41,7 @@ void tft_init()
     tft.initDMA();
     tft.fillScreen(TFT_BLACK);
     tft.setRotation(0);
+
+    randomSeed(analogRead(A0));
     
 }
