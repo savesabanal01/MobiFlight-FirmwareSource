@@ -26,7 +26,6 @@ void     drawUpdate(bool sel);
 
 // Used for fps measuring
 uint16_t counter     = 0;
-int32_t  startMillis = millis();
 uint16_t interval    = 100;
 String   fps         = "xx.xx fps";
 
@@ -71,7 +70,21 @@ void init_bouncingCircles()
 // #########################################################################
 void loop_bouncingCircles()
 {
-    //    init_TFT();
+    // Create the 2 sprites, each is half the size of the screen
+    sprPtr[0] = (uint16_t *)spr[0].createSprite(DWIDTH, DHEIGHT / 2);
+    sprPtr[1] = (uint16_t *)spr[1].createSprite(DWIDTH, DHEIGHT / 2);
+
+    // Move the sprite 1 coordinate datum upwards half the screen height
+    // so from coordinate point of view it occupies the bottom of screen
+    spr[1].setViewport(0, -DHEIGHT / 2, DWIDTH, DHEIGHT);
+
+    // Define text datum for each Sprite
+    spr[0].setTextDatum(MC_DATUM);
+    spr[1].setTextDatum(MC_DATUM);
+
+    // Seed the random number generator
+    randomSeed(analogRead(A0));
+
     while (1) {
         drawUpdate(0); // Update top half
         drawUpdate(1); // Update bottom half
@@ -84,8 +97,9 @@ void loop_bouncingCircles()
 Serial.println(fps);
             startMillis = millis();
         }
-        
     }
+    //sprPtr[0].deleteSprite();
+    //sprPtr[1].deleteSprite();
 }
 
 // #########################################################################

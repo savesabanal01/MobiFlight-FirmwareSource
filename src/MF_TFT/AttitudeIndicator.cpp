@@ -39,9 +39,8 @@ uint32_t redrawTime = 0;
 
 void init_AttitudeIndicator(void)
 {
-    randomSeed(analogRead(A0));
     tft.startWrite(); // TFT chip select held low permanently
-    
+    startMillis = millis();
 }
 
 // #########################################################################
@@ -52,6 +51,21 @@ int pitch = 0;
 
 void loop_AttitudeIndicator()
 {
+    // Create the 2 sprites, each is half the size of the screen
+    sprPtr[0] = (uint16_t *)spr[0].createSprite(DWIDTH, DHEIGHT / 2);
+    sprPtr[1] = (uint16_t *)spr[1].createSprite(DWIDTH, DHEIGHT / 2);
+
+    // Move the sprite 1 coordinate datum upwards half the screen height
+    // so from coordinate point of view it occupies the bottom of screen
+    spr[1].setViewport(0, -DHEIGHT / 2, DWIDTH, DHEIGHT);
+
+    // Define text datum for each Sprite
+    spr[0].setTextDatum(MC_DATUM);
+    spr[1].setTextDatum(MC_DATUM);
+
+    // Seed the random number generator
+    randomSeed(analogRead(A0));
+
 /*
     tft.fillRect(XC - 100, YC - 100, 200, 100, SKY_BLUE);
     tft.fillRect(XC - 100, YC, 200, 100, BROWN);

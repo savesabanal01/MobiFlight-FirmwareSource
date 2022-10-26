@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "TFT.h"
 
-
+int32_t  startMillis = 0;
 
 // Library instance
 TFT_eSPI tft = TFT_eSPI();
@@ -41,19 +41,5 @@ void tft_init()
     tft.initDMA();
     tft.fillScreen(TFT_BLACK);
     tft.setRotation(0);
-
-    // Create the 2 sprites, each is half the size of the screen
-    sprPtr[0] = (uint16_t *)spr[0].createSprite(DWIDTH, DHEIGHT / 2);
-    sprPtr[1] = (uint16_t *)spr[1].createSprite(DWIDTH, DHEIGHT / 2);
-
-    // Move the sprite 1 coordinate datum upwards half the screen height
-    // so from coordinate point of view it occupies the bottom of screen
-    spr[1].setViewport(0, -DHEIGHT / 2, DWIDTH, DHEIGHT);
-
-    // Define text datum for each Sprite
-    spr[0].setTextDatum(MC_DATUM);
-    spr[1].setTextDatum(MC_DATUM);
-
-    // Seed the random number generator
-    randomSeed(analogRead(A0));
+    
 }
