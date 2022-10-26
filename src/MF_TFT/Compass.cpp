@@ -34,11 +34,11 @@
 #define SPRITE_Y0     60                // upper left y position where to plot
 #define SPRITE_WIDTH  240               // 100 // size of sprite
 #define SPRITE_HEIGTH 240               // 100 // size pf sprite
-#define X0            SPRITE_WIDTH / 2  // center position of compass
-#define Y0            SPRITE_HEIGTH / 2 // center position of compass
-#define NEEDLE_L      140 / 2           // 84/2  // Needle length is 84, we want radius which is 42
-#define NEEDLE_W      16 / 2            // 12/2  // Needle width is 12, radius is then 6
-#define WAIT          20                // Pause in milliseconds to set refresh speed
+#define X0            SPRITE_WIDTH / 2  // center position of compass in the middle of trhte sprite
+#define Y0            SPRITE_HEIGTH / 2 // center position of compass in the middle of trhte sprite
+#define NEEDLE_L      200 / 2           // 84/2  // Needle length is 84, we want radius which is 42
+#define NEEDLE_W      20 / 2            // 12/2  // Needle width is 12, radius is then 6
+#define WAIT          10                // Pause in milliseconds to set refresh speed
 
 void drawCompass(int x, int y, int angle, bool sel);
 void getCoord(int x, int y, int *xp, int *yp, int r, int a);
@@ -130,7 +130,7 @@ void drawCompass(int x, int y, int angle, bool sel)
     spr[sel].drawString("S", X0, Y0 + NEEDLE_L, 2);
     spr[sel].drawString("W", X0 - NEEDLE_L, Y0, 2);
 
-    spr[sel].drawCircle(X0, Y0, 60, TFT_DARKGREY);
+    spr[sel].drawCircle(X0, Y0, NEEDLE_L - 15, TFT_DARKGREY);
 
     getCoord(x, y, &lx1, &ly1, NEEDLE_L, angle);
     getCoord(x, y, &lx2, &ly2, NEEDLE_L, angle + 180);
