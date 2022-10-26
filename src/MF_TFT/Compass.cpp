@@ -29,16 +29,21 @@
 #include <Arduino.h>
 #include "TFT.h"
 
-#define BACKGROUND    TFT_BLACK
-#define SPRITE_X0     0                 // upper left x position where to plot
-#define SPRITE_Y0     60                // upper left y position where to plot
+
+// Define the width and height according to the TFT and the
+// available memory. The sprites will require:
+//     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
+// Note: for a 240 * 320 area this is 150 Kbytes!
 #define SPRITE_WIDTH  240               // 100 // size of sprite
 #define SPRITE_HEIGTH 240               // 100 // size pf sprite
+#define SPRITE_X0     0                 // upper left x position where to plot
+#define SPRITE_Y0     60                // upper left y position where to plot
 #define X0            SPRITE_WIDTH / 2  // center position of compass in the middle of trhte sprite
 #define Y0            SPRITE_HEIGTH / 2 // center position of compass in the middle of trhte sprite
 #define NEEDLE_L      200 / 2           // 84/2  // Needle length is 84, we want radius which is 42
 #define NEEDLE_W      20 / 2            // 12/2  // Needle width is 12, radius is then 6
 #define WAIT          10                // Pause in milliseconds to set refresh speed
+#define BACKGROUND    TFT_BLACK
 
 void drawCompass(int x, int y, int angle, bool sel);
 void getCoord(int x, int y, int *xp, int *yp, int r, int a);
@@ -69,11 +74,12 @@ void init_Compass(void)
     spr[1].setRotation(0);
     spr[1].fillScreen(BACKGROUND);
 
+    // Create the 2 sprites, each is half the size of the screen
     sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     // Move the sprite 1 coordinate datum upwards half the screen height
     // so from coordinate point of view it occupies the bottom of screen
-    spr[1].setViewport(SPRITE_X0, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
+    spr[1].setViewport(0 /* SPRITE_X0 */, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
 
     tft.startWrite(); // TFT chip select held low permanently
 
@@ -144,7 +150,6 @@ void drawCompass(int x, int y, int angle, bool sel)
     spr[sel].fillCircle(X0, Y0, 3, TFT_DARKGREY);
     spr[sel].fillCircle(Y0, X0, 2, TFT_LIGHTGREY);
 
-    // spr[0].pushSprite(SPRITE_X0 - SPRITE_WIDTH / 2, SPRITE_Y0 - SPRITE_HEIGTH / 2, TFT_TRANSPARENT);
     tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
 
     TPRINT
