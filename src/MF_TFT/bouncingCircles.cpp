@@ -16,7 +16,12 @@
 #include "TFT.h"
 #include "bouncingCircles.h"
 
-
+// Define the width and height according to the TFT and the
+// available memory. The sprites will require:
+//     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
+// Note: for a 240 * 320 area this is 150 Kbytes!
+#define SPRITE_WIDTH  240
+#define SPRITE_HEIGTH 320
 // Number of circles to draw
 #define CNUMBER 42
 
@@ -60,16 +65,6 @@ void init_bouncingCircles()
         if (random(2)) circle->dy[i] = -circle->dy[i];
     }
 
-    tft.startWrite(); // TFT chip select held low permanently
-
-    startMillis = millis();
-}
-
-// #########################################################################
-// Loop
-// #########################################################################
-void loop_bouncingCircles()
-{
     // Create the 2 sprites, each is half the size of the screen
     sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
@@ -82,7 +77,21 @@ void loop_bouncingCircles()
     spr[0].setTextDatum(MC_DATUM);
     spr[1].setTextDatum(MC_DATUM);
 
-    while (1) {
+    tft.startWrite(); // TFT chip select held low permanently
+
+    startMillis = millis();
+}
+
+void stop_bouncingCircles()
+{
+    spr[0].deleteSprite();
+    spr[1].deleteSprite();
+}
+// #########################################################################
+// Loop
+// #########################################################################
+void loop_bouncingCircles()
+{
         drawUpdate(0); // Update top half
         drawUpdate(1); // Update bottom half
 
@@ -93,10 +102,7 @@ void loop_bouncingCircles()
             fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
 //Serial.println(fps);
             startMillis = millis();
-        }
     }
-    spr[0].deleteSprite();
-    spr[1].deleteSprite();
 }
 
 // #########################################################################

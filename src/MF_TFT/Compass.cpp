@@ -69,37 +69,38 @@ void init_Compass(void)
     spr[1].setRotation(0);
     spr[1].fillScreen(BACKGROUND);
 
-    tft.startWrite(); // TFT chip select held low permanently
-
-    startMillis = millis();
-}
-
-// -------------------------------------------------------------------------
-// Main loop
-// -------------------------------------------------------------------------
-void loop_Compass()
-{
     sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     // Move the sprite 1 coordinate datum upwards half the screen height
     // so from coordinate point of view it occupies the bottom of screen
     spr[1].setViewport(SPRITE_X0, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
 
-    while (1) {
-        drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
-        drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
-        angle += 3;                    // Increment angle for testing
-        if (angle > 359) angle = 0;    // Limit angle to 360
-        delay(WAIT);
-        drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
-        drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
-        angle += 3;                    // Increment angle for testing
-        if (angle > 359) angle = 0;    // Limit angle to 360
-        delay(WAIT);
-    }
+    tft.startWrite(); // TFT chip select held low permanently
+
+    startMillis = millis();
+}
+
+void stop_Compass()
+{
     // Delete sprite to free up the RAM
     spr[0].deleteSprite();
     spr[1].deleteSprite();
+}
+// -------------------------------------------------------------------------
+// Main loop
+// -------------------------------------------------------------------------
+void loop_Compass()
+{
+    drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
+    drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
+    angle += 3;                    // Increment angle for testing
+    if (angle > 359) angle = 0;    // Limit angle to 360
+    delay(WAIT);
+    drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
+    drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
+    angle += 3;                    // Increment angle for testing
+    if (angle > 359) angle = 0;    // Limit angle to 360
+    delay(WAIT);
 }
 
 // Test code to measure runtimes, executes code 100x and shows time taken
