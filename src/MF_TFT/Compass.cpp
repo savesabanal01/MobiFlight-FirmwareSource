@@ -29,18 +29,18 @@
 #include <Arduino.h>
 #include "TFT.h"
 
-#define BACKGROUND      TFT_BLACK
-#define SPRITE_WIDTH    160               // 100 // size of sprite
-#define SPRITE_HEIGTH   160               // 100 // size pf sprite
-#define SPRITE_CENTER_X 120               // center position where to plot
-#define SPRITE_CENTER_Y 160               // center position where to plot
-#define X0              SPRITE_WIDTH / 2  // center position of compass
-#define Y0              SPRITE_HEIGTH / 2 // center position of compass
-#define NEEDLE_L        140 / 2           // 84/2  // Needle length is 84, we want radius which is 42
-#define NEEDLE_W        16 / 2            // 12/2  // Needle width is 12, radius is then 6
-#define WAIT            20                // Pause in milliseconds to set refresh speed
+#define BACKGROUND    TFT_BLACK
+#define SPRITE_X0     0                 // upper left x position where to plot
+#define SPRITE_Y0     60                // upper left y position where to plot
+#define SPRITE_WIDTH  240               // 100 // size of sprite
+#define SPRITE_HEIGTH 240               // 100 // size pf sprite
+#define X0            SPRITE_WIDTH / 2  // center position of compass
+#define Y0            SPRITE_HEIGTH / 2 // center position of compass
+#define NEEDLE_L      140 / 2           // 84/2  // Needle length is 84, we want radius which is 42
+#define NEEDLE_W      16 / 2            // 12/2  // Needle width is 12, radius is then 6
+#define WAIT          20                // Pause in milliseconds to set refresh speed
 
-void drawCompass(int x, int y, int angle);
+void drawCompass(int x, int y, int angle, bool sel);
 void getCoord(int x, int y, int *xp, int *yp, int r, int a);
 
 int number = 0;
@@ -79,16 +79,22 @@ void init_Compass(void)
 // -------------------------------------------------------------------------
 void loop_Compass()
 {
-    sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH);
-    //sprPtr[1] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH);
+    sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
+    sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
+    // Move the sprite 1 coordinate datum upwards half the screen height
+    // so from coordinate point of view it occupies the bottom of screen
+    spr[1].setViewport(SPRITE_X0, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
+
     while (1) {
-        drawCompass(X0, Y0, angle); // Draw centre of compass at 50,50
-        angle += 3;                 // Increment angle for testing
-        if (angle > 359) angle = 0; // Limit angle to 360
+        drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
+        drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
+        angle += 3;                    // Increment angle for testing
+        if (angle > 359) angle = 0;    // Limit angle to 360
         delay(WAIT);
-        drawCompass(X0, Y0, angle); // Draw centre of compass at 50,50
-        angle += 3;                 // Increment angle for testing
-        if (angle > 359) angle = 0; // Limit angle to 360
+        drawCompass(X0, Y0, angle, 0); // Draw centre of compass at X0,Y0
+        drawCompass(X0, Y0, angle, 1); // Draw centre of compass at X0,Y0
+        angle += 3;                    // Increment angle for testing
+        if (angle > 359) angle = 0;    // Limit angle to 360
         delay(WAIT);
     }
     // Delete sprite to free up the RAM
@@ -103,42 +109,42 @@ void loop_Compass()
 // #########################################################################
 // Draw compass using the defined transparent colour (takes ~6ms)
 // #########################################################################
-void drawCompass(int x, int y, int angle)
+void drawCompass(int x, int y, int angle, bool sel)
 {
     TSTART
     // TFT_TRANSPARENT is a special colour with reversible 8/16 bit coding
     // this allows it to be used in both 8 and 16 bit colour sprites.
-    spr[0].fillSprite(TFT_TRANSPARENT);
+    spr[sel].fillSprite(TFT_TRANSPARENT);
 
     // Draw the old needle position in the screen background colour so
     // it gets erased on the TFT when the sprite is drawn
-    spr[0].fillTriangle(lx1, ly1, lx3, ly3, lx4, ly4, BACKGROUND);
-    spr[0].fillTriangle(lx2, ly2, lx3, ly3, lx4, ly4, BACKGROUND);
+    spr[sel].fillTriangle(lx1, ly1, lx3, ly3, lx4, ly4, BACKGROUND);
+    spr[sel].fillTriangle(lx2, ly2, lx3, ly3, lx4, ly4, BACKGROUND);
 
     // Set text coordinate datum to middle centre
-    spr[0].setTextDatum(MC_DATUM);
-    spr[0].setTextColor(TFT_WHITE);
+    spr[sel].setTextDatum(MC_DATUM);
+    spr[sel].setTextColor(TFT_WHITE);
 
-    spr[0].drawString("N", X0, Y0 - NEEDLE_L, 2);
-    spr[0].drawString("E", X0 + NEEDLE_L, 50, 2);
-    spr[0].drawString("S", X0, Y0 + NEEDLE_L, 2);
-    spr[0].drawString("W", X0 - NEEDLE_L, Y0, 2);
+    spr[sel].drawString("N", X0, Y0 - NEEDLE_L, 2);
+    spr[sel].drawString("E", X0 + NEEDLE_L, Y0, 2);
+    spr[sel].drawString("S", X0, Y0 + NEEDLE_L, 2);
+    spr[sel].drawString("W", X0 - NEEDLE_L, Y0, 2);
 
-    spr[0].drawCircle(X0, Y0, 60, TFT_DARKGREY);
+    spr[sel].drawCircle(X0, Y0, 60, TFT_DARKGREY);
 
     getCoord(x, y, &lx1, &ly1, NEEDLE_L, angle);
     getCoord(x, y, &lx2, &ly2, NEEDLE_L, angle + 180);
     getCoord(x, y, &lx3, &ly3, NEEDLE_W, angle + 90);
     getCoord(x, y, &lx4, &ly4, NEEDLE_W, angle - 90);
 
-    spr[0].fillTriangle(lx1, ly1, lx3, ly3, lx4, ly4, TFT_RED);
-    spr[0].fillTriangle(lx2, ly2, lx3, ly3, lx4, ly4, TFT_LIGHTGREY);
+    spr[sel].fillTriangle(lx1, ly1, lx3, ly3, lx4, ly4, TFT_RED);
+    spr[sel].fillTriangle(lx2, ly2, lx3, ly3, lx4, ly4, TFT_LIGHTGREY);
 
-    spr[0].fillCircle(X0, Y0, 3, TFT_DARKGREY);
-    spr[0].fillCircle(Y0, X0, 2, TFT_LIGHTGREY);
+    spr[sel].fillCircle(X0, Y0, 3, TFT_DARKGREY);
+    spr[sel].fillCircle(Y0, X0, 2, TFT_LIGHTGREY);
 
-    // spr[0].pushSprite(SPRITE_CENTER_X - SPRITE_WIDTH / 2, SPRITE_CENTER_Y - SPRITE_HEIGTH / 2, TFT_TRANSPARENT);
-    tft.pushImageDMA(SPRITE_CENTER_X - SPRITE_WIDTH / 2, SPRITE_CENTER_Y - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH, sprPtr[0]);
+    // spr[0].pushSprite(SPRITE_X0 - SPRITE_WIDTH / 2, SPRITE_Y0 - SPRITE_HEIGTH / 2, TFT_TRANSPARENT);
+    tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
 
     TPRINT
 }
