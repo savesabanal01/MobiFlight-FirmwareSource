@@ -7,22 +7,22 @@
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
+#define TFT_WIDTH  240
+#define TFT_HEIGTH 320
 // Define the width and height according to the TFT and the
 // available memory. The sprites will require:
 //     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
 // Note: for a 240 * 320 area this is 150 Kbytes!
 #define SPRITE_WIDTH    240
 #define SPRITE_HEIGTH   240
-#define SPRITE_X0       0  // upper left x position where to plot
-#define SPRITE_Y0       40 // upper left y position where to plot
-#define TFT_WIDTH       240
-#define TFT_HEIGTH      320
+#define SPRITE_X0       0      // upper left x position where to plot
+#define SPRITE_Y0       40     // upper left y position where to plot
 #define CLIPPING_X0     120    // x mid point in sprite of instrument
 #define CLIPPING_Y0     120    // y mid point in sprite of instrument
 #define CLIP_CIRCLE     0      // set to 1 for round instrument, set to 0 for rect instrument
 #define CLIPPING_XWIDTH 200    // width of clipping area for rect instrument
 #define CLIPPING_YWIDTH 200    // height of clipping area for rect instrument
-#define CLIPPING_R      100    // radius of clipping area for round instrument (rotating)
+#define CLIPPING_R      100    // radius of clipping area for round instrument (rotating part)
 #define REDRAW_DELAY    16     // minimum delay in milliseconds between display updates
 #define BROWN           0xFD20 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE        0x02B5 // 0x0318 //0x039B //0x34BF
@@ -44,6 +44,8 @@ void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bo
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
 void drawFastVLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
 void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
+void fillCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel);
+void drawOuter();
 
 int last_roll  = 0; // the whole horizon graphic
 int last_pitch = 0;
@@ -85,18 +87,8 @@ void init_AttitudeIndicator(void)
     spr[0].setTextDatum(MC_DATUM);
     spr[1].setTextDatum(MC_DATUM);
 
-#if CLIP_CIRCLE == 1
-    //spr[0].fillCircle();
-#else
-    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
-    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
-#endif
-
-    // Draw the horizon graphic
-    drawHorizon(0, 0, 0);
-    drawHorizon(0, 0, 1);
+    // draw outer part of instrument
+    drawOuter();
 
     // Draw fixed text at top/bottom of screen
     tft.setTextColor(TFT_YELLOW);
@@ -186,13 +178,6 @@ void updateHorizon(int roll, int pitch)
 // #########################################################################
 // Draw the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
-void swap(int16_t *a, int16_t *b)
-{
-    int16_t temp = *b;
-    *b           = *a;
-    *a           = temp;
-}
-
 void drawHorizon(int roll, int pitch, bool sel)
 {
     // Calculate coordinates for line start
@@ -257,7 +242,13 @@ void drawHorizon(int roll, int pitch, bool sel)
         last_roll  = roll;
         last_pitch = pitch;
     }
-
+#if CLIP_CIRCLE == 1
+    spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+    spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+#else
+    spr[0].drawRect(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH, SPRITE_HEIGTH, DARK_GREY);
+    spr[1].drawRect(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH, SPRITE_HEIGTH, DARK_GREY);
+#endif
     drawScale(sel);
 
     tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
@@ -317,10 +308,30 @@ void drawScale(bool sel)
     tft.drawString(message, XC, TFT_HEIGTH - 18, 1);
 }
 
+void drawOuter()
+{
+#if CLIP_CIRCLE == 1
+    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
+    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
+    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
+    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
+#else
+    spr[0].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, SKY_BLUE);
+    spr[0].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, BROWN);
+    spr[1].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, SKY_BLUE);
+    spr[1].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, BROWN);
+#endif
+
+    // Draw the horizon graphic
+    drawHorizon(0, 0, 0);
+    drawHorizon(0, 0, 1);
+
+    delay(2000);
+}
+
 // #########################################################################
 // Function to generate roll angles for testing only
 // #########################################################################
-
 int rollGenerator(int maxroll)
 {
     // Synthesize a smooth +/- 50 degree roll value for testing
@@ -465,7 +476,7 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 #if CLIP_CIRCLE == 1
     if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
 #else
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
 #endif
     if (w < 0) {
         x -= w;
@@ -477,8 +488,8 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
     if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
 #else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2) x = CLIPPING_X0 - CLIPPING_XWIDTH/2;
-    if (xE > CLIPPING_X0 + CLIPPING_XWIDTH/2) xE = CLIPPING_X0 + CLIPPING_XWIDTH/2;
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
+    if (xE > CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
 #endif
     spr[sel].drawFastHLine(x, y, xE - x + 1, color);
 }
@@ -492,7 +503,7 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 #if CLIP_CIRCLE == 1
     if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
 #else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
 #endif
     if (h < 0) {
         y -= h;
@@ -504,8 +515,8 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
     if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
 #else
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2) y = CLIPPING_Y0 - CLIPPING_YWIDTH/2;
-    if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH/2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH/2;
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
+    if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
 #endif
     spr[sel].drawFastVLine(x, y, yE - y + 1, color);
 }
@@ -518,14 +529,52 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
 {
     // First do a rect clipping
 #if CLIP_CIRCLE == 1
-    if (x <= CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
-    if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+    if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+    if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
     // next check if Pixel is within circel or outside
     if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
     if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
 #else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
 #endif
     spr[sel].drawPixel(x, y, color);
+}
+
+/***************************************************************************************
+** Function name:           fillCircle
+** Description:             draw a filled circle, upper or lower part
+***************************************************************************************/
+// Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
+// Improved algorithm avoids repetition of lines
+void fillCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel)
+{
+    int32_t x  = 0;
+    int32_t dx = 1;
+    int32_t dy = r + r;
+    int32_t p  = -(r >> 1);
+
+    if (upper) spr[sel].drawFastHLine(x0 - r, y0, dy + 1, color);
+
+    while (x < r) {
+
+        if (p >= 0) {
+            if (upper)
+                spr[sel].drawFastHLine(x0 - x, y0 - r, dx, color);
+            else
+                spr[sel].drawFastHLine(x0 - x, y0 + r, dx, color);
+            dy -= 2;
+            p -= dy;
+            r--;
+        }
+
+        dx += 2;
+        p += dx;
+        x++;
+
+        if (upper)
+            spr[sel].drawFastHLine(x0 - r, y0 - x, dy + 1, color);
+        else
+            spr[sel].drawFastHLine(x0 - r, y0 + x, dy + 1, color);
+    }
 }
