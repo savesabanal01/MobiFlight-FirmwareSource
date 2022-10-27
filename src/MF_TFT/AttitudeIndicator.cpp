@@ -15,15 +15,15 @@
 // Note: for a 240 * 320 area this is 150 Kbytes!
 #define SPRITE_WIDTH    240
 #define SPRITE_HEIGTH   240
+// with this dimensions 112.5kBytes are required
 #define SPRITE_X0       0      // upper left x position where to plot
 #define SPRITE_Y0       40     // upper left y position where to plot
 #define CLIPPING_X0     120    // x mid point in sprite of instrument
 #define CLIPPING_Y0     120    // y mid point in sprite of instrument
-#define CLIP_CIRCLE     0      // set to 1 for round instrument, set to 0 for rect instrument
+#define CLIP_CIRCLE     1      // set to 1 for round instrument, set to 0 for rect instrument
 #define CLIPPING_XWIDTH 200    // width of clipping area for rect instrument
 #define CLIPPING_YWIDTH 200    // height of clipping area for rect instrument
 #define CLIPPING_R      100    // radius of clipping area for round instrument (rotating part)
-#define REDRAW_DELAY    16     // minimum delay in milliseconds between display updates
 #define BROWN           0xFD20 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE        0x02B5 // 0x0318 //0x039B //0x34BF
 #define DARK_RED        0x8000
@@ -55,8 +55,6 @@ int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
 // Variables for test only
 int test_roll = 0;
 int delta     = 0;
-
-uint32_t redrawTime = 0;
 
 // #########################################################################
 // Setup, runs once on boot up
@@ -93,8 +91,8 @@ void init_AttitudeIndicator(void)
     // Draw fixed text at top/bottom of screen
     tft.setTextColor(TFT_YELLOW);
     tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("SPD  LNAV WNAV PTH", XC, 1, 1);
-    tft.drawString("Bodmer's AHI", XC, TFT_HEIGTH - 9, 1);
+    tft.drawString("Demo Attitude Indicator", XC, 1, 1);
+    tft.drawString("Based on Bodmer's example", XC, 10, 1);
 
     startMillis = millis();
 }
@@ -114,28 +112,18 @@ int pitch = 0;
 
 void loop_AttitudeIndicator()
 {
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("Random", XC, 10, 1);
+    // Roll is in degrees in range +/-180
+    // roll = random(361) - 180;
+    roll++;
+    if (roll == 180) roll = -180;
 
-    // Refresh the display at regular intervals
-    //    if (millis() > redrawTime)
-    {
-        redrawTime = millis() + REDRAW_DELAY;
+    // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
+    // Maximum pitch shouls be in range +/- 80 with HOR = 172
+    // pitch = 10; //random(2 * YC) - YC;
+    pitch++;
+    if (pitch > 40) pitch = -30;
 
-        // Roll is in degrees in range +/-180
-        // roll = random(361) - 180;
-        roll++;
-        if (roll == 180) roll = -180;
-
-        // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
-        // Maximum pitch shouls be in range +/- 80 with HOR = 172
-        // pitch = 10; //random(2 * YC) - YC;
-        pitch++;
-        if (pitch > 40) pitch = -30;
-
-        updateHorizon(roll, pitch);
-    }
+    updateHorizon(roll, pitch);
 }
 
 // #########################################################################
@@ -245,9 +233,14 @@ void drawHorizon(int roll, int pitch, bool sel)
 #if CLIP_CIRCLE == 1
     spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
     spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+    spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
+    spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
 #else
-    spr[0].drawRect(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH, SPRITE_HEIGTH, DARK_GREY);
-    spr[1].drawRect(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH, SPRITE_HEIGTH, DARK_GREY);
+    spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
+    spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
+// ToDo: Why are there sometimes some Pixel outside the area???
+    spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
+    spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
 #endif
     drawScale(sel);
 
@@ -305,7 +298,7 @@ void drawScale(bool sel)
     tft.setTextPadding(24);                                              // Padding width to wipe previous number
     char message[40];                                                    // buffer for message
     sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
-    tft.drawString(message, XC, TFT_HEIGTH - 18, 1);
+    tft.drawString(message, XC, TFT_HEIGTH - 9, 1);
 }
 
 void drawOuter()
@@ -316,10 +309,10 @@ void drawOuter()
     fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
     fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
 #else
-    spr[0].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, SKY_BLUE);
-    spr[0].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, BROWN);
-    spr[1].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, SKY_BLUE);
-    spr[1].fillRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, BROWN);
+    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
+    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
+    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
+    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
 #endif
 
     // Draw the horizon graphic
@@ -357,7 +350,6 @@ void testRoll(void)
     tft.drawString("Roll test", XC, 10, 1);
 
     for (int a = 0; a < 360; a++) {
-        // delay(REDRAW_DELAY / 2);
         updateHorizon(rollGenerator(180), 0);
     }
     tft.setTextColor(TFT_YELLOW, SKY_BLUE);
@@ -372,21 +364,18 @@ void testRoll(void)
 void testPitch(void)
 {
     tft.setTextColor(TFT_YELLOW, SKY_BLUE);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
+    tft.setTextDatum(TC_DATUM);
     tft.drawString("Pitch test", XC, 10, 1);
 
     for (int p = 0; p > -80; p--) {
-        delay(REDRAW_DELAY / 2);
         updateHorizon(0, p);
     }
 
     for (int p = -80; p < 80; p++) {
-        delay(REDRAW_DELAY / 2);
         updateHorizon(0, p);
     }
 
     for (int p = 80; p > 0; p--) {
-        delay(REDRAW_DELAY / 2);
         updateHorizon(0, p);
     }
 
@@ -400,7 +389,8 @@ void testPitch(void)
 //
 // Before using this functions refresh rate was 21ms
 // Without Clipping it mostly 21ms, sometimes 70ms
-// With rectangular clippung it is still 21ms with sometimes 70ms
+// With rectangular clipping it is still 21ms with sometimes 70ms
+// With round clipping it is 21 - 22ms
 //
 // #########################################################################
 
