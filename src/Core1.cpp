@@ -13,7 +13,7 @@
 void core1_init()
 {
     tft_init();
-    init_bouncingCirclesRandom();
+    init_bouncingCirclesRandom();   // random seems not to work on core1
 }
 
 void core1_loop()
