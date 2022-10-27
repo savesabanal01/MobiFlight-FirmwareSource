@@ -38,7 +38,7 @@ void core1_loop()
 #ifdef ATTITUDE_INDICATOR
         //testRoll();
         //testPitch();
-        loop_AttitudeIndicator();
+        loop_AttitudeIndicator(0);
 #endif
 #ifdef COMPASS
         loop_Compass();

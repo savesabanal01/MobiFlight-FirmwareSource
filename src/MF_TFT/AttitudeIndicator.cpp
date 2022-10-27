@@ -2,6 +2,8 @@
 // Demo code for artifical horizon display
 // Written by Bodmer for a 160 x 128 TFT display
 // 16/8/16
+// Adapted to use sprites and DMA transfer for RP2040
+// additionally rect and round instrument implemented
 
 #include <Arduino.h>
 #include "TFT.h"
@@ -13,14 +15,13 @@
 // available memory. The sprites will require:
 //     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
 // Note: for a 240 * 320 area this is 150 Kbytes!
-#define SPRITE_WIDTH    240
-#define SPRITE_HEIGTH   240
+#define SPRITE_WIDTH  240
+#define SPRITE_HEIGTH 240
 // with this dimensions 112.5kBytes are required
 #define SPRITE_X0       0      // upper left x position where to plot
 #define SPRITE_Y0       40     // upper left y position where to plot
 #define CLIPPING_X0     120    // x mid point in sprite of instrument
 #define CLIPPING_Y0     120    // y mid point in sprite of instrument
-#define CLIP_CIRCLE     1      // set to 1 for round instrument, set to 0 for rect instrument
 #define CLIPPING_XWIDTH 200    // width of clipping area for rect instrument
 #define CLIPPING_YWIDTH 200    // height of clipping area for rect instrument
 #define CLIPPING_R      100    // radius of clipping area for round instrument (rotating part)
@@ -47,19 +48,14 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
 void fillCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel);
 void drawOuter();
 
-int last_roll  = 0; // the whole horizon graphic
-int last_pitch = 0;
-
+int     last_roll                 = 0;
+int     last_pitch                = 0;
 int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
-
-// Variables for test only
-int test_roll = 0;
-int delta     = 0;
+uint8_t instrumentType            = 0;   // 0 = rect instrument, 1 = round instrument
 
 // #########################################################################
 // Setup, runs once on boot up
 // #########################################################################
-
 void init_AttitudeIndicator(void)
 {
     // setup clipping area
@@ -99,6 +95,7 @@ void init_AttitudeIndicator(void)
 
 void stop_AttitudeIndicator()
 {
+    tft.endWrite();
     // Delete sprite to free up the RAM
     spr[0].deleteSprite();
     spr[1].deleteSprite();
@@ -110,8 +107,9 @@ void stop_AttitudeIndicator()
 int roll  = 0;
 int pitch = 0;
 
-void loop_AttitudeIndicator()
+void loop_AttitudeIndicator(uint8_t type)
 {
+    instrumentType = type;
     // Roll is in degrees in range +/-180
     // roll = random(361) - 180;
     roll++;
@@ -129,7 +127,6 @@ void loop_AttitudeIndicator()
 // #########################################################################
 // Update the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
-
 void updateHorizon(int roll, int pitch)
 {
     bool draw        = 1;
@@ -230,18 +227,20 @@ void drawHorizon(int roll, int pitch, bool sel)
         last_roll  = roll;
         last_pitch = pitch;
     }
-#if CLIP_CIRCLE == 1
-    spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
-    spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
-    spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
-    spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
-#else
-    spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
-    spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
-// ToDo: Why are there sometimes some Pixel outside the area???
-    spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
-    spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
-#endif
+
+    if (instrumentType == 1) {
+        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
+        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
+    } else if (instrumentType == 0) {
+        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
+        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
+        // ToDo: Why are there sometimes some Pixel outside the area???
+        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
+        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
+    }
+
     drawScale(sel);
 
     tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
@@ -303,85 +302,20 @@ void drawScale(bool sel)
 
 void drawOuter()
 {
-#if CLIP_CIRCLE == 1
-    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
-    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
-    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
-    fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
-#else
-    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-    spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
-    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-    spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
-#endif
-
+    if (instrumentType == 1) {
+        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
+        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
+        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
+        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
+    } else if (instrumentType == 0) {
+        spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
+        spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
+        spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
+        spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
+    }
     // Draw the horizon graphic
     drawHorizon(0, 0, 0);
     drawHorizon(0, 0, 1);
-
-    delay(2000);
-}
-
-// #########################################################################
-// Function to generate roll angles for testing only
-// #########################################################################
-int rollGenerator(int maxroll)
-{
-    // Synthesize a smooth +/- 50 degree roll value for testing
-    delta++;
-    if (delta >= 360) test_roll = 0;
-    test_roll = (maxroll + 1) * sin((delta)*DEG2RAD);
-
-    // Clip value so we hold roll near peak
-    if (test_roll > maxroll) test_roll = maxroll;
-    if (test_roll < -maxroll) test_roll = -maxroll;
-
-    return test_roll;
-}
-
-// #########################################################################
-// Function to generate roll angles for testing only
-// #########################################################################
-
-void testRoll(void)
-{
-    tft.setTextColor(TFT_YELLOW, SKY_BLUE);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("Roll test", XC, 10, 1);
-
-    for (int a = 0; a < 360; a++) {
-        updateHorizon(rollGenerator(180), 0);
-    }
-    tft.setTextColor(TFT_YELLOW, SKY_BLUE);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("         ", XC, 10, 1);
-}
-
-// #########################################################################
-// Function to generate pitch angles for testing only
-// #########################################################################
-
-void testPitch(void)
-{
-    tft.setTextColor(TFT_YELLOW, SKY_BLUE);
-    tft.setTextDatum(TC_DATUM);
-    tft.drawString("Pitch test", XC, 10, 1);
-
-    for (int p = 0; p > -80; p--) {
-        updateHorizon(0, p);
-    }
-
-    for (int p = -80; p < 80; p++) {
-        updateHorizon(0, p);
-    }
-
-    for (int p = 80; p > 0; p--) {
-        updateHorizon(0, p);
-    }
-
-    tft.setTextColor(TFT_YELLOW, SKY_BLUE);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("          ", XC, 10, 1);
 }
 
 // #########################################################################
@@ -463,24 +397,24 @@ void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bo
 ***************************************************************************************/
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 {
-#if CLIP_CIRCLE == 1
-    if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
-#else
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-#endif
+    if (instrumentType == 1) {
+        if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
+    } else if (instrumentType == 0) {
+        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+    }
     if (w < 0) {
         x -= w;
         w *= -1;
     }
     int32_t xE = x + w;
-#if CLIP_CIRCLE == 1
-    // calculate X start and x end from look up table for the given x position
-    if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
-    if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
-#else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
-    if (xE > CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
-#endif
+    if (instrumentType == 1) {
+        // calculate X start and x end from look up table for the given x position
+        if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
+        if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
+    } else if (instrumentType == 0) {
+        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
+        if (xE > CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
+    }
     spr[sel].drawFastHLine(x, y, xE - x + 1, color);
 }
 
@@ -490,24 +424,26 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 ***************************************************************************************/
 void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 {
-#if CLIP_CIRCLE == 1
-    if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
-#else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-#endif
+    if (instrumentType == 1) {
+        if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
+    }
+    else if(instrumentType == 0)
+    {
+        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+    }
     if (h < 0) {
         y -= h;
         h *= -1;
     }
     int32_t yE = y + h;
-#if CLIP_CIRCLE == 1
-    // calculate Y start and Y end from look up table for the given x position
-    if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
-    if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
-#else
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
-    if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
-#endif
+    if (instrumentType == 1) {
+        // calculate Y start and Y end from look up table for the given x position
+        if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
+        if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
+    } else if (instrumentType == 0) {
+        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
+        if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
+    }
     spr[sel].drawFastVLine(x, y, yE - y + 1, color);
 }
 
@@ -518,16 +454,16 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
 {
     // First do a rect clipping
-#if CLIP_CIRCLE == 1
-    if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-    if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-    // next check if Pixel is within circel or outside
-    if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
-    if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
-#else
-    if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-#endif
+    if (instrumentType == 1) {
+        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+        // next check if Pixel is within circel or outside
+        if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
+        if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
+    } else if (instrumentType == 0) {
+        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+    }
     spr[sel].drawPixel(x, y, color);
 }
 
