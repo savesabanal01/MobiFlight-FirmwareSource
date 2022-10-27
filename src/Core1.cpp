@@ -36,8 +36,8 @@ void core1_loop()
         loop_bouncingCircles();
 #endif
 #ifdef ATTITUDE_INDICATOR
-        // testRoll();
-        // testPitch();
+        //testRoll();
+        //testPitch();
         loop_AttitudeIndicator();
 #endif
 #ifdef COMPASS
