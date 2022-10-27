@@ -17,6 +17,9 @@
 #define SPRITE_Y0     40 // upper left y position where to plot
 #define TFT_WIDTH     240
 #define TFT_HEIGTH    320
+#define CLIPPING_X0   120
+#define CLIPPING_Y0   120
+#define CLIPPING_R    100
 #define REDRAW_DELAY  16     // minimum delay in milliseconds between display updates
 #define BROWN         0xFD20 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE      0x02B5 // 0x0318 //0x039B //0x34BF
@@ -38,7 +41,6 @@ void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bo
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
 void drawFastVLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
 void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
-
 
 int last_roll  = 0; // the whole horizon graphic
 int last_pitch = 0;
@@ -162,7 +164,6 @@ void updateHorizon(int roll, int pitch)
 
         drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 0);
         drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
-
     }
 }
 
@@ -210,41 +211,37 @@ void drawHorizon(int roll, int pitch, bool sel)
     if ((roll != last_roll) || (pitch != last_pitch)) {
         xdn = 6 * xd;
         ydn = 6 * yd;
-        spr[sel].drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
-        spr[sel].drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
         xdn = 5 * xd;
         ydn = 5 * yd;
-        spr[sel].drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
-        spr[sel].drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
         xdn = 4 * xd;
         ydn = 4 * yd;
-        spr[sel].drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
-        spr[sel].drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
 
         xdn = 3 * xd;
         ydn = 3 * yd;
-        spr[sel].drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
-        spr[sel].drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
     }
     xdn = 2 * xd;
     ydn = 2 * yd;
-    spr[sel].drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE);
-    spr[sel].drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN);
+    drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+    drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
 
-    spr[sel].drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE);
-    spr[sel].drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN);
+    drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE, sel);
+    drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN, sel);
 
-    spr[sel].drawLine(XC - x0, YC - y0 - pitch, XC + x0, YC + y0 - pitch, TFT_WHITE);
+    drawLine(XC - x0, YC - y0 - pitch, XC + x0, YC + y0 - pitch, TFT_WHITE, sel);
 
     if (sel) {
         last_roll  = roll;
         last_pitch = pitch;
     }
-    /*
-        for (uint16_t i = 99; i < 170; i++) {
-           spr[sel].drawCircle(XC, YC, i, TFT_BLACK);
-        }
-    */
+
     drawScale(sel);
 
     tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
@@ -373,6 +370,11 @@ void testPitch(void)
 
 // #########################################################################
 // Helper functions transferred from the lib for a round clipping area
+//
+// Before using this functions refresh rate was 21ms
+// Without Clipping it mostly 21ms, sometimes 70ms
+// With rectangular clippung it is still 21ms with sometimes 70ms
+//
 // #########################################################################
 
 /***************************************************************************************
@@ -384,55 +386,59 @@ void testPitch(void)
 void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
 {
 
-  bool steep = abs(y1 - y0) > abs(x1 - x0);
-  if (steep) {
-    swap_coord(x0, y0);
-    swap_coord(x1, y1);
-  }
-
-  if (x0 > x1) {
-    swap_coord(x0, x1);
-    swap_coord(y0, y1);
-  }
-
-  int32_t dx = x1 - x0, dy = abs(y1 - y0);;
-
-  int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
-
-  if (y0 < y1) ystep = 1;
-
-  // Split into steep and not steep for FastH/V separation
-  if (steep) {
-    for (; x0 <= x1; x0++) {
-      dlen++;
-      err -= dy;
-      if (err < 0) {
-        if (dlen == 1) drawPixel(y0, xs, color, sel);
-        else drawFastVLine(y0, xs, dlen, color, sel);
-        dlen = 0;
-        y0 += ystep; xs = x0 + 1;
-        err += dx;
-      }
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+    if (steep) {
+        swap_coord(x0, y0);
+        swap_coord(x1, y1);
     }
-    if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
-  }
-  else
-  {
-    for (; x0 <= x1; x0++) {
-      dlen++;
-      err -= dy;
-      if (err < 0) {
-        if (dlen == 1) drawPixel(xs, y0, color, sel);
-        else drawFastHLine(xs, y0, dlen, color, sel);
-        dlen = 0;
-        y0 += ystep; xs = x0 + 1;
-        err += dx;
-      }
+
+    if (x0 > x1) {
+        swap_coord(x0, x1);
+        swap_coord(y0, y1);
     }
-    if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
-  }
+
+    int32_t dx = x1 - x0, dy = abs(y1 - y0);
+    ;
+
+    int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
+
+    if (y0 < y1) ystep = 1;
+
+    // Split into steep and not steep for FastH/V separation
+    if (steep) {
+        for (; x0 <= x1; x0++) {
+            dlen++;
+            err -= dy;
+            if (err < 0) {
+                if (dlen == 1)
+                    drawPixel(y0, xs, color, sel);
+                else
+                    drawFastVLine(y0, xs, dlen, color, sel);
+                dlen = 0;
+                y0 += ystep;
+                xs = x0 + 1;
+                err += dx;
+            }
+        }
+        if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
+    } else {
+        for (; x0 <= x1; x0++) {
+            dlen++;
+            err -= dy;
+            if (err < 0) {
+                if (dlen == 1)
+                    drawPixel(xs, y0, color, sel);
+                else
+                    drawFastHLine(xs, y0, dlen, color, sel);
+                dlen = 0;
+                y0 += ystep;
+                xs = x0 + 1;
+                err += dx;
+            }
+        }
+        if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
+    }
 }
-
 
 /***************************************************************************************
 ** Function name:           drawFastHLine
@@ -440,7 +446,17 @@ void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bo
 ***************************************************************************************/
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 {
-    spr[sel].drawFastHLine(x,y,w,color);
+    if (y < CLIPPING_Y0 - CLIPPING_R || y > CLIPPING_Y0 + CLIPPING_R) return;
+    if (w < 0)
+    {
+        x -= w;
+        w *= -1;
+    }
+    int32_t xS = x;
+    int32_t xE = x + w;
+    if (xS < CLIPPING_X0 - CLIPPING_R) xS = CLIPPING_X0 - CLIPPING_R;
+    if (xE > CLIPPING_X0 + CLIPPING_R) xE = CLIPPING_X0 + CLIPPING_R;
+    spr[sel].drawFastHLine(xS, y, xE - xS + 1, color);
 }
 
 /***************************************************************************************
@@ -449,9 +465,18 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 ***************************************************************************************/
 void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 {
-    spr[sel].drawFastVLine(x,y,h,color);
+    if (x < CLIPPING_X0 - CLIPPING_R || x > CLIPPING_X0 + CLIPPING_R) return;
+    if (h < 0)
+    {
+        y -= h;
+        h *= -1;
+    }
+    int32_t yS = y;
+    int32_t yE = y + h;
+    if (yS < CLIPPING_Y0 - CLIPPING_R) yS = CLIPPING_Y0 - CLIPPING_R;
+    if (yE > CLIPPING_Y0 + CLIPPING_R) yE = CLIPPING_Y0 + CLIPPING_R;
+    spr[sel].drawFastVLine(x, yS, yE - yS + 1, color);
 }
-
 
 /***************************************************************************************
 ** Function name:           drawPixel
@@ -461,7 +486,7 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
 {
 
     // Range checking
-    // TBD
-    spr[sel].drawPixel(x,y,color);
-
+    if (x < CLIPPING_X0 - CLIPPING_R || x > CLIPPING_X0 + CLIPPING_R) return;
+    if (y < CLIPPING_Y0 - CLIPPING_R || y > CLIPPING_Y0 + CLIPPING_R) return;
+    spr[sel].drawPixel(x, y, color);
 }
