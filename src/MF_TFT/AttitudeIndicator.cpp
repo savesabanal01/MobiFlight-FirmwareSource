@@ -34,6 +34,11 @@ int  rollGenerator(int maxroll);
 void testRoll(void);
 void testPitch(void);
 void drawScale(bool sel);
+void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel);
+void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
+void drawFastVLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
+void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
+
 
 int last_roll  = 0; // the whole horizon graphic
 int last_pitch = 0;
@@ -364,4 +369,99 @@ void testPitch(void)
     tft.setTextColor(TFT_YELLOW, SKY_BLUE);
     tft.setTextDatum(TC_DATUM); // Centre middle justified
     tft.drawString("          ", XC, 10, 1);
+}
+
+// #########################################################################
+// Helper functions transferred from the lib for a round clipping area
+// #########################################################################
+
+/***************************************************************************************
+** Function name:           drawLine
+** Description:             draw a line between 2 arbitrary points
+***************************************************************************************/
+// Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
+// an efficient FastH/V Line draw routine for line segments of 2 pixels or more
+void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
+{
+
+  bool steep = abs(y1 - y0) > abs(x1 - x0);
+  if (steep) {
+    swap_coord(x0, y0);
+    swap_coord(x1, y1);
+  }
+
+  if (x0 > x1) {
+    swap_coord(x0, x1);
+    swap_coord(y0, y1);
+  }
+
+  int32_t dx = x1 - x0, dy = abs(y1 - y0);;
+
+  int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
+
+  if (y0 < y1) ystep = 1;
+
+  // Split into steep and not steep for FastH/V separation
+  if (steep) {
+    for (; x0 <= x1; x0++) {
+      dlen++;
+      err -= dy;
+      if (err < 0) {
+        if (dlen == 1) drawPixel(y0, xs, color, sel);
+        else drawFastVLine(y0, xs, dlen, color, sel);
+        dlen = 0;
+        y0 += ystep; xs = x0 + 1;
+        err += dx;
+      }
+    }
+    if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
+  }
+  else
+  {
+    for (; x0 <= x1; x0++) {
+      dlen++;
+      err -= dy;
+      if (err < 0) {
+        if (dlen == 1) drawPixel(xs, y0, color, sel);
+        else drawFastHLine(xs, y0, dlen, color, sel);
+        dlen = 0;
+        y0 += ystep; xs = x0 + 1;
+        err += dx;
+      }
+    }
+    if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
+  }
+}
+
+
+/***************************************************************************************
+** Function name:           drawFastHLine
+** Description:             draw a horizontal line
+***************************************************************************************/
+void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
+{
+    spr[sel].drawFastHLine(x,y,w,color);
+}
+
+/***************************************************************************************
+** Function name:           drawFastVLine
+** Description:             draw a vertical line
+***************************************************************************************/
+void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
+{
+    spr[sel].drawFastVLine(x,y,h,color);
+}
+
+
+/***************************************************************************************
+** Function name:           drawPixel
+** Description:             push a single pixel at an arbitrary position
+***************************************************************************************/
+void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
+{
+
+    // Range checking
+    // TBD
+    spr[sel].drawPixel(x,y,color);
+
 }
