@@ -152,6 +152,7 @@ void setup()
 {
     Serial.begin(115200);
 //while (!Serial) delay(10);
+//delay(1000);
     MFeeprom.init();
     attachCommandCallbacks();
     cmdMessenger.printLfCr();

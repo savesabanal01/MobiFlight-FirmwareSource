@@ -17,9 +17,7 @@ void core1_init()
 #ifdef BOUNCING_CIRCLES
     init_bouncingCircles();
 #endif
-#ifdef ATTITUDE_INDICATOR
-    init_AttitudeIndicator();
-#endif
+
 #ifdef COMPASS
     init_Compass();
 #endif
@@ -29,16 +27,19 @@ void core1_loop()
 {
     uint32_t millisStart = millis();
     uint8_t  loopCounter = 0;
+    uint8_t attitudeType = 2;
+#ifdef ATTITUDE_INDICATOR
+    init_AttitudeIndicator(attitudeType);
+#endif
 
     while (1) {
-
 #ifdef BOUNCING_CIRCLES
         loop_bouncingCircles();
 #endif
 #ifdef ATTITUDE_INDICATOR
         //testRoll();
         //testPitch();
-        loop_AttitudeIndicator(0);
+        loop_AttitudeIndicator(attitudeType);
 #endif
 #ifdef COMPASS
         loop_Compass();
@@ -46,7 +47,7 @@ void core1_loop()
 
         loopCounter++;
         if (loopCounter == 10) {
-            Serial.print("Time for 1 loops: "); Serial.print((millis() - millisStart) / 10); Serial.println("ms");
+    //        Serial.print("Time for 1 loops: "); Serial.print((millis() - millisStart) / 10); Serial.println("ms");
             millisStart = millis();
             loopCounter = 0;
         }

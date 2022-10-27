@@ -51,13 +51,15 @@ void drawOuter();
 int     last_roll                 = 0;
 int     last_pitch                = 0;
 int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
-uint8_t instrumentType            = 0;   // 0 = rect instrument, 1 = round instrument
+uint8_t instrumentType            = 0;   // 2 = rect instrument, 1 = round instrument
 
 // #########################################################################
 // Setup, runs once on boot up
 // #########################################################################
-void init_AttitudeIndicator(void)
+void init_AttitudeIndicator(uint8_t type)
 {
+    instrumentType = type;
+    tft.fillScreen(TFT_BLACK);
     // setup clipping area
     // calculate for each x the y value, required for drawPixel and FastVerLine
     checkClipping[0] = CLIPPING_R;
@@ -109,7 +111,6 @@ int pitch = 0;
 
 void loop_AttitudeIndicator(uint8_t type)
 {
-    instrumentType = type;
     // Roll is in degrees in range +/-180
     // roll = random(361) - 180;
     roll++;
@@ -233,7 +234,8 @@ void drawHorizon(int roll, int pitch, bool sel)
         spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
         spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
         spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
         spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
         // ToDo: Why are there sometimes some Pixel outside the area???
@@ -307,7 +309,8 @@ void drawOuter()
         fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
         fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
         fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
         spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
         spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
@@ -399,7 +402,8 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 {
     if (instrumentType == 1) {
         if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
     }
     if (w < 0) {
@@ -411,7 +415,8 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
         // calculate X start and x end from look up table for the given x position
         if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
         if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
         if (xE > CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
     }
@@ -427,7 +432,7 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     if (instrumentType == 1) {
         if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
     }
-    else if(instrumentType == 0)
+    if(instrumentType == 2)
     {
         if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
     }
@@ -440,7 +445,8 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
         // calculate Y start and Y end from look up table for the given x position
         if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
         if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
         if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
     }
@@ -460,7 +466,8 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
         // next check if Pixel is within circel or outside
         if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
         if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
-    } else if (instrumentType == 0) {
+    }
+    if (instrumentType == 2) {
         if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
         if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
     }
