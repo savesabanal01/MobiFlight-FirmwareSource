@@ -37,7 +37,7 @@
 #define SPRITE_WIDTH  240               // 100 // size of sprite
 #define SPRITE_HEIGTH 240               // 100 // size pf sprite
 #define SPRITE_X0     0                 // upper left x position where to plot
-#define SPRITE_Y0     60                // upper left y position where to plot
+#define SPRITE_Y0     40                // upper left y position where to plot
 #define X0            SPRITE_WIDTH / 2  // center position of compass in the middle of trhte sprite
 #define Y0            SPRITE_HEIGTH / 2 // center position of compass in the middle of trhte sprite
 #define NEEDLE_L      200 / 2           // 84/2  // Needle length is 84, we want radius which is 42

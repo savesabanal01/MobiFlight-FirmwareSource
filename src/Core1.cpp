@@ -6,30 +6,30 @@
 #include "AttitudeIndicator.h"
 #include "Compass.h"
 
-//#define BOUNCING_CIRCLES
-#define ATTITUDE_INDICATOR
+#define BOUNCING_CIRCLES
+//#define ATTITUDE_INDICATOR
 //#define COMPASS
 
 void core1_init()
 {
     tft_init();
-
-#ifdef BOUNCING_CIRCLES
-    init_bouncingCircles();
-#endif
-
-#ifdef COMPASS
-    init_Compass();
-#endif
+    init_bouncingCirclesRandom();
 }
 
 void core1_loop()
 {
     uint32_t millisStart = millis();
     uint8_t  loopCounter = 0;
-    uint8_t attitudeType = 2;
+    uint8_t attitudeType = 1;
+
+#ifdef BOUNCING_CIRCLES
+    init_bouncingCircles();
+#endif
 #ifdef ATTITUDE_INDICATOR
     init_AttitudeIndicator(attitudeType);
+#endif
+#ifdef COMPASS
+    init_Compass();
 #endif
 
     while (1) {

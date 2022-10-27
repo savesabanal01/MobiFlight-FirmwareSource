@@ -50,7 +50,7 @@ circle_t *circle = new circle_param;
 // #########################################################################
 // Setup
 // #########################################################################
-void init_bouncingCircles()
+void init_bouncingCirclesRandom()
 {
     // Initialise circle parameters
     for (uint16_t i = 0; i < CNUMBER; i++) {
@@ -64,7 +64,10 @@ void init_bouncingCircles()
         circle->dy[i] = random(1, 5);
         if (random(2)) circle->dy[i] = -circle->dy[i];
     }
+}
 
+void init_bouncingCircles()
+{
     // Create the 2 sprites, each is half the size of the screen
     sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
     sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);

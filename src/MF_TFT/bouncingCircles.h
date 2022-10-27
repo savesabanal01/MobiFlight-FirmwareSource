@@ -1,5 +1,5 @@
 #pragma once
 
-
-void loop_bouncingCircles();
+void init_bouncingCirclesRandom();
 void init_bouncingCircles();
+void loop_bouncingCircles();

@@ -230,17 +230,17 @@ void drawHorizon(int roll, int pitch, bool sel)
     }
 
     if (instrumentType == 1) {
-        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
-        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R , DARK_GREY);
+        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R , DARK_GREY);
         spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
         spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
     }
     if (instrumentType == 2) {
-        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
-        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH, CLIPPING_YWIDTH, DARK_GREY);
+        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH + 1, CLIPPING_YWIDTH + 1, DARK_GREY);
+        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH + 1, CLIPPING_YWIDTH + 1, DARK_GREY);
         // ToDo: Why are there sometimes some Pixel outside the area???
-        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
-        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 2, CLIPPING_YWIDTH, DARK_GREY);
+        spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 3, CLIPPING_YWIDTH, DARK_GREY);
+        spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 3, CLIPPING_YWIDTH, DARK_GREY);
     }
 
     drawScale(sel);
@@ -404,7 +404,7 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
         if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
     }
     if (instrumentType == 2) {
-        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
     }
     if (w < 0) {
         x -= w;
@@ -413,12 +413,12 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     int32_t xE = x + w;
     if (instrumentType == 1) {
         // calculate X start and x end from look up table for the given x position
-        if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
-        if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
+        if (x <= CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
+        if (xE >= CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
     }
     if (instrumentType == 2) {
-        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
-        if (xE > CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
+        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
+        if (xE >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
     }
     spr[sel].drawFastHLine(x, y, xE - x + 1, color);
 }
@@ -434,7 +434,7 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     }
     if(instrumentType == 2)
     {
-        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
     }
     if (h < 0) {
         y -= h;
@@ -443,12 +443,12 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     int32_t yE = y + h;
     if (instrumentType == 1) {
         // calculate Y start and Y end from look up table for the given x position
-        if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
-        if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
+        if (y <= CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
+        if (yE >= CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
     }
     if (instrumentType == 2) {
-        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
-        if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
+        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
+        if (yE >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
     }
     spr[sel].drawFastVLine(x, y, yE - y + 1, color);
 }
@@ -468,8 +468,8 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
         if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
     }
     if (instrumentType == 2) {
-        if (x < CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-        if (y < CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
     }
     spr[sel].drawPixel(x, y, color);
 }
