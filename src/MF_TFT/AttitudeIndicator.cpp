@@ -11,25 +11,28 @@
 // available memory. The sprites will require:
 //     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
 // Note: for a 240 * 320 area this is 150 Kbytes!
-#define SPRITE_WIDTH  240
-#define SPRITE_HEIGTH 240
-#define SPRITE_X0     0  // upper left x position where to plot
-#define SPRITE_Y0     40 // upper left y position where to plot
-#define TFT_WIDTH     240
-#define TFT_HEIGTH    320
-#define CLIPPING_X0   120
-#define CLIPPING_Y0   120
-#define CLIPPING_R    100
-#define REDRAW_DELAY  16     // minimum delay in milliseconds between display updates
-#define BROWN         0xFD20 // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE      0x02B5 // 0x0318 //0x039B //0x34BF
-#define DARK_RED      0x8000
-#define DARK_GREY     0x39C7
-#define XC            120
-#define YC            120
-#define HOR           400 // 130 //400 // Horizon vector line length ### was 172
-#define DEG2RAD       0.0174532925
-#define WAIT          10 // Pause in milliseconds to set refresh speed
+#define SPRITE_WIDTH    240
+#define SPRITE_HEIGTH   240
+#define SPRITE_X0       0  // upper left x position where to plot
+#define SPRITE_Y0       40 // upper left y position where to plot
+#define TFT_WIDTH       240
+#define TFT_HEIGTH      320
+#define CLIPPING_X0     120    // x mid point in sprite of instrument
+#define CLIPPING_Y0     120    // y mid point in sprite of instrument
+#define CLIP_CIRCLE     0      // set to 1 for round instrument, set to 0 for rect instrument
+#define CLIPPING_XWIDTH 200    // width of clipping area for rect instrument
+#define CLIPPING_YWIDTH 200    // height of clipping area for rect instrument
+#define CLIPPING_R      100    // radius of clipping area for round instrument (rotating)
+#define REDRAW_DELAY    16     // minimum delay in milliseconds between display updates
+#define BROWN           0xFD20 // 0x5140 // 0x5960 the other are not working??
+#define SKY_BLUE        0x02B5 // 0x0318 //0x039B //0x34BF
+#define DARK_RED        0x8000
+#define DARK_GREY       0x39C7
+#define XC              120
+#define YC              120
+#define HOR             400 // 130 //400 // Horizon vector line length ### was 172
+#define DEG2RAD         0.0174532925
+#define WAIT            10 // Pause in milliseconds to set refresh speed
 
 void updateHorizon(int roll, int pitch);
 void drawHorizon(int roll, int pitch, bool sel);
@@ -45,6 +48,8 @@ void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
 int last_roll  = 0; // the whole horizon graphic
 int last_pitch = 0;
 
+int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
+
 // Variables for test only
 int test_roll = 0;
 int delta     = 0;
@@ -57,6 +62,13 @@ uint32_t redrawTime = 0;
 
 void init_AttitudeIndicator(void)
 {
+    // setup clipping area
+    // calculate for each x the y value, required for drawPixel and FastVerLine
+    checkClipping[0] = CLIPPING_R;
+    for (uint8_t i = 1; i < CLIPPING_R; i++) {
+        checkClipping[i] = sqrt(CLIPPING_R * CLIPPING_R - i * i);
+    }
+
     tft.startWrite(); // TFT chip select held low permanently
 
     spr[0].setRotation(0);
@@ -73,10 +85,14 @@ void init_AttitudeIndicator(void)
     spr[0].setTextDatum(MC_DATUM);
     spr[1].setTextDatum(MC_DATUM);
 
+#if CLIP_CIRCLE == 1
+    //spr[0].fillCircle();
+#else
     spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
     spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
     spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
     spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
+#endif
 
     // Draw the horizon graphic
     drawHorizon(0, 0, 0);
@@ -446,17 +462,25 @@ void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bo
 ***************************************************************************************/
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 {
-    if (y < CLIPPING_Y0 - CLIPPING_R || y > CLIPPING_Y0 + CLIPPING_R) return;
-    if (w < 0)
-    {
+#if CLIP_CIRCLE == 1
+    if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
+#else
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+#endif
+    if (w < 0) {
         x -= w;
         w *= -1;
     }
-    int32_t xS = x;
     int32_t xE = x + w;
-    if (xS < CLIPPING_X0 - CLIPPING_R) xS = CLIPPING_X0 - CLIPPING_R;
-    if (xE > CLIPPING_X0 + CLIPPING_R) xE = CLIPPING_X0 + CLIPPING_R;
-    spr[sel].drawFastHLine(xS, y, xE - xS + 1, color);
+#if CLIP_CIRCLE == 1
+    // calculate X start and x end from look up table for the given x position
+    if (x < CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
+    if (xE > CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
+#else
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2) x = CLIPPING_X0 - CLIPPING_XWIDTH/2;
+    if (xE > CLIPPING_X0 + CLIPPING_XWIDTH/2) xE = CLIPPING_X0 + CLIPPING_XWIDTH/2;
+#endif
+    spr[sel].drawFastHLine(x, y, xE - x + 1, color);
 }
 
 /***************************************************************************************
@@ -465,17 +489,25 @@ void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
 ***************************************************************************************/
 void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 {
-    if (x < CLIPPING_X0 - CLIPPING_R || x > CLIPPING_X0 + CLIPPING_R) return;
-    if (h < 0)
-    {
+#if CLIP_CIRCLE == 1
+    if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
+#else
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
+#endif
+    if (h < 0) {
         y -= h;
         h *= -1;
     }
-    int32_t yS = y;
     int32_t yE = y + h;
-    if (yS < CLIPPING_Y0 - CLIPPING_R) yS = CLIPPING_Y0 - CLIPPING_R;
-    if (yE > CLIPPING_Y0 + CLIPPING_R) yE = CLIPPING_Y0 + CLIPPING_R;
-    spr[sel].drawFastVLine(x, yS, yE - yS + 1, color);
+#if CLIP_CIRCLE == 1
+    // calculate Y start and Y end from look up table for the given x position
+    if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
+    if (yE > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
+#else
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2) y = CLIPPING_Y0 - CLIPPING_YWIDTH/2;
+    if (yE > CLIPPING_Y0 + CLIPPING_YWIDTH/2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH/2;
+#endif
+    spr[sel].drawFastVLine(x, y, yE - y + 1, color);
 }
 
 /***************************************************************************************
@@ -484,9 +516,16 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
 ***************************************************************************************/
 void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
 {
-
-    // Range checking
-    if (x < CLIPPING_X0 - CLIPPING_R || x > CLIPPING_X0 + CLIPPING_R) return;
-    if (y < CLIPPING_Y0 - CLIPPING_R || y > CLIPPING_Y0 + CLIPPING_R) return;
+    // First do a rect clipping
+#if CLIP_CIRCLE == 1
+    if (x <= CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
+    if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+    // next check if Pixel is within circel or outside
+    if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
+    if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
+#else
+    if (x < CLIPPING_X0 - CLIPPING_XWIDTH/2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH/2) return;
+    if (y < CLIPPING_Y0 - CLIPPING_YWIDTH/2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH/2) return;
+#endif
     spr[sel].drawPixel(x, y, color);
 }
