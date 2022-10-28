@@ -82,6 +82,12 @@ namespace Compass
         // so from coordinate point of view it occupies the bottom of screen
         spr[1].setViewport(0 /* SPRITE_X0 */, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
 
+        // Draw fixed text at top/bottom of screen
+        tft.setTextColor(TFT_WHITE);
+        tft.setTextDatum(TC_DATUM); // Centre middle justified
+        tft.drawString("Demo Compass", TFT_WIDTH / 2, 1, 1);
+        tft.drawString("Based on Bodmer's example", TFT_WIDTH / 2, 10, 1);
+
         tft.startWrite(); // TFT chip select held low permanently
     }
 
