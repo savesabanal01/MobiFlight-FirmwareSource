@@ -6,8 +6,8 @@
 #include "AttitudeIndicator.h"
 #include "Compass.h"
 
-#define BOUNCING_CIRCLES
-//#define ATTITUDE_INDICATOR
+//#define BOUNCING_CIRCLES
+#define ATTITUDE_INDICATOR
 //#define COMPASS
 
 void core1_init()
@@ -26,7 +26,7 @@ void core1_loop()
     init_bouncingCircles();
 #endif
 #ifdef ATTITUDE_INDICATOR
-    init_AttitudeIndicator(attitudeType);
+    AttitudeIndicator::init(attitudeType);
 #endif
 #ifdef COMPASS
     init_Compass();
@@ -39,7 +39,7 @@ void core1_loop()
 #ifdef ATTITUDE_INDICATOR
         //testRoll();
         //testPitch();
-        loop_AttitudeIndicator(attitudeType);
+        AttitudeIndicator::loop(attitudeType);
 #endif
 #ifdef COMPASS
         loop_Compass();
@@ -58,9 +58,14 @@ void core1_loop()
         // #########################################################################
         if (multicore_fifo_rvalid()) {
             uint32_t dataCore0 = multicore_fifo_pop_blocking();
-            if (dataCore0 == CORE1_CMD_STOP) multicore_lockout_victim_init();
-            if (dataCore0 & CORE1_DATA) {
+            // check if bit 32 is set to 1
+            if (dataCore0 & CORE1_CMD) {
+                if (dataCore0 == CORE1_CMD_STOP) multicore_lockout_victim_init();
+            } 
+            // check if bit 32 is set to 0
+            if (!(dataCore0 & CORE1_DATA)) {
                 uint32_t receivedData = dataCore0 & 0x00FFFFFF;
+                // Do something with your data
             }
         }
     }

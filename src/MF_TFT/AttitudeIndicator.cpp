@@ -38,8 +38,6 @@
 void updateHorizon(int roll, int pitch);
 void drawHorizon(int roll, int pitch, bool sel);
 int  rollGenerator(int maxroll);
-void testRoll(void);
-void testPitch(void);
 void drawScale(bool sel);
 void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel);
 void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
@@ -52,11 +50,12 @@ int     last_roll                 = 0;
 int     last_pitch                = 0;
 int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
 uint8_t instrumentType            = 0;   // 2 = rect instrument, 1 = round instrument
-
+namespace AttitudeIndicator
+{
 // #########################################################################
 // Setup, runs once on boot up
 // #########################################################################
-void init_AttitudeIndicator(uint8_t type)
+void init(uint8_t type)
 {
     instrumentType = type;
     tft.fillScreen(TFT_BLACK);
@@ -95,7 +94,7 @@ void init_AttitudeIndicator(uint8_t type)
     startMillis = millis();
 }
 
-void stop_AttitudeIndicator()
+void stop()
 {
     tft.endWrite();
     // Delete sprite to free up the RAM
@@ -109,7 +108,7 @@ void stop_AttitudeIndicator()
 int roll  = 0;
 int pitch = 0;
 
-void loop_AttitudeIndicator(uint8_t type)
+void loop(uint8_t type)
 {
     // Roll is in degrees in range +/-180
     // roll = random(361) - 180;
@@ -124,7 +123,7 @@ void loop_AttitudeIndicator(uint8_t type)
 
     updateHorizon(roll, pitch);
 }
-
+}   // end of namespace
 // #########################################################################
 // Update the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
