@@ -82,6 +82,7 @@ namespace BouncingCircles
     {
         spr[0].deleteSprite();
         spr[1].deleteSprite();
+        tft.endWrite();
     }
     // #########################################################################
     // Loop
