@@ -35,7 +35,7 @@ void core1_loop()
         BouncingCircles::stop();
 
         demoMillis = millis();
-        AttitudeIndicator::init(2);
+        AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE);
         do {
             AttitudeIndicator::loop();
             checkDataCore0();
@@ -51,7 +51,7 @@ void core1_loop()
         Compass::stop();
 
         demoMillis = millis();
-        AttitudeIndicator::init(1);
+        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
             AttitudeIndicator::loop();
             checkDataCore0();
