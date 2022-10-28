@@ -1,3 +1,5 @@
+#if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
+
 #include <Arduino.h>
 #include "Core1.h"
 #include "pico/stdlib.h"
@@ -7,49 +9,50 @@
 #include "Compass.h"
 
 //#define BOUNCING_CIRCLES
-#define ATTITUDE_INDICATOR
-//#define COMPASS
+//#define ATTITUDE_INDICATOR
+#define COMPASS
 
 void core1_init()
 {
     tft_init();
-    init_bouncingCirclesRandom();   // random seems not to work on core1
+    BouncingCircles::initRandom(); // random seems not to work on core1
 }
 
 void core1_loop()
 {
-    uint32_t millisStart = millis();
-    uint8_t  loopCounter = 0;
-    uint8_t attitudeType = 1;
+    uint32_t startMillis  = millis();
+    uint16_t interval     = 10;
+    uint16_t loopCounter  = 0;
+    uint8_t  attitudeType = 1;
+    String   fps          = "xx.xx fps";
 
 #ifdef BOUNCING_CIRCLES
-    init_bouncingCircles();
+    BouncingCircles::init();
 #endif
 #ifdef ATTITUDE_INDICATOR
     AttitudeIndicator::init(attitudeType);
 #endif
 #ifdef COMPASS
-    init_Compass();
+    Compass::init();
 #endif
 
     while (1) {
 #ifdef BOUNCING_CIRCLES
-        loop_bouncingCircles();
+        BouncingCircles::loop();
 #endif
 #ifdef ATTITUDE_INDICATOR
-        //testRoll();
-        //testPitch();
         AttitudeIndicator::loop(attitudeType);
 #endif
 #ifdef COMPASS
-        loop_Compass();
+        Compass::loop();
 #endif
 
         loopCounter++;
-        if (loopCounter == 10) {
-    //        Serial.print("Time for 1 loops: "); Serial.print((millis() - millisStart) / 10); Serial.println("ms");
-            millisStart = millis();
-            loopCounter = 0;
+        if (loopCounter % interval == 0) {
+            long millisSinceUpdate = millis() - startMillis;
+            fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
+Serial.println(fps);
+            startMillis = millis();
         }
 
         // #########################################################################
@@ -61,7 +64,7 @@ void core1_loop()
             // check if bit 32 is set to 1
             if (dataCore0 & CORE1_CMD) {
                 if (dataCore0 == CORE1_CMD_STOP) multicore_lockout_victim_init();
-            } 
+            }
             // check if bit 32 is set to 0
             if (!(dataCore0 & CORE1_DATA)) {
                 uint32_t receivedData = dataCore0 & 0x00FFFFFF;
@@ -70,3 +73,5 @@ void core1_loop()
         }
     }
 }
+
+#endif // #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)

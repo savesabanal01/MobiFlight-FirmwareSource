@@ -1,5 +1,8 @@
 #pragma one
 
-void loop_Compass();
-void init_Compass();
-
+namespace Compass
+{
+    void init();
+    void loop();
+    void stop();
+}

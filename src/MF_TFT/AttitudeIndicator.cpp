@@ -90,8 +90,6 @@ void init(uint8_t type)
     tft.setTextDatum(TC_DATUM); // Centre middle justified
     tft.drawString("Demo Attitude Indicator", XC, 1, 1);
     tft.drawString("Based on Bodmer's example", XC, 10, 1);
-
-    startMillis = millis();
 }
 
 void stop()

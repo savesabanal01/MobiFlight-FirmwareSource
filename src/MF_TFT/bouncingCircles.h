@@ -1,5 +1,8 @@
 #pragma once
 
-void init_bouncingCirclesRandom();
-void init_bouncingCircles();
-void loop_bouncingCircles();
+namespace BouncingCircles
+{
+    void initRandom();
+    void init();
+    void loop();
+}

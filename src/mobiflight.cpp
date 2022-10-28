@@ -31,7 +31,7 @@
 #if MF_DIGIN_MUX_SUPPORT == 1
 #include "DigInMux.h"
 #endif
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
 #include "Core1.h"
 #endif
 
@@ -158,7 +158,7 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
     core1_init();
     multicore_launch_core1(core1_loop);
 #endif
