@@ -39,17 +39,11 @@ void updateHorizon(int roll, int pitch);
 void drawHorizon(int roll, int pitch, bool sel);
 int  rollGenerator(int maxroll);
 void drawScale(bool sel);
-void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel);
-void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
-void drawFastVLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
-void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
-void fillCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel);
 void drawOuter();
 
-int     last_roll                 = 0;
-int     last_pitch                = 0;
-int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
-uint8_t instrumentType            = 0;   // 2 = rect instrument, 1 = round instrument
+int last_roll  = 0;
+int last_pitch = 0;
+uint8_t instrumentType = 0; // 1 = round instrument, 2 = rect instrument
 namespace AttitudeIndicator
 {
     // #########################################################################
@@ -60,11 +54,10 @@ namespace AttitudeIndicator
         instrumentType = type;
         tft.fillScreen(TFT_BLACK);
         // setup clipping area
-        // calculate for each x the y value, required for drawPixel and FastVerLine
-        checkClipping[0] = CLIPPING_R;
-        for (uint8_t i = 1; i < CLIPPING_R; i++) {
-            checkClipping[i] = sqrt(CLIPPING_R * CLIPPING_R - i * i);
-        }
+        if (instrumentType == 1)
+            TFT::setClippingArea(CLIPPING_X0, CLIPPING_Y0, CLIPPING_XWIDTH, CLIPPING_YWIDTH, CLIPPING_R, CLIPPING_R);
+        if (instrumentType == 2)
+            TFT::setClippingArea(CLIPPING_X0, CLIPPING_Y0, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0, CLIPPING_R);
 
         tft.startWrite(); // TFT chip select held low permanently
 
@@ -111,7 +104,7 @@ namespace AttitudeIndicator
     int roll  = 0;
     int pitch = 0;
 
-    void loop(uint8_t type)
+    void loop()
     {
         // Roll is in degrees in range +/-180
         // roll = random(361) - 180;
@@ -200,31 +193,31 @@ void drawHorizon(int roll, int pitch, bool sel)
     if ((roll != last_roll) || (pitch != last_pitch)) {
         xdn = 6 * xd;
         ydn = 6 * yd;
-        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+        TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
         xdn = 5 * xd;
         ydn = 5 * yd;
-        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+        TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
         xdn = 4 * xd;
         ydn = 4 * yd;
-        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+        TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
 
         xdn = 3 * xd;
         ydn = 3 * yd;
-        drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-        drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+        TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+        TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
     }
     xdn = 2 * xd;
     ydn = 2 * yd;
-    drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-    drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+    TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
+    TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
 
-    drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE, sel);
-    drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN, sel);
+    TFT::drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE, sel);
+    TFT::drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN, sel);
 
-    drawLine(XC - x0, YC - y0 - pitch, XC + x0, YC + y0 - pitch, TFT_WHITE, sel);
+    TFT::drawLine(XC - x0, YC - y0 - pitch, XC + x0, YC + y0 - pitch, TFT_WHITE, sel);
 
     if (sel) {
         last_roll  = roll;
@@ -310,10 +303,10 @@ void drawScale(bool sel)
 void drawOuter()
 {
     if (instrumentType == 1) {
-        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
-        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
-        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
-        fillCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
+        TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
+        TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
+        TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
+        TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
     }
     if (instrumentType == 2) {
         spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
@@ -324,194 +317,4 @@ void drawOuter()
     // Draw the horizon graphic
     drawHorizon(0, 0, 0);
     drawHorizon(0, 0, 1);
-}
-
-// #########################################################################
-// Helper functions transferred from the lib for a round clipping area
-//
-// Before using this functions refresh rate was 21ms
-// Without Clipping it mostly 21ms, sometimes 70ms
-// With rectangular clipping it is still 21ms with sometimes 70ms
-// With round clipping it is 21 - 22ms
-//
-// #########################################################################
-
-/***************************************************************************************
-** Function name:           drawLine
-** Description:             draw a line between 2 arbitrary points
-***************************************************************************************/
-// Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
-// an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
-{
-
-    bool steep = abs(y1 - y0) > abs(x1 - x0);
-    if (steep) {
-        swap_coord(x0, y0);
-        swap_coord(x1, y1);
-    }
-
-    if (x0 > x1) {
-        swap_coord(x0, x1);
-        swap_coord(y0, y1);
-    }
-
-    int32_t dx = x1 - x0, dy = abs(y1 - y0);
-    ;
-
-    int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
-
-    if (y0 < y1) ystep = 1;
-
-    // Split into steep and not steep for FastH/V separation
-    if (steep) {
-        for (; x0 <= x1; x0++) {
-            dlen++;
-            err -= dy;
-            if (err < 0) {
-                if (dlen == 1)
-                    drawPixel(y0, xs, color, sel);
-                else
-                    drawFastVLine(y0, xs, dlen, color, sel);
-                dlen = 0;
-                y0 += ystep;
-                xs = x0 + 1;
-                err += dx;
-            }
-        }
-        if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
-    } else {
-        for (; x0 <= x1; x0++) {
-            dlen++;
-            err -= dy;
-            if (err < 0) {
-                if (dlen == 1)
-                    drawPixel(xs, y0, color, sel);
-                else
-                    drawFastHLine(xs, y0, dlen, color, sel);
-                dlen = 0;
-                y0 += ystep;
-                xs = x0 + 1;
-                err += dx;
-            }
-        }
-        if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
-    }
-}
-
-/***************************************************************************************
-** Function name:           drawFastHLine
-** Description:             draw a horizontal line
-***************************************************************************************/
-void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
-{
-    if (instrumentType == 1) {
-        if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
-    }
-    if (instrumentType == 2) {
-        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-    }
-    if (w < 0) {
-        x -= w;
-        w *= -1;
-    }
-    int32_t xE = x + w;
-    if (instrumentType == 1) {
-        // calculate X start and x end from look up table for the given x position
-        if (x <= CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
-        if (xE >= CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
-    }
-    if (instrumentType == 2) {
-        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
-        if (xE >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
-    }
-    spr[sel].drawFastHLine(x, y, xE - x + 1, color);
-}
-
-/***************************************************************************************
-** Function name:           drawFastVLine
-** Description:             draw a vertical line
-***************************************************************************************/
-void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
-{
-    if (instrumentType == 1) {
-        if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
-    }
-    if (instrumentType == 2) {
-        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-    }
-    if (h < 0) {
-        y -= h;
-        h *= -1;
-    }
-    int32_t yE = y + h;
-    if (instrumentType == 1) {
-        // calculate Y start and Y end from look up table for the given x position
-        if (y <= CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
-        if (yE >= CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
-    }
-    if (instrumentType == 2) {
-        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
-        if (yE >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
-    }
-    spr[sel].drawFastVLine(x, y, yE - y + 1, color);
-}
-
-/***************************************************************************************
-** Function name:           drawPixel
-** Description:             push a single pixel at an arbitrary position
-***************************************************************************************/
-void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
-{
-    // First do a rect clipping
-    if (instrumentType == 1) {
-        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-        // next check if Pixel is within circel or outside
-        if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
-        if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
-    }
-    if (instrumentType == 2) {
-        if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-        if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
-    }
-    spr[sel].drawPixel(x, y, color);
-}
-
-/***************************************************************************************
-** Function name:           fillCircle
-** Description:             draw a filled circle, upper or lower part
-***************************************************************************************/
-// Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
-// Improved algorithm avoids repetition of lines
-void fillCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel)
-{
-    int32_t x  = 0;
-    int32_t dx = 1;
-    int32_t dy = r + r;
-    int32_t p  = -(r >> 1);
-
-    if (upper) spr[sel].drawFastHLine(x0 - r, y0, dy + 1, color);
-
-    while (x < r) {
-
-        if (p >= 0) {
-            if (upper)
-                spr[sel].drawFastHLine(x0 - x, y0 - r, dx, color);
-            else
-                spr[sel].drawFastHLine(x0 - x, y0 + r, dx, color);
-            dy -= 2;
-            p -= dy;
-            r--;
-        }
-
-        dx += 2;
-        p += dx;
-        x++;
-
-        if (upper)
-            spr[sel].drawFastHLine(x0 - r, y0 - x, dy + 1, color);
-        else
-            spr[sel].drawFastHLine(x0 - r, y0 + x, dy + 1, color);
-    }
 }

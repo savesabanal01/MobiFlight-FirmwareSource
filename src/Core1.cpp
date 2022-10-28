@@ -12,7 +12,7 @@ void checkDataCore0();
 
 void core1_init()
 {
-    tft_init();
+    TFT::init();
     BouncingCircles::initRandom(); // random seems not to work on core1
 }
 
@@ -37,7 +37,7 @@ void core1_loop()
         demoMillis = millis();
         AttitudeIndicator::init(2);
         do {
-            AttitudeIndicator::loop(1);
+            AttitudeIndicator::loop();
             checkDataCore0();
         } while (millis() - demoMillis < 10000);
         AttitudeIndicator::stop();
@@ -53,7 +53,7 @@ void core1_loop()
         demoMillis = millis();
         AttitudeIndicator::init(1);
         do {
-            AttitudeIndicator::loop(1);
+            AttitudeIndicator::loop();
             checkDataCore0();
         } while (millis() - demoMillis < 10000);
         AttitudeIndicator::stop();
