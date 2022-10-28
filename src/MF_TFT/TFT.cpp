@@ -1,14 +1,10 @@
 #include <Arduino.h>
 #include "TFT.h"
 
-int32_t startMillis = 0;
-
 // Library instance
 TFT_eSPI tft = TFT_eSPI();
-
 // Create two sprites for a DMA toggle buffer
 TFT_eSprite spr[2] = {TFT_eSprite(&tft), TFT_eSprite(&tft)};
-
 // Pointers to start of Sprites in RAM (these are then "image" pointers)
 uint16_t *sprPtr[2];
 
