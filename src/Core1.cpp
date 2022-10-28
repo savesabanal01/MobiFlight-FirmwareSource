@@ -8,7 +8,7 @@
 #include "AttitudeIndicator.h"
 #include "Compass.h"
 
-void checkDataCore0();
+void checkDataFromCore0();
 
 void core1_init()
 {
@@ -19,18 +19,13 @@ void core1_init()
 void core1_loop()
 {
     uint32_t demoMillis  = millis();
-    uint8_t attitudeType = 1;
-/*
-    BouncingCircles::init();
-    AttitudeIndicator::init(attitudeType);
-    Compass::init();
-*/
+
     while (1) {
         demoMillis = millis();
         BouncingCircles::init();
         do {
             BouncingCircles::loop();
-            checkDataCore0();
+            checkDataFromCore0();
         } while (millis() - demoMillis < 5000);
         BouncingCircles::stop();
 
@@ -38,7 +33,7 @@ void core1_loop()
         AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE);
         do {
             AttitudeIndicator::loop();
-            checkDataCore0();
+            checkDataFromCore0();
         } while (millis() - demoMillis < 10000);
         AttitudeIndicator::stop();
 
@@ -46,7 +41,7 @@ void core1_loop()
         Compass::init();
         do {
             Compass::loop();
-            checkDataCore0();
+            checkDataFromCore0();
         } while (millis() - demoMillis < 5000);
         Compass::stop();
 
@@ -54,13 +49,13 @@ void core1_loop()
         AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
             AttitudeIndicator::loop();
-            checkDataCore0();
+            checkDataFromCore0();
         } while (millis() - demoMillis < 10000);
         AttitudeIndicator::stop();
     }
 }
 
-void checkDataCore0()
+void checkDataFromCore0()
 {
     uint16_t loopCounter = 0;
     uint32_t startMillis = millis();
@@ -82,11 +77,11 @@ void checkDataCore0()
     if (multicore_fifo_rvalid()) {
         uint32_t dataCore0 = multicore_fifo_pop_blocking();
         // check if bit 32 is set to 1
-        if (dataCore0 & CORE1_CMD) {
-            if (dataCore0 == CORE1_CMD_STOP) multicore_lockout_victim_init();
+        if (dataCore0 ^ CORE1_CMD) {
+            if (dataCore0 ^ !(1<<31)== CORE1_CMD_STOP) multicore_lockout_victim_init();
         }
         // check if bit 32 is set to 0
-        if (!(dataCore0 & CORE1_DATA)) {
+        if (!(dataCore0 ^ CORE1_DATA)) {
             uint32_t receivedData = dataCore0 & 0x00FFFFFF;
             // Do something with your data
         }
