@@ -52,76 +52,81 @@ int32_t checkClipping[CLIPPING_R] = {0}; // for round clipping
 uint8_t instrumentType            = 0;   // 2 = rect instrument, 1 = round instrument
 namespace AttitudeIndicator
 {
-// #########################################################################
-// Setup, runs once on boot up
-// #########################################################################
-void init(uint8_t type)
-{
-    instrumentType = type;
-    tft.fillScreen(TFT_BLACK);
-    // setup clipping area
-    // calculate for each x the y value, required for drawPixel and FastVerLine
-    checkClipping[0] = CLIPPING_R;
-    for (uint8_t i = 1; i < CLIPPING_R; i++) {
-        checkClipping[i] = sqrt(CLIPPING_R * CLIPPING_R - i * i);
+    // #########################################################################
+    // Setup, runs once on boot up
+    // #########################################################################
+    void init(uint8_t type)
+    {
+        instrumentType = type;
+        tft.fillScreen(TFT_BLACK);
+        // setup clipping area
+        // calculate for each x the y value, required for drawPixel and FastVerLine
+        checkClipping[0] = CLIPPING_R;
+        for (uint8_t i = 1; i < CLIPPING_R; i++) {
+            checkClipping[i] = sqrt(CLIPPING_R * CLIPPING_R - i * i);
+        }
+
+        tft.startWrite(); // TFT chip select held low permanently
+
+        spr[0].setRotation(0);
+        spr[1].setRotation(0);
+
+        // Create the 2 sprites, each is half the size of the screen
+        sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
+        sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
+        // Move the sprite 1 coordinate datum upwards half the screen height
+        // so from coordinate point of view it occupies the bottom of screen
+        spr[1].setViewport(0 /* SPRITE_X0 */, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
+
+        // Define text datum for each Sprite
+        spr[0].setTextDatum(MC_DATUM);
+        spr[1].setTextDatum(MC_DATUM);
+
+        // draw outer part of instrument
+        drawOuter();
+        if (instrumentType == 2) {
+            tft.fillRect(0, 0, TFT_WIDTH, 40, SKY_BLUE);
+            tft.fillRect(0, 280, TFT_WIDTH, 40, BROWN);
+        }
+
+        // Draw fixed text at top/bottom of screen
+        tft.setTextColor(TFT_WHITE);
+        tft.setTextDatum(TC_DATUM); // Centre middle justified
+        tft.drawString("Demo Attitude Indicator", XC, 1, 1);
+        tft.drawString("Based on Bodmer's example", XC, 10, 1);
+        tft.setTextColor(TFT_YELLOW);
     }
 
-    tft.startWrite(); // TFT chip select held low permanently
+    void stop()
+    {
+        tft.endWrite();
+        // Delete sprite to free up the RAM
+        spr[0].deleteSprite();
+        spr[1].deleteSprite();
+    }
 
-    spr[0].setRotation(0);
-    spr[1].setRotation(0);
+    // #########################################################################
+    // Main loop, keeps looping around
+    // #########################################################################
+    int roll  = 0;
+    int pitch = 0;
 
-    // Create the 2 sprites, each is half the size of the screen
-    sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
-    sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
-    // Move the sprite 1 coordinate datum upwards half the screen height
-    // so from coordinate point of view it occupies the bottom of screen
-    spr[1].setViewport(0 /* SPRITE_X0 */, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
+    void loop(uint8_t type)
+    {
+        // Roll is in degrees in range +/-180
+        // roll = random(361) - 180;
+        roll++;
+        if (roll == 180) roll = -180;
 
-    // Define text datum for each Sprite
-    spr[0].setTextDatum(MC_DATUM);
-    spr[1].setTextDatum(MC_DATUM);
+        // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
+        // Maximum pitch shouls be in range +/- 80 with HOR = 172
+        // pitch = 10; //random(2 * YC) - YC;
+        pitch++;
+        if (pitch > 40) pitch = -30;
 
-    // draw outer part of instrument
-    drawOuter();
-
-    // Draw fixed text at top/bottom of screen
-    tft.setTextColor(TFT_YELLOW);
-    tft.setTextDatum(TC_DATUM); // Centre middle justified
-    tft.drawString("Demo Attitude Indicator", XC, 1, 1);
-    tft.drawString("Based on Bodmer's example", XC, 10, 1);
-}
-
-void stop()
-{
-    tft.endWrite();
-    // Delete sprite to free up the RAM
-    spr[0].deleteSprite();
-    spr[1].deleteSprite();
-}
-
-// #########################################################################
-// Main loop, keeps looping around
-// #########################################################################
-int roll  = 0;
-int pitch = 0;
-
-void loop(uint8_t type)
-{
-    // Roll is in degrees in range +/-180
-    // roll = random(361) - 180;
-    roll++;
-    if (roll == 180) roll = -180;
-
-    // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
-    // Maximum pitch shouls be in range +/- 80 with HOR = 172
-    // pitch = 10; //random(2 * YC) - YC;
-    pitch++;
-    if (pitch > 40) pitch = -30;
-
-    updateHorizon(roll, pitch);
-}
-}   // end of namespace
+        updateHorizon(roll, pitch);
+    }
+} // end of namespace
 // #########################################################################
 // Update the horizon with a new roll (angle in range -180 to +180)
 // #########################################################################
@@ -227,8 +232,8 @@ void drawHorizon(int roll, int pitch, bool sel)
     }
 
     if (instrumentType == 1) {
-        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R , DARK_GREY);
-        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R , DARK_GREY);
+        spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
+        spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
         spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
         spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
     }
@@ -291,7 +296,10 @@ void drawScale(bool sel)
     spr[sel].print("20");
 
     // Display justified roll value near bottom of screen
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);                             // Text with background
+    if (instrumentType == 1)
+        tft.setTextColor(TFT_WHITE, TFT_BLACK); // Text with background
+    else
+        tft.setTextColor(TFT_BLACK, BROWN);                              // Text with background
     tft.setTextDatum(MC_DATUM);                                          // Centre middle justified
     tft.setTextPadding(24);                                              // Padding width to wipe previous number
     char message[40];                                                    // buffer for message
@@ -429,8 +437,7 @@ void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     if (instrumentType == 1) {
         if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
     }
-    if(instrumentType == 2)
-    {
+    if (instrumentType == 2) {
         if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
     }
     if (h < 0) {

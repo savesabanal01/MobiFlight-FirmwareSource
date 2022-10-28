@@ -69,6 +69,7 @@ namespace Compass
     // -------------------------------------------------------------------------
     void init(void)
     {
+        tft.fillScreen(TFT_BLACK);
         spr[0].setRotation(0);
         spr[0].fillScreen(BACKGROUND);
         spr[1].setRotation(0);
