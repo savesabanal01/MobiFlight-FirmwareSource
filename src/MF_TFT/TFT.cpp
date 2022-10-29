@@ -43,26 +43,26 @@ namespace TFT
     }
 
 #define CLIPPING_MAX_SIZE 200
-    int32_t checkClipping[CLIPPING_MAX_SIZE] = {0}; // for round clipping
-    int32_t CLIPPING_X0;
-    int32_t CLIPPING_Y0;
-    int32_t CLIPPING_XWIDTH;
-    int32_t CLIPPING_YWIDTH;
-    int32_t CLIPPING_R;
+    int32_t checkClippingArea[CLIPPING_MAX_SIZE] = {0}; // for round clipping
+    int32_t clippingCenterX;
+    int32_t clippingCenterY;
+    int32_t clippingWidthX;
+    int32_t clippingWidthY;
+    int32_t clippingRadius;
 
     // setup clipping area
-    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius, int8_t clippingSize)
+    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius)
     {
-        if (clippingSize >= CLIPPING_MAX_SIZE) return;
-        checkClipping[0] = clippingSize;
-        for (uint8_t i = 1; i < clippingSize; i++) {
-            checkClipping[i] = sqrt(clippingSize * clippingSize - i * i);
+        if (ClippingRadius >= CLIPPING_MAX_SIZE) return;
+        checkClippingArea[0] = ClippingRadius;
+        for (uint8_t i = 1; i < ClippingRadius; i++) {
+            checkClippingArea[i] = sqrt(ClippingRadius * ClippingRadius - i * i);
         }
-        CLIPPING_X0     = ClippingX0;
-        CLIPPING_Y0     = ClippingY0;
-        CLIPPING_XWIDTH = ClippingXwidth;
-        CLIPPING_YWIDTH = ClippingYwidth;
-        CLIPPING_R      = ClippingRadius;
+        clippingCenterX = ClippingX0;
+        clippingCenterY = ClippingY0;
+        clippingWidthX  = ClippingXwidth;
+        clippingWidthY  = ClippingYwidth;
+        clippingRadius  = ClippingRadius;
     }
 
     // #########################################################################
@@ -141,23 +141,27 @@ namespace TFT
     ***************************************************************************************/
     void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     {
-        if (CLIPPING_R > 0) {
-            if (y <= CLIPPING_Y0 - CLIPPING_R || y >= CLIPPING_Y0 + CLIPPING_R) return;
+        // First check upper and lower limits, it's quite easy
+        if (clippingRadius > 0) {
+            if (y <= clippingCenterY - clippingRadius || y >= clippingCenterY + clippingRadius) return;
         } else {
-            if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
         }
+        // always draw from left to right
         if (w < 0) {
             x -= w;
             w *= -1;
         }
         int32_t xE = x + w;
-        if (CLIPPING_R > 0) {
-            // calculate X start and x end from look up table for the given x position
-            if (x <= CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)]) x = CLIPPING_X0 - checkClipping[abs(y - CLIPPING_Y0)];
-            if (xE >= CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)]) xE = CLIPPING_X0 + checkClipping[abs(y - CLIPPING_Y0)];
+        // check if pixel is inside the radius
+        if (clippingRadius > 0) {
+            // check left and right limit and set start / end point accordingly from look up table for the given x position
+            if (x <= clippingCenterX - checkClippingArea[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingArea[abs(y - clippingCenterY)];
+            if (xE >= clippingCenterX + checkClippingArea[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingArea[abs(y - clippingCenterY)];
         } else {
-            if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2) x = CLIPPING_X0 - CLIPPING_XWIDTH / 2;
-            if (xE >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) xE = CLIPPING_X0 + CLIPPING_XWIDTH / 2;
+            // check left and right limit and set start / end point accordingly
+            if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
+            if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
         }
         spr[sel].drawFastHLine(x, y, xE - x + 1, color);
     }
@@ -168,23 +172,24 @@ namespace TFT
     ***************************************************************************************/
     void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     {
-        if (CLIPPING_R > 0) {
-            if (x <= CLIPPING_X0 - CLIPPING_R || x >= CLIPPING_X0 + CLIPPING_R) return;
+        if (clippingRadius > 0) {
+            if (x <= clippingCenterX - clippingRadius || x >= clippingCenterX + clippingRadius) return;
         } else {
-            if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
+            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
         }
         if (h < 0) {
             y -= h;
             h *= -1;
         }
         int32_t yE = y + h;
-        if (CLIPPING_R > 0) {
-            // calculate Y start and Y end from look up table for the given x position
-            if (y <= CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) y = CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)];
-            if (yE >= CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) yE = CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)];
+        if (clippingRadius > 0) {
+            // check upper and lower limit and set start / end point accordingly from look up table for the given x position
+            if (y <= clippingCenterY - checkClippingArea[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingArea[abs(x - clippingCenterX)];
+            if (yE >= clippingCenterY + checkClippingArea[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingArea[abs(x - clippingCenterX)];
         } else {
-            if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2) y = CLIPPING_Y0 - CLIPPING_YWIDTH / 2;
-            if (yE >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) yE = CLIPPING_Y0 + CLIPPING_YWIDTH / 2;
+            // check left and right limit and set start / end point accordingly
+            if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
+            if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
         }
         spr[sel].drawFastVLine(x, y, yE - y + 1, color);
     }
@@ -195,16 +200,17 @@ namespace TFT
     ***************************************************************************************/
     void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
     {
-        if (CLIPPING_R > 0) {
+        if (clippingRadius > 0) {
             // First do a rect clipping
-            if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-            if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+            if (x <= clippingCenterX - clippingRadius || x >= clippingCenterX + clippingRadius) return;
+            if (y <= clippingCenterY - clippingRadius || y >= clippingCenterY + clippingRadius) return;
             // next check if Pixel is within circel or outside
-            if (y < CLIPPING_Y0 - checkClipping[abs(x - CLIPPING_X0)]) return;
-            if (y > CLIPPING_Y0 + checkClipping[abs(x - CLIPPING_X0)]) return;
+            if (y < clippingCenterY - checkClippingArea[abs(x - clippingCenterX)]) return;
+            if (y > clippingCenterY + checkClippingArea[abs(x - clippingCenterX)]) return;
         } else {
-            if (x <= CLIPPING_X0 - CLIPPING_XWIDTH / 2 || x >= CLIPPING_X0 + CLIPPING_XWIDTH / 2) return;
-            if (y <= CLIPPING_Y0 - CLIPPING_YWIDTH / 2 || y >= CLIPPING_Y0 + CLIPPING_YWIDTH / 2) return;
+            // for a rect clipping area just check upper/lower and left/right limit
+            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
+            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
         }
         spr[sel].drawPixel(x, y, color);
     }

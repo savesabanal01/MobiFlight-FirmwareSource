@@ -9,7 +9,7 @@ extern uint16_t   *sprPtr[];
 
 namespace TFT {
 void init();
-void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius,  int8_t clippingSize);
+void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius);
 void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel);
 void fillHalfCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel);
 void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
