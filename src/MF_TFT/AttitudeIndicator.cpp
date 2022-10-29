@@ -101,8 +101,8 @@ namespace AttitudeIndicator
         // Draw fixed text at top/bottom of screen
         tft.setTextColor(TFT_WHITE);
         tft.setTextDatum(TC_DATUM); // Centre middle justified
-        tft.drawString("Demo Attitude Indicator", INSTRUMENT_CENTER_X0_RECT, 1, 1);
-        tft.drawString("Based on Bodmer's example", INSTRUMENT_CENTER_X0_RECT, 10, 1);
+        tft.drawString("Demo Attitude Indicator", TFT_WIDTH / 2, 1, 1);
+        tft.drawString("Based on Bodmer's example", TFT_WIDTH / 2, 10, 1);
         tft.setTextColor(TFT_YELLOW);
     }
 
@@ -385,7 +385,7 @@ namespace AttitudeIndicator
         tft.setTextPadding(24);                                              // Padding width to wipe previous number
         char message[40];                                                    // buffer for message
         sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
-        tft.drawString(message, INSTRUMENT_CENTER_X0_RECT, TFT_HEIGTH - 9, 1);
+        tft.drawString(message, TFT_WIDTH / 2, TFT_HEIGTH - 9, 1);
     }
 
     void drawOuter()
