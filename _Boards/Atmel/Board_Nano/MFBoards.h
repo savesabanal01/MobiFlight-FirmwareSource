@@ -36,8 +36,8 @@
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
 
-#define MAX_OUTPUTS         18
-#define MAX_BUTTONS         18
+#define MAX_OUTPUTS         20
+#define MAX_BUTTONS         20
 #define MAX_LEDSEGMENTS     1
 #define MAX_ENCODERS        3
 #define MAX_STEPPERS        2
