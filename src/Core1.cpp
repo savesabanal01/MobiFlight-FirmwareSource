@@ -55,13 +55,12 @@ void core1_loop()
     }
 }
 
+uint16_t loopCounter = 0;
+uint32_t startMillis = millis();
+uint16_t interval    = 10;
+String  fps          = "xx.xx fps";
 void checkDataFromCore0()
 {
-    uint16_t loopCounter = 0;
-    uint32_t startMillis = millis();
-    uint16_t interval    = 10;
-    String  fps          = "xx.xx fps";
-
     loopCounter++;
     if (loopCounter % interval == 0) {
         long millisSinceUpdate = millis() - startMillis;
