@@ -32,21 +32,29 @@
 #define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
 #define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
 #define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
+#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
+#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
+#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
+#define INSTRUMENT_CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_OUTER_RADIUS      120                    // radius of outer part of instrument
+#define INSTRUMENT_MOVING_RADIUS     100                    // radius of moving part of instrument
+#define CLIPPING_RADIUS              120                    // radius of clipping area for round instrument including the outer part!
+#define HOR                          350                    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
+#define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
+#define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
+#define DARK_RED                     0x8000
+#define DARK_GREY                    0x39C7
+// TFT_TRANSPARENT check how to use
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].setColorDepth(int8_t b);
+// spr[0].createSprite(70, 80);
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].pushSprite(x, y, TFT_TRANSPARENT);
+// spr[0].getColorDepth(void);
+// spr[0].deleteSprite();
 
-#define SPRITE_DIM_RADIUS          120               // dimension for x and y direction of sprite, including outer part
-#define SPRITE_X0_ROUND            0                 // upper left x position where to plot
-#define SPRITE_Y0_ROUND            40                // upper left y position where to plot
-#define INSTRUMENT_CENTER_X0_ROUND SPRITE_DIM_RADIUS // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_CENTER_Y0_ROUND SPRITE_DIM_RADIUS // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_OUTER_RADIUS    120               // radius of outer part of instrument
-#define INSTRUMENT_MOVIG_RADIUS    100               // radius of moving part of instrument
-#define CLIPPING_RADIUS            120               // radius of clipping area for round instrument including the outer part!
-#define HOR                        350               // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
-#define BROWN                      0xFD20            // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE                   0x02B5            // 0x0318 //0x039B //0x34BF
-#define DARK_RED                   0x8000
-#define DARK_GREY                  0x39C7
-#define DEG2RAD                    0.0174532925
+#define DEG2RAD 0.0174532925
 
 int     last_roll      = 0;
 int     last_pitch     = 0;
@@ -67,12 +75,14 @@ namespace AttitudeIndicator
         tft.fillScreen(TFT_BLACK);
         // setup clipping area
         if (instrumentType == ROUND_SHAPE)
-            TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVIG_RADIUS);
+            TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS);
         if (instrumentType == RECT_SHAPE)
             TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
 
         spr[0].setRotation(0);
         spr[1].setRotation(0);
+        // spr[0].setColorDepth(8);
+        // spr[1].setColorDepth(8);
         if (instrumentType == ROUND_SHAPE) {
             // Create the 2 sprites, each is half the size
             sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
@@ -235,10 +245,10 @@ namespace AttitudeIndicator
 
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
 
-            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVIG_RADIUS, DARK_GREY);
-            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVIG_RADIUS, DARK_GREY);
-            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVIG_RADIUS + 1, DARK_GREY);
-            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVIG_RADIUS + 1, DARK_GREY);
+            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS, DARK_GREY);
+            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS, DARK_GREY);
+            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS + 1, DARK_GREY);
+            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS + 1, DARK_GREY);
         }
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
@@ -285,6 +295,7 @@ namespace AttitudeIndicator
 
         if (instrumentType == ROUND_SHAPE) {
             tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
+            // spr[sel].pushSprite(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, TFT_TRANSPARENT);
         }
         if (instrumentType == RECT_SHAPE) {
             tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
