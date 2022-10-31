@@ -9,10 +9,7 @@
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
-#define TFT_WIDTH  240
-#define TFT_HEIGTH 320
-// Define the width and height according to the TFT and the
-// available memory. The sprites will require:
+//  The sprites will require:
 //     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
 // Note: for a 240 * 320 area this is 150 Kbytes!
 
@@ -396,7 +393,7 @@ namespace AttitudeIndicator
         tft.setTextPadding(24);                                              // Padding width to wipe previous number
         char message[40];                                                    // buffer for message
         sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
-        tft.drawString(message, TFT_WIDTH / 2, TFT_HEIGTH - 9, 1);
+        tft.drawString(message, TFT_WIDTH / 2, TFT_HEIGHT - 9, 1);
     }
 
     void drawOuter()
