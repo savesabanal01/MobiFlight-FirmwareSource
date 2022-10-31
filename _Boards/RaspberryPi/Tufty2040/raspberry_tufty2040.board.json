@@ -1,0 +1,72 @@
+{
+    "$schema": "./mfboard.schema.json",
+    "AvrDudeSettings": {
+      "Device": "RaspiPico",
+      "BaudRate": "115200",
+      "Programmer": "arduino",
+      "FirmwareBaseName": "mobiflight_raspberrytufty2040",
+      "Timeout": 15000
+    },
+    "Connection": {
+      "ConnectionDelay": 1250,
+      "DelayAfterFirmwareUpdate": 1250,
+      "DtrEnable": true,
+      "EEPROMSize": 1496,
+      "ExtraConnectionRetry": false,
+      "ForceResetOnFirmwareUpdate": true,
+      "MessageSize": 64
+    },
+    "HardwareIds": ["^VID_2E8A&PID_000A"],
+    "Info": {
+      "CanInstallFirmware": true,
+      "FriendlyName": "RaspiTufty2040",
+      "LatestFirmwareVersion": "2.2.2",
+      "MobiFlightType": "MobiFlight RaspiTufty2040"
+    },
+    "ModuleLimits": {
+      "MaxAnalogInputs": 16,
+      "MaxInputShifters": 4,
+      "MaxButtons": 68,
+      "MaxEncoders": 20,
+      "MaxLcdI2C": 2,
+      "MaxLedSegments": 4,
+      "MaxOutputs": 40,
+      "MaxServos": 10,
+      "MaxShifters": 4,
+      "MaxSteppers": 10,
+      "MaxInputMultiplexer": 2
+    },
+    "Pins": [
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": true,
+        "Pin": 0
+      },
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": true,
+        "Pin": 1
+      },
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": true,
+        "Pin": 3
+      },
+      {
+        "isAnalog": false,
+        "isI2C": true,
+        "isPWM": true,
+        "Pin": 4
+      },
+      {
+        "isAnalog": false,
+        "isI2C": true,
+        "isPWM": true,
+        "Pin": 5
+      }
+    ]
+  }
+  
