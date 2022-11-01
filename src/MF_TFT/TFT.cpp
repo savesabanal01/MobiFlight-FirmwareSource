@@ -221,22 +221,20 @@ namespace TFT
     ***************************************************************************************/
     // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
     // Improved algorithm avoids repetition of lines
-    void fillHalfCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool upper, bool sel)
+    void fillHalfCircleSprite(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower, bool sel)
     {
         int32_t x  = 0;
         int32_t dx = 1;
         int32_t dy = r + r;
         int32_t p  = -(r >> 1);
 
-        if (upper) spr[sel].drawFastHLine(x0 - r, y0, dy + 1, color);
+        spr[sel].drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
 
         while (x < r) {
 
             if (p >= 0) {
-                if (upper)
-                    spr[sel].drawFastHLine(x0 - x, y0 - r, dx, color);
-                else
-                    spr[sel].drawFastHLine(x0 - x, y0 + r, dx, color);
+                spr[sel].drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
+                spr[sel].drawFastHLine(x0 - x, y0 + r, dx, colorLower);
                 dy -= 2;
                 p -= dy;
                 r--;
@@ -246,10 +244,42 @@ namespace TFT
             p += dx;
             x++;
 
-            if (upper)
-                spr[sel].drawFastHLine(x0 - r, y0 - x, dy + 1, color);
-            else
-                spr[sel].drawFastHLine(x0 - r, y0 + x, dy + 1, color);
+            spr[sel].drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
+            spr[sel].drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
+        }
+    }
+
+ /***************************************************************************************
+    ** Function name:           fillHalfCircle
+    ** Description:             draw a filled circle, upper or lower part
+    ***************************************************************************************/
+    // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
+    // Improved algorithm avoids repetition of lines
+    void fillHalfCircleTFT(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower)
+    {
+        int32_t x  = 0;
+        int32_t dx = 1;
+        int32_t dy = r + r;
+        int32_t p  = -(r >> 1);
+
+        tft.drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
+
+        while (x < r) {
+
+            if (p >= 0) {
+                tft.drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
+                tft.drawFastHLine(x0 - x, y0 + r, dx, colorLower);
+                dy -= 2;
+                p -= dy;
+                r--;
+            }
+
+            dx += 2;
+            p += dx;
+            x++;
+
+            tft.drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
+            tft.drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
         }
     }
 } // end of namespace TFT
