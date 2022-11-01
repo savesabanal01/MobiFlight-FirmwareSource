@@ -29,19 +29,20 @@
 #define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
 #define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
 #define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
-#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
-#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
-#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
+#define SPRITE_DIM_RADIUS            100                    // dimension for x and y direction of sprite, including outer part
+#define SPRITE_X0_ROUND              20                     // upper left x position where to plot
+#define SPRITE_Y0_ROUND              60                     // upper left y position where to plot
 #define INSTRUMENT_CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
 #define INSTRUMENT_CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
 #define INSTRUMENT_OUTER_RADIUS      120                    // radius of outer part of instrument
-#define INSTRUMENT_MOVING_RADIUS     100                    // radius of moving part of instrument
+#define INSTRUMENT_MOVING_RADIUS     99                     // radius of moving part of instrument
 #define CLIPPING_RADIUS              120                    // radius of clipping area for round instrument including the outer part!
 #define HOR                          350                    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
 #define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
 #define DARK_RED                     0x8000
-#define DARK_GREY                    0x39C7
+#define DARK_GREY                    ILI9341_DARKGREY // 0x39C7
+#define LIGHT_GREY                   ILI9341_LIGHTGREY
 // TFT_TRANSPARENT check how to use
 // spr[0].fillSprite(TFT_TRANSPARENT);
 // spr[0].setColorDepth(int8_t b);
@@ -241,11 +242,9 @@ namespace AttitudeIndicator
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xd, INSTRUMENT_CENTER_Y0_ROUND - y0 + yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xd, INSTRUMENT_CENTER_Y0_ROUND + y0 + yd - pitch, BROWN, sel);
 
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
-
-            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS, DARK_GREY);
-            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS, DARK_GREY);
-            spr[0].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS + 1, DARK_GREY);
-            spr[1].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS + 1, DARK_GREY);
+                       
+            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 1, LIGHT_GREY);
+            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 2, DARK_GREY);
         }
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
@@ -400,10 +399,10 @@ namespace AttitudeIndicator
     {
         if (instrumentType == ROUND_SHAPE) {
             // fill sprite with not moving area
-            TFT::fillHalfCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, 1, 0);
-            TFT::fillHalfCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, 1, 1);
-            TFT::fillHalfCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, BROWN, 0, 0);
-            TFT::fillHalfCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, BROWN, 0, 1);
+            TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 0);
+            TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 1);
+            // and now the "static" area
+            TFT::fillHalfCircleTFT(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
