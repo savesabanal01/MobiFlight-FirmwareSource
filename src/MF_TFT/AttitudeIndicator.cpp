@@ -41,10 +41,11 @@
 #define INSTRUMENT_MOVING_RADIUS     99                     // radius of moving part of instrument
 #define CLIPPING_RADIUS              120                    // radius of clipping area for round instrument including the outer part!
 #define HOR                          350                    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
+#define MAX_PITCH                    100                    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
 #define DARK_RED                     0x8000
-#define DARK_GREY                    ILI9341_DARKGREY // 0x39C7
+#define DARK_GREY                    ILI9341_DARKGREY
 #define LIGHT_GREY                   ILI9341_LIGHTGREY
 // TFT_TRANSPARENT check how to use
 // spr[0].fillSprite(TFT_TRANSPARENT);
@@ -57,6 +58,8 @@
 
 #define DEG2RAD 0.0174532925
 
+int     roll           = 0;
+int     pitch          = 0;
 int     last_roll      = 0;
 int     last_pitch     = 0;
 uint8_t instrumentType = 0; // 1 = round instrument, 2 = rect instrument
@@ -73,6 +76,10 @@ namespace AttitudeIndicator
     void init(uint8_t type)
     {
         instrumentType = type;
+        pitch          = 0;
+        roll           = 0;
+        last_pitch     = 0;
+        last_roll      = 0;
         tft.fillScreen(TFT_BLACK);
         // setup clipping area
         if (instrumentType == ROUND_SHAPE)
@@ -128,8 +135,6 @@ namespace AttitudeIndicator
     // #########################################################################
     // Main loop, keeps looping around
     // #########################################################################
-    int roll  = 0;
-    int pitch = 0;
 
     void loop()
     {
@@ -142,8 +147,22 @@ namespace AttitudeIndicator
         // Maximum pitch shouls be in range +/- 80 with HOR = 172
         // pitch = 10; //random(2 * INSTRUMENT_CENTER_Y0_RECT) - INSTRUMENT_CENTER_Y0_RECT;
         pitch++;
-        if (pitch > 40) pitch = -40;
 
+        // check for overflow, if so then move step by step
+        // to lower pitch
+        if (pitch > MAX_PITCH) {
+            while (pitch > -MAX_PITCH + 3) {
+                updateHorizon(roll, pitch);
+                pitch -= 3;
+            };
+        }
+        // to upper pitch
+        if (pitch < -MAX_PITCH) {
+            while (pitch < MAX_PITCH - 3) {
+                updateHorizon(roll, pitch);
+                pitch += 3;
+            };
+        }
         updateHorizon(roll, pitch);
     }
 
@@ -156,6 +175,13 @@ namespace AttitudeIndicator
         int  delta_pitch = 0;
         int  pitch_error = 0;
         int  delta_roll  = 0;
+
+        if (last_roll == -180 && roll > 0) {
+            last_roll = 180;
+        }
+        if (last_roll == 180 && roll < 0) {
+            last_roll = -180;
+        }
 
         while ((last_pitch != pitch) || (last_roll != roll)) {
             delta_pitch = 0;
@@ -180,6 +206,9 @@ namespace AttitudeIndicator
 
             drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 0);
             drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
+
+            last_roll  = roll;
+            last_pitch = pitch;
         }
     }
 
@@ -218,16 +247,6 @@ namespace AttitudeIndicator
         }
 
         if (instrumentType == ROUND_SHAPE) {
-            if (xd != 0) {
-                for (int16_t xStep = (INSTRUMENT_CENTER_X0_ROUND - INSTRUMENT_MOVING_RADIUS); xStep <= INSTRUMENT_CENTER_X0_ROUND + INSTRUMENT_MOVING_RADIUS; xStep++) {
-                    TFT::drawLine(xStep - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, xStep + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, SKY_BLUE, sel); // Wo muss die Farbe gewechselt werden??
-                }
-            } else {
-                for (int16_t yStep = (INSTRUMENT_CENTER_Y0_ROUND - INSTRUMENT_MOVING_RADIUS); yStep <= INSTRUMENT_CENTER_X0_ROUND + INSTRUMENT_MOVING_RADIUS; yStep++) {
-                    TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, yStep - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, yStep + y0 - pitch, yStep < pitch ? SKY_BLUE : BROWN, sel); // Wo muss die Farbe gewechselt werden??
-                }
-            }
-/*
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 xdn = 6 * xd;
                 ydn = 6 * yd;
@@ -254,11 +273,16 @@ namespace AttitudeIndicator
 
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xd, INSTRUMENT_CENTER_Y0_ROUND - y0 - yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xd, INSTRUMENT_CENTER_Y0_ROUND + y0 - yd - pitch, SKY_BLUE, sel);
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xd, INSTRUMENT_CENTER_Y0_ROUND - y0 + yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xd, INSTRUMENT_CENTER_Y0_ROUND + y0 + yd - pitch, BROWN, sel);
-*/
+
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
 
-            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 1, LIGHT_GREY);
-            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 2, DARK_GREY);
+            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
+            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 2, LIGHT_GREY);
+            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
+
+            drawScale(sel);
+
+            tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
         }
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
@@ -294,20 +318,9 @@ namespace AttitudeIndicator
             tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
             tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
             tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-        }
 
-        if (sel) {
-            last_roll  = roll;
-            last_pitch = pitch;
-        }
+            drawScale(sel);
 
-        drawScale(sel);
-
-        if (instrumentType == ROUND_SHAPE) {
-            tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
-            // spr[sel].pushSprite(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, TFT_TRANSPARENT);
-        }
-        if (instrumentType == RECT_SHAPE) {
             tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
         }
     }
@@ -417,6 +430,7 @@ namespace AttitudeIndicator
             TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 1);
             // and now the "static" area
             TFT::fillHalfCircleTFT(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
+            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
