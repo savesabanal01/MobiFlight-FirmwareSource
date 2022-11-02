@@ -15,7 +15,9 @@
       "ForceResetOnFirmwareUpdate": true,
       "MessageSize": 64
     },
-    "HardwareIds": ["^VID_2E8A&PID_000A"],
+    "HardwareIds": [
+      "^VID_2E8A&PID_80F1"
+    ],
     "Info": {
       "CanInstallFirmware": true,
       "FriendlyName": "RaspiTufty2040",
