@@ -42,8 +42,8 @@
 #define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
 #define DARK_RED                     0x8000
-#define DARK_GREY                    ILI9341_DARKGREY
-#define LIGHT_GREY                   ILI9341_LIGHTGREY
+#define DARK_GREY                    TFT_BLACK //ILI9341_DARKGREY
+#define LIGHT_GREY                   TFT_BLACK //ILI9341_LIGHTGREY
 // TFT_TRANSPARENT check how to use
 // spr[0].fillSprite(TFT_TRANSPARENT);
 // spr[0].setColorDepth(int8_t b);

@@ -7,8 +7,75 @@
 #include "bouncingCircles.h"
 #include "AttitudeIndicator.h"
 #include "Compass.h"
+#include "commandmessenger.h"
+
+#define CORE1_CMD_PITCH  (1 < 30)
+#define CORE1_CMD_ROLL   (1 < 29)
+#define CORE1_CMD_COURSE (1 < 28)
 
 void checkDataFromCore0();
+
+void OnSetCore1()
+{
+    // For now the LCD display is used
+    // once the custom device is implemented in the connector
+    // change it to receive a string with the required values
+    // like from the LCD
+    char *params, *p = NULL;
+    int   deviceID = cmdMessenger.readInt16Arg();
+
+    if (deviceID >= 1)
+        return;
+
+    char *output = cmdMessenger.readStringArg();
+    cmdMessenger.unescape(output);
+
+    params       = strtok_r(output, ",", &p);
+    uint8_t type = atoi(params);
+
+    params       = strtok_r(NULL, ",", &p);
+    int16_t roll = atoi(params);
+
+    params        = strtok_r(NULL, ",", &p);
+    int16_t pitch = atoi(params);
+
+    params         = strtok_r(NULL, ",", &p);
+    int16_t course = atoi(params);
+
+    //   params   = strtok_r(NULL, ",", &p);
+    //   int16_t temp = atoi(params);
+
+    if (roll < -180)
+        roll = -180;
+    if (roll > 180)
+        roll = 180;
+
+    if (pitch < -80)
+        pitch = -80;
+    if (pitch > 80)
+        pitch = 80;
+
+    if (pitch < -80)
+        pitch = -80;
+    if (pitch > 80)
+        pitch = 80;
+
+    if (course < 0)
+        course = 0;
+    if (course > 360)
+        course = 360;
+
+    // #########################################################################
+    // Communication with Core1
+    // see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
+    // #########################################################################
+    multicore_fifo_push_blocking(CORE1_CMD || CORE1_CMD_PITCH || (pitch & 0x00FFFFFF));
+    multicore_fifo_push_blocking(CORE1_CMD || CORE1_CMD_ROLL || (roll & 0x00FFFFFF));
+    multicore_fifo_push_blocking(CORE1_CMD || CORE1_CMD_COURSE || (course & 0x00FFFFFF));
+
+    // do something
+    setLastCommandMillis();
+}
 
 void core1_init()
 {
@@ -18,7 +85,7 @@ void core1_init()
 
 void core1_loop()
 {
-    uint32_t demoMillis  = millis();
+    uint32_t demoMillis = millis();
 
     while (1) {
         demoMillis = millis();
@@ -58,14 +125,14 @@ void core1_loop()
 uint16_t loopCounter = 0;
 uint32_t startMillis = millis();
 uint16_t interval    = 10;
-String  fps          = "xx.xx fps";
-void checkDataFromCore0()
+String   fps         = "xx.xx fps";
+void     checkDataFromCore0()
 {
     loopCounter++;
     if (loopCounter % interval == 0) {
         long millisSinceUpdate = millis() - startMillis;
         fps                    = String((interval * 1000.0 / (millisSinceUpdate))) + " fps";
-        Serial.println(fps);
+        //        Serial.println(fps);
         startMillis = millis();
     }
 
@@ -77,7 +144,7 @@ void checkDataFromCore0()
         uint32_t dataCore0 = multicore_fifo_pop_blocking();
         // check if bit 32 is set to 1
         if (dataCore0 ^ CORE1_CMD) {
-            if (dataCore0 ^ !(1<<31)== CORE1_CMD_STOP) multicore_lockout_victim_init();
+            if (dataCore0 ^ !(1 << 31) == CORE1_CMD_STOP) multicore_lockout_victim_init();
         }
         // check if bit 32 is set to 0
         if (!(dataCore0 ^ CORE1_DATA)) {
