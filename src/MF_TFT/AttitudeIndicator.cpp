@@ -9,31 +9,50 @@
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
-#define TFT_WIDTH  240
-#define TFT_HEIGTH 320
-// Define the width and height according to the TFT and the
-// available memory. The sprites will require:
+//  The sprites will require:
 //     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
 // Note: for a 240 * 320 area this is 150 Kbytes!
-#define SPRITE_WIDTH  240
-#define SPRITE_HEIGTH 240
-// with this dimensions 112.5kBytes are required
-#define SPRITE_X0       0      // upper left x position where to plot
-#define SPRITE_Y0       40     // upper left y position where to plot
-#define CLIPPING_X0     120    // x mid point in sprite of instrument
-#define CLIPPING_Y0     120    // y mid point in sprite of instrument
-#define CLIPPING_XWIDTH 200    // width of clipping area for rect instrument
-#define CLIPPING_YWIDTH 200    // height of clipping area for rect instrument
-#define CLIPPING_R      100    // radius of clipping area for round instrument (rotating part)
-#define BROWN           0xFD20 // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE        0x02B5 // 0x0318 //0x039B //0x34BF
-#define DARK_RED        0x8000
-#define DARK_GREY       0x39C7
-#define XC              120
-#define YC              120
-#define HOR             400 // 130 //400 // Horizon vector line length ### was 172
-#define DEG2RAD         0.0174532925
-#define WAIT            10 // Pause in milliseconds to set refresh speed
+
+// Hmhm, but an outer rand should not get changed
+// so dimension of 200 x 200 should be OK and
+// no rect clipping would be required...
+// It's also valid for the round clipping area
+// sprite must be max. 2 * Radius in x and y direction...
+// But adapt Sprite center position...
+#define SPRITE_WIDTH_RECT            200
+#define SPRITE_HEIGTH_RECT           280                    // with this dimensions 112.5kBytes are required
+#define SPRITE_X0_RECT               20                     // upper left x position where to plot
+#define SPRITE_Y0_RECT               20                     // upper left y position where to plot
+#define INSTRUMENT_CENTER_X0_RECT    SPRITE_WIDTH_RECT / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_CENTER_Y0_RECT    SPRITE_HEIGTH_RECT / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_OUTER_WIDTH_RECT  240                    // width of outer part of instrument
+#define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
+#define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
+#define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
+#define SPRITE_DIM_RADIUS            100                    // dimension for x and y direction of sprite, including outer part
+#define SPRITE_X0_ROUND              20                     // upper left x position where to plot
+#define SPRITE_Y0_ROUND              60                     // upper left y position where to plot
+#define INSTRUMENT_CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_OUTER_RADIUS      120                    // radius of outer part of instrument
+#define INSTRUMENT_MOVING_RADIUS     99                     // radius of moving part of instrument
+#define CLIPPING_RADIUS              120                    // radius of clipping area for round instrument including the outer part!
+#define HOR                          350                    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
+#define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
+#define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
+#define DARK_RED                     0x8000
+#define DARK_GREY                    ILI9341_DARKGREY // 0x39C7
+#define LIGHT_GREY                   ILI9341_LIGHTGREY
+// TFT_TRANSPARENT check how to use
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].setColorDepth(int8_t b);
+// spr[0].createSprite(70, 80);
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].pushSprite(x, y, TFT_TRANSPARENT);
+// spr[0].getColorDepth(void);
+// spr[0].deleteSprite();
+
+#define DEG2RAD 0.0174532925
 
 int     last_roll      = 0;
 int     last_pitch     = 0;
@@ -54,20 +73,30 @@ namespace AttitudeIndicator
         tft.fillScreen(TFT_BLACK);
         // setup clipping area
         if (instrumentType == ROUND_SHAPE)
-            TFT::setClippingArea(CLIPPING_X0, CLIPPING_Y0, CLIPPING_XWIDTH, CLIPPING_YWIDTH, CLIPPING_R, CLIPPING_R);
+            TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS);
         if (instrumentType == RECT_SHAPE)
-            TFT::setClippingArea(CLIPPING_X0, CLIPPING_Y0, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0, CLIPPING_R);
+            TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
 
         spr[0].setRotation(0);
         spr[1].setRotation(0);
-
-        // Create the 2 sprites, each is half the size of the screen
-        sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
-        sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH, SPRITE_HEIGTH / 2);
-        // Move the sprite 1 coordinate datum upwards half the screen height
-        // so from coordinate point of view it occupies the bottom of screen
-        spr[1].setViewport(0 /* SPRITE_X0 */, -SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH);
-
+        // spr[0].setColorDepth(8);
+        // spr[1].setColorDepth(8);
+        if (instrumentType == ROUND_SHAPE) {
+            // Create the 2 sprites, each is half the size
+            sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
+            sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
+            // Move the sprite 1 coordinate datum upwards half the screen height
+            // so from coordinate point of view it occupies the bottom of screen
+            spr[1].setViewport(0 /* SPRITE_X0_RECT */, -SPRITE_DIM_RADIUS, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS * 2);
+        }
+        if (instrumentType == RECT_SHAPE) {
+            // Create the 2 sprites, each is half the size of the screen
+            sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2);
+            sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2);
+            // Move the sprite 1 coordinate datum upwards half the screen height
+            // so from coordinate point of view it occupies the bottom of screen
+            spr[1].setViewport(0 /* SPRITE_X0_RECT */, -SPRITE_HEIGTH_RECT / 2, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT);
+        }
         // Define text datum for each Sprite
         spr[0].setTextDatum(MC_DATUM);
         spr[1].setTextDatum(MC_DATUM);
@@ -80,8 +109,8 @@ namespace AttitudeIndicator
         // Draw fixed text at top/bottom of screen
         tft.setTextColor(TFT_WHITE);
         tft.setTextDatum(TC_DATUM); // Centre middle justified
-        tft.drawString("Demo Attitude Indicator", XC, 1, 1);
-        tft.drawString("Based on Bodmer's example", XC, 10, 1);
+        tft.drawString("Demo Attitude Indicator", TFT_WIDTH / 2, 1, 1);
+        tft.drawString("Based on Bodmer's example", TFT_WIDTH / 2, 10, 1);
         tft.setTextColor(TFT_YELLOW);
     }
 
@@ -108,9 +137,9 @@ namespace AttitudeIndicator
 
         // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
         // Maximum pitch shouls be in range +/- 80 with HOR = 172
-        // pitch = 10; //random(2 * YC) - YC;
+        // pitch = 10; //random(2 * INSTRUMENT_CENTER_Y0_RECT) - INSTRUMENT_CENTER_Y0_RECT;
         pitch++;
-        if (pitch > 40) pitch = -30;
+        if (pitch > 40) pitch = -40;
 
         updateHorizon(roll, pitch);
     }
@@ -184,58 +213,89 @@ namespace AttitudeIndicator
             xd = 0;
             yd = -1;
         }
+        if (instrumentType == ROUND_SHAPE) {
+            if ((roll != last_roll) || (pitch != last_pitch)) {
+                xdn = 6 * xd;
+                ydn = 6 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
+                xdn = 5 * xd;
+                ydn = 5 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
+                xdn = 4 * xd;
+                ydn = 4 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
 
-        if ((roll != last_roll) || (pitch != last_pitch)) {
-            xdn = 6 * xd;
-            ydn = 6 * yd;
-            TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
-            xdn = 5 * xd;
-            ydn = 5 * yd;
-            TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
-            xdn = 4 * xd;
-            ydn = 4 * yd;
-            TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+                xdn = 3 * xd;
+                ydn = 3 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
+            }
+            xdn = 2 * xd;
+            ydn = 2 * yd;
+            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
 
-            xdn = 3 * xd;
-            ydn = 3 * yd;
-            TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xd, INSTRUMENT_CENTER_Y0_ROUND - y0 - yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xd, INSTRUMENT_CENTER_Y0_ROUND + y0 - yd - pitch, SKY_BLUE, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xd, INSTRUMENT_CENTER_Y0_ROUND - y0 + yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xd, INSTRUMENT_CENTER_Y0_ROUND + y0 + yd - pitch, BROWN, sel);
+
+            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
+                       
+            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 1, LIGHT_GREY);
+            tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 2, DARK_GREY);
         }
-        xdn = 2 * xd;
-        ydn = 2 * yd;
-        TFT::drawLine(XC - x0 - xdn, YC - y0 - ydn - pitch, XC + x0 - xdn, YC + y0 - ydn - pitch, SKY_BLUE, sel);
-        TFT::drawLine(XC - x0 + xdn, YC - y0 + ydn - pitch, XC + x0 + xdn, YC + y0 + ydn - pitch, BROWN, sel);
+        if (instrumentType == RECT_SHAPE) {
+            if ((roll != last_roll) || (pitch != last_pitch)) {
+                xdn = 6 * xd;
+                ydn = 6 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
+                xdn = 5 * xd;
+                ydn = 5 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
+                xdn = 4 * xd;
+                ydn = 4 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
 
-        TFT::drawLine(XC - x0 - xd, YC - y0 - yd - pitch, XC + x0 - xd, YC + y0 - yd - pitch, SKY_BLUE, sel);
-        TFT::drawLine(XC - x0 + xd, YC - y0 + yd - pitch, XC + x0 + xd, YC + y0 + yd - pitch, BROWN, sel);
+                xdn = 3 * xd;
+                ydn = 3 * yd;
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
+                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
+            }
+            xdn = 2 * xd;
+            ydn = 2 * yd;
+            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
 
-        TFT::drawLine(XC - x0, YC - y0 - pitch, XC + x0, YC + y0 - pitch, TFT_WHITE, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xd, INSTRUMENT_CENTER_Y0_RECT - y0 - yd - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xd, INSTRUMENT_CENTER_Y0_RECT + y0 - yd - pitch, SKY_BLUE, sel);
+            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xd, INSTRUMENT_CENTER_Y0_RECT - y0 + yd - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xd, INSTRUMENT_CENTER_Y0_RECT + y0 + yd - pitch, BROWN, sel);
+
+            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0, INSTRUMENT_CENTER_Y0_RECT - y0 - pitch, INSTRUMENT_CENTER_X0_RECT + x0, INSTRUMENT_CENTER_Y0_RECT + y0 - pitch, TFT_WHITE, sel);
+
+            tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+            tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+            tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+            tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+        }
 
         if (sel) {
             last_roll  = roll;
             last_pitch = pitch;
         }
 
-        if (instrumentType == ROUND_SHAPE) {
-            spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
-            spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R, DARK_GREY);
-            spr[0].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
-            spr[1].drawCircle(CLIPPING_X0, CLIPPING_Y0, CLIPPING_R + 1, DARK_GREY);
-        }
-        if (instrumentType == RECT_SHAPE) {
-            spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH + 1, CLIPPING_YWIDTH + 1, DARK_GREY);
-            spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2, CLIPPING_Y0 - CLIPPING_YWIDTH / 2, CLIPPING_XWIDTH + 1, CLIPPING_YWIDTH + 1, DARK_GREY);
-            // ToDo: Why are there sometimes some Pixel outside the area???
-            spr[0].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 3, CLIPPING_YWIDTH, DARK_GREY);
-            spr[1].drawRect(CLIPPING_X0 - CLIPPING_XWIDTH / 2 - 1, CLIPPING_Y0 - CLIPPING_YWIDTH / 2 - 1, CLIPPING_XWIDTH + 3, CLIPPING_YWIDTH, DARK_GREY);
-        }
-
         drawScale(sel);
 
-        tft.pushImageDMA(SPRITE_X0, SPRITE_Y0 + (SPRITE_HEIGTH / 2) * sel, SPRITE_WIDTH, SPRITE_HEIGTH / 2, sprPtr[sel]);
+        if (instrumentType == ROUND_SHAPE) {
+            tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
+            // spr[sel].pushSprite(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, TFT_TRANSPARENT);
+        }
+        if (instrumentType == RECT_SHAPE) {
+            tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
+        }
     }
 
     // #########################################################################
@@ -243,76 +303,116 @@ namespace AttitudeIndicator
     // #########################################################################
     void drawScale(bool sel)
     {
-        // Update things near middle of screen first (most likely to get obscured)
+        if (instrumentType == ROUND_SHAPE) {
+            // Update things near middle of screen first (most likely to get obscured)
+            // Level wings graphic
+            spr[sel].fillRect(INSTRUMENT_CENTER_X0_ROUND - 1, INSTRUMENT_CENTER_Y0_ROUND - 1, 3, 3, TFT_RED);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 30, INSTRUMENT_CENTER_Y0_ROUND, 24, TFT_RED);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND + 30 - 24, INSTRUMENT_CENTER_Y0_ROUND, 24, TFT_RED);
+            spr[sel].drawFastVLine(INSTRUMENT_CENTER_X0_ROUND - 30 + 24, INSTRUMENT_CENTER_Y0_ROUND, 3, TFT_RED);
+            spr[sel].drawFastVLine(INSTRUMENT_CENTER_X0_ROUND + 30 - 24, INSTRUMENT_CENTER_Y0_ROUND, 3, TFT_RED);
 
-        // Level wings graphic
-        spr[sel].fillRect(XC - 1, YC - 1, 3, 3, TFT_RED);
-        spr[sel].drawFastHLine(XC - 30, YC, 24, TFT_RED);
-        spr[sel].drawFastHLine(XC + 30 - 24, YC, 24, TFT_RED);
-        spr[sel].drawFastVLine(XC - 30 + 24, YC, 3, TFT_RED);
-        spr[sel].drawFastVLine(XC + 30 - 24, YC, 3, TFT_RED);
+            // Pitch scale
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND - 40, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND - 30, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND - 20, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND - 10, 12, TFT_WHITE);
 
-        // Pitch scale
-        spr[sel].drawFastHLine(XC - 12, YC - 40, 24, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 6, YC - 30, 12, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 12, YC - 20, 24, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 6, YC - 10, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND + 10, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND + 20, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND + 30, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND + 40, 24, TFT_WHITE);
 
-        spr[sel].drawFastHLine(XC - 6, YC + 10, 12, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 12, YC + 20, 24, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 6, YC + 30, 12, TFT_WHITE);
-        spr[sel].drawFastHLine(XC - 12, YC + 40, 24, TFT_WHITE);
+            // Pitch scale values
+            spr[sel].setTextColor(TFT_WHITE);
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND - 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND - 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND + 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND + 20 - 3);
+            spr[sel].print("10");
 
-        // Pitch scale values
-        spr[sel].setTextColor(TFT_WHITE);
-        spr[sel].setCursor(XC - 12 - 13, YC - 20 - 3);
-        spr[sel].print("10");
-        spr[sel].setCursor(XC + 12 + 1, YC - 20 - 3);
-        spr[sel].print("10");
-        spr[sel].setCursor(XC - 12 - 13, YC + 20 - 3);
-        spr[sel].print("10");
-        spr[sel].setCursor(XC + 12 + 1, YC + 20 - 3);
-        spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND - 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND - 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND + 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND + 40 - 3);
+            spr[sel].print("20");
 
-        spr[sel].setCursor(XC - 12 - 13, YC - 40 - 3);
-        spr[sel].print("20");
-        spr[sel].setCursor(XC + 12 + 1, YC - 40 - 3);
-        spr[sel].print("20");
-        spr[sel].setCursor(XC - 12 - 13, YC + 40 - 3);
-        spr[sel].print("20");
-        spr[sel].setCursor(XC + 12 + 1, YC + 40 - 3);
-        spr[sel].print("20");
+            tft.setTextColor(TFT_WHITE, TFT_BLACK); // Text with background
+        }
+        if (instrumentType == RECT_SHAPE) {
+            // Update things near middle of screen first (most likely to get obscured)
+            // Level wings graphic
+            spr[sel].fillRect(INSTRUMENT_CENTER_X0_RECT - 1, INSTRUMENT_CENTER_Y0_RECT - 1, 3, 3, TFT_RED);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 30, INSTRUMENT_CENTER_Y0_RECT, 24, TFT_RED);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT + 30 - 24, INSTRUMENT_CENTER_Y0_RECT, 24, TFT_RED);
+            spr[sel].drawFastVLine(INSTRUMENT_CENTER_X0_RECT - 30 + 24, INSTRUMENT_CENTER_Y0_RECT, 3, TFT_RED);
+            spr[sel].drawFastVLine(INSTRUMENT_CENTER_X0_RECT + 30 - 24, INSTRUMENT_CENTER_Y0_RECT, 3, TFT_RED);
+
+            // Pitch scale
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT - 40, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT - 30, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT - 20, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT - 10, 12, TFT_WHITE);
+
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT + 10, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT + 20, 24, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT + 30, 12, TFT_WHITE);
+            spr[sel].drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT + 40, 24, TFT_WHITE);
+
+            // Pitch scale values
+            spr[sel].setTextColor(TFT_WHITE);
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT - 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT - 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT + 20 - 3);
+            spr[sel].print("10");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT + 20 - 3);
+            spr[sel].print("10");
+
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT - 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT - 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT + 40 - 3);
+            spr[sel].print("20");
+            spr[sel].setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT + 40 - 3);
+            spr[sel].print("20");
+            tft.setTextColor(TFT_BLACK, BROWN); // Text with background
+        }
 
         // Display justified roll value near bottom of screen
-        if (instrumentType == ROUND_SHAPE)
-            tft.setTextColor(TFT_WHITE, TFT_BLACK); // Text with background
-        else
-            tft.setTextColor(TFT_BLACK, BROWN);                              // Text with background
         tft.setTextDatum(MC_DATUM);                                          // Centre middle justified
         tft.setTextPadding(24);                                              // Padding width to wipe previous number
         char message[40];                                                    // buffer for message
         sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
-        tft.drawString(message, XC, TFT_HEIGTH - 9, 1);
+        tft.drawString(message, TFT_WIDTH / 2, TFT_HEIGHT - 9, 1);
     }
 
     void drawOuter()
     {
         if (instrumentType == ROUND_SHAPE) {
             // fill sprite with not moving area
-            TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 0);
-            TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, SKY_BLUE, 1, 1);
-            TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 0);
-            TFT::fillHalfCircle(CLIPPING_X0, CLIPPING_Y0, SPRITE_WIDTH / 2, BROWN, 0, 1);
+            TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 0);
+            TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 1);
+            // and now the "static" area
+            TFT::fillHalfCircleTFT(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
-            spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-            spr[0].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
-            spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC - SPRITE_HEIGTH / 2, SPRITE_WIDTH, SPRITE_HEIGTH / 2, SKY_BLUE);
-            spr[1].fillRect(XC - SPRITE_WIDTH / 2, YC, SPRITE_WIDTH, SPRITE_HEIGTH / 2, BROWN);
+            spr[0].fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT - SPRITE_HEIGTH_RECT / 2, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, SKY_BLUE);
+            spr[0].fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, BROWN);
+            spr[1].fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT - SPRITE_HEIGTH_RECT / 2, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, SKY_BLUE);
+            spr[1].fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, BROWN);
             // fill area outside sprite with not moving area
-            tft.fillRect(0, 0, TFT_WIDTH, 40, SKY_BLUE);
-            tft.fillRect(0, 280, TFT_WIDTH, 40, BROWN);
+            tft.fillRect(0, 0, TFT_WIDTH, TFT_HEIGHT / 2, SKY_BLUE);
+            tft.fillRect(0, 160, TFT_WIDTH, TFT_HEIGHT / 2, BROWN);
         }
         // Draw the horizon graphic
         drawHorizon(0, 0, 0);
