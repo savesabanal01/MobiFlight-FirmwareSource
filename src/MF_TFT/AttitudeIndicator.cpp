@@ -216,7 +216,18 @@ namespace AttitudeIndicator
             xd = 0;
             yd = -1;
         }
+
         if (instrumentType == ROUND_SHAPE) {
+            if (xd != 0) {
+                for (int16_t xStep = (INSTRUMENT_CENTER_X0_ROUND - INSTRUMENT_MOVING_RADIUS); xStep <= INSTRUMENT_CENTER_X0_ROUND + INSTRUMENT_MOVING_RADIUS; xStep++) {
+                    TFT::drawLine(xStep - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, xStep + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, SKY_BLUE, sel); // Wo muss die Farbe gewechselt werden??
+                }
+            } else {
+                for (int16_t yStep = (INSTRUMENT_CENTER_Y0_ROUND - INSTRUMENT_MOVING_RADIUS); yStep <= INSTRUMENT_CENTER_X0_ROUND + INSTRUMENT_MOVING_RADIUS; yStep++) {
+                    TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, yStep - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, yStep + y0 - pitch, yStep < pitch ? SKY_BLUE : BROWN, sel); // Wo muss die Farbe gewechselt werden??
+                }
+            }
+/*
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 xdn = 6 * xd;
                 ydn = 6 * yd;
@@ -243,9 +254,9 @@ namespace AttitudeIndicator
 
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xd, INSTRUMENT_CENTER_Y0_ROUND - y0 - yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xd, INSTRUMENT_CENTER_Y0_ROUND + y0 - yd - pitch, SKY_BLUE, sel);
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xd, INSTRUMENT_CENTER_Y0_ROUND - y0 + yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xd, INSTRUMENT_CENTER_Y0_ROUND + y0 + yd - pitch, BROWN, sel);
-
+*/
             TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
-                       
+
             tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 1, LIGHT_GREY);
             tft.drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_MOVING_RADIUS + 2, DARK_GREY);
         }
