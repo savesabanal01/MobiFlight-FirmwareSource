@@ -41,7 +41,7 @@ namespace TFT
         tft.setRotation(0);
         randomSeed(analogRead(A0));
     }
-    int32_t *checkClippingArea;
+    int32_t checkClippingArea[MAX_CLIPPING_RADIUS];
 
     int32_t clippingCenterX;
     int32_t clippingCenterY;
@@ -52,7 +52,6 @@ namespace TFT
     // setup clipping area
     void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius)
     {
-        *checkClippingArea = new int32_t[ClippingRadius];
         checkClippingArea[0] = ClippingRadius;
         for (uint8_t i = 1; i < ClippingRadius; i++) {
             checkClippingArea[i] = sqrt(ClippingRadius * ClippingRadius - i * i);

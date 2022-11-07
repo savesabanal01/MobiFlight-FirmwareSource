@@ -3,6 +3,8 @@
 #include <TFT_eSPI.h>
 #include <SD.h>
 
+#define MAX_CLIPPING_RADIUS 200
+
 extern TFT_eSPI    tft;
 extern TFT_eSprite spr[];
 extern uint16_t   *sprPtr[];
