@@ -41,9 +41,9 @@
 #define MAX_PITCH                    100                    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
-#define DARK_RED                     TFT_RED //0x8000
-#define DARK_GREY                    TFT_BLACK //ILI9341_DARKGREY
-#define LIGHT_GREY                   TFT_BLACK //ILI9341_LIGHTGREY
+#define DARK_RED                     TFT_RED                // 0x8000
+#define DARK_GREY                    TFT_BLACK              // ILI9341_DARKGREY
+#define LIGHT_GREY                   TFT_BLACK              // ILI9341_LIGHTGREY
 // TFT_TRANSPARENT check how to use
 // spr[0].fillSprite(TFT_TRANSPARENT);
 // spr[0].setColorDepth(int8_t b);
@@ -215,16 +215,16 @@ namespace AttitudeIndicator
     void drawHorizon(int roll, int pitch, bool sel)
     {
         // Calculate coordinates for line start
-        float sx = cos(roll * DEG2RAD);
-        float sy = sin(roll * DEG2RAD);
+        int16_t x0 = (float)cos(roll * DEG2RAD) * HOR;
+        int16_t y0 = (float)sin(roll * DEG2RAD) * HOR;
 
-        int16_t x0 = sx * HOR;
-        int16_t y0 = sy * HOR;
-
+        // check in which direction to move
         int16_t xd  = 0;
         int16_t yd  = 1;
         int16_t xdn = 0;
         int16_t ydn = 0;
+        // position to draw lines
+        int16_t posX, posY, widthX, widthY;
 
         if (roll > 45 && roll < 135) {
             xd = -1;
@@ -245,33 +245,26 @@ namespace AttitudeIndicator
 
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
-                xdn = 6 * xd;
-                ydn = 6 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
-                xdn = 5 * xd;
-                ydn = 5 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
-                xdn = 4 * xd;
-                ydn = 4 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
-
-                xdn = 3 * xd;
-                ydn = 3 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
+                for (uint8_t i = 6; i > 0; i--) {
+                    xdn = i * xd;
+                    ydn = i * yd;
+                    posX = INSTRUMENT_CENTER_X0_ROUND - x0 - xdn;
+                    posY = INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch;
+                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0 - xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch;
+                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posX = INSTRUMENT_CENTER_X0_ROUND - x0 + xdn;
+                    posY = INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch;
+                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0 + xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch;
+                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                }
             }
-            xdn = 2 * xd;
-            ydn = 2 * yd;
-            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xdn, INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch, BROWN, sel);
-
-            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 - xd, INSTRUMENT_CENTER_Y0_ROUND - y0 - yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 - xd, INSTRUMENT_CENTER_Y0_ROUND + y0 - yd - pitch, SKY_BLUE, sel);
-            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0 + xd, INSTRUMENT_CENTER_Y0_ROUND - y0 + yd - pitch, INSTRUMENT_CENTER_X0_ROUND + x0 + xd, INSTRUMENT_CENTER_Y0_ROUND + y0 + yd - pitch, BROWN, sel);
-
-            TFT::drawLine(INSTRUMENT_CENTER_X0_ROUND - x0, INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch, INSTRUMENT_CENTER_X0_ROUND + x0, INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch, TFT_WHITE, sel);
+            posX = INSTRUMENT_CENTER_X0_ROUND - x0;
+            posY = INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch;
+            widthX = INSTRUMENT_CENTER_X0_ROUND + x0;
+            widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
+            TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
 
             spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
             spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 2, LIGHT_GREY);
@@ -283,33 +276,26 @@ namespace AttitudeIndicator
         }
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
-                xdn = 6 * xd;
-                ydn = 6 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
-                xdn = 5 * xd;
-                ydn = 5 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
-                xdn = 4 * xd;
-                ydn = 4 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
-
-                xdn = 3 * xd;
-                ydn = 3 * yd;
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
-                TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
+                for (uint8_t i = 6; i > 0; i--) {
+                    xdn = i * xd;
+                    ydn = i * yd;
+                    posX = INSTRUMENT_CENTER_X0_RECT - x0 - xdn;
+                    posY = INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch;
+                    widthX = INSTRUMENT_CENTER_X0_RECT + x0 - xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch;
+                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posX = INSTRUMENT_CENTER_X0_RECT - x0 + xdn;
+                    posY = INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch;
+                    widthX = INSTRUMENT_CENTER_X0_RECT + x0 + xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
+                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                }
             }
-            xdn = 2 * xd;
-            ydn = 2 * yd;
-            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xdn, INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xdn, INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch, SKY_BLUE, sel);
-            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xdn, INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xdn, INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch, BROWN, sel);
-
-            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 - xd, INSTRUMENT_CENTER_Y0_RECT - y0 - yd - pitch, INSTRUMENT_CENTER_X0_RECT + x0 - xd, INSTRUMENT_CENTER_Y0_RECT + y0 - yd - pitch, SKY_BLUE, sel);
-            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0 + xd, INSTRUMENT_CENTER_Y0_RECT - y0 + yd - pitch, INSTRUMENT_CENTER_X0_RECT + x0 + xd, INSTRUMENT_CENTER_Y0_RECT + y0 + yd - pitch, BROWN, sel);
-
-            TFT::drawLine(INSTRUMENT_CENTER_X0_RECT - x0, INSTRUMENT_CENTER_Y0_RECT - y0 - pitch, INSTRUMENT_CENTER_X0_RECT + x0, INSTRUMENT_CENTER_Y0_RECT + y0 - pitch, TFT_WHITE, sel);
+            posX = INSTRUMENT_CENTER_X0_RECT - x0;
+            posY = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
+            widthX = INSTRUMENT_CENTER_X0_RECT + x0;
+            widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
+            TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
 
             tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
             tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
