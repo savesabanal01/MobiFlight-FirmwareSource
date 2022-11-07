@@ -29,9 +29,9 @@
 #define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
 #define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
 #define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
-#define SPRITE_DIM_RADIUS            100                    // dimension for x and y direction of sprite, including outer part
-#define SPRITE_X0_ROUND              20                     // upper left x position where to plot
-#define SPRITE_Y0_ROUND              60                     // upper left y position where to plot
+#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
+#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
+#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
 #define INSTRUMENT_CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
 #define INSTRUMENT_CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
 #define INSTRUMENT_OUTER_RADIUS      120                    // radius of outer part of instrument
@@ -78,16 +78,10 @@ namespace AttitudeIndicator
         last_pitch     = 0;
         last_roll      = 0;
         tft.fillScreen(TFT_BLACK);
-        // setup clipping area
-        if (instrumentType == ROUND_SHAPE)
-            TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS);
-        if (instrumentType == RECT_SHAPE)
-            TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
 
         spr[0].setRotation(0);
         spr[1].setRotation(0);
-        // spr[0].setColorDepth(8);
-        // spr[1].setColorDepth(8);
+
         if (instrumentType == ROUND_SHAPE) {
             // Create the 2 sprites, each is half the size
             sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
@@ -137,7 +131,7 @@ namespace AttitudeIndicator
     {
         // Roll is in degrees in range +/-180
         // roll = random(361) - 180;
-        roll++;
+        //roll++;
         if (roll == 180) roll = -180;
 
         // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
@@ -215,8 +209,10 @@ namespace AttitudeIndicator
     void drawHorizon(int roll, int pitch, bool sel)
     {
         // Calculate coordinates for line start
-        int16_t x0 = (float)cos(roll * DEG2RAD) * HOR;
-        int16_t y0 = (float)sin(roll * DEG2RAD) * HOR;
+        int16_t x0      = (float)cos(roll * DEG2RAD) * HOR;
+        int16_t y0      = (float)sin(roll * DEG2RAD) * HOR;
+        int16_t x0outer = (float)cos(roll * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
+        int16_t y0outer = (float)sin(roll * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
 
         // check in which direction to move
         int16_t xd  = 0;
@@ -245,66 +241,102 @@ namespace AttitudeIndicator
 
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
+                // draw outer part
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS);
                 for (uint8_t i = 6; i > 0; i--) {
-                    xdn = i * xd;
-                    ydn = i * yd;
-                    posX = INSTRUMENT_CENTER_X0_ROUND - x0 - xdn;
-                    posY = INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch;
+                    xdn    = i * xd;
+                    ydn    = i * yd;
+                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn;
+                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn;
+
+                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn;
+                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn;
+                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                }
+                posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
+                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer;
+                widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
+                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer;
+                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+
+                // draw inner moving part
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS);
+                for (uint8_t i = 6; i > 0; i--) {
+                    xdn    = i * xd;
+                    ydn    = i * yd;
+                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0 - xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_ROUND + x0 - xdn;
                     widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
-                    posX = INSTRUMENT_CENTER_X0_ROUND - x0 + xdn;
-                    posY = INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch;
+                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0 + xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_ROUND + x0 + xdn;
                     widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
                 }
+
+                posX   = INSTRUMENT_CENTER_X0_ROUND - x0;
+                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch;
+                widthX = INSTRUMENT_CENTER_X0_ROUND + x0;
+                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
+                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+
+                spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
+                spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 2, LIGHT_GREY);
+                spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
+
+                drawScale(sel);
+
+                tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
             }
-            posX = INSTRUMENT_CENTER_X0_ROUND - x0;
-            posY = INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch;
-            widthX = INSTRUMENT_CENTER_X0_ROUND + x0;
-            widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
-            TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
-
-            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
-            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 2, LIGHT_GREY);
-            spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
-
-            drawScale(sel);
-
-            tft.pushImageDMA(SPRITE_X0_ROUND, SPRITE_Y0_ROUND + (SPRITE_DIM_RADIUS)*sel, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS, sprPtr[sel]);
         }
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
+                // draw outer part
+                tft.fillRect(0, 20, 20, 140 - pitch - 1, SKY_BLUE);
+                tft.fillRect(0, 160 - pitch, 20, 140 + pitch, BROWN);
+
+                tft.fillRect(220, 20, 20, 140 - pitch - 1, SKY_BLUE);
+                tft.fillRect(220, 160 - pitch, 20, 140 + pitch, BROWN);
+
+                // draw inner moving part
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
                 for (uint8_t i = 6; i > 0; i--) {
-                    xdn = i * xd;
-                    ydn = i * yd;
-                    posX = INSTRUMENT_CENTER_X0_RECT - x0 - xdn;
-                    posY = INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch;
+                    xdn    = i * xd;
+                    ydn    = i * yd;
+                    posX   = INSTRUMENT_CENTER_X0_RECT - x0 - xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_RECT + x0 - xdn;
                     widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
-                    posX = INSTRUMENT_CENTER_X0_RECT - x0 + xdn;
-                    posY = INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch;
+                    posX   = INSTRUMENT_CENTER_X0_RECT - x0 + xdn;
+                    posY   = INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_RECT + x0 + xdn;
                     widthY = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
                 }
+
+                posX   = INSTRUMENT_CENTER_X0_RECT - x0;
+                posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
+                widthX = INSTRUMENT_CENTER_X0_RECT + x0;
+                widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
+                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+
+                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+
+                drawScale(sel);
+
+                tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
             }
-            posX = INSTRUMENT_CENTER_X0_RECT - x0;
-            posY = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
-            widthX = INSTRUMENT_CENTER_X0_RECT + x0;
-            widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
-            TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
-
-            tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-            tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-            tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-            tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-
-            drawScale(sel);
-
-            tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
         }
     }
 
