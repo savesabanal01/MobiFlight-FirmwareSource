@@ -9,10 +9,10 @@
 #include <Arduino.h>
 #include "MFBoards.h"
 
-#define ADC_MAX_AVERAGE          8                                           // must be 2^n
-#define ADC_MAX_AVERAGE_LOG2     3                                           // please calculate LOG2(ADC_MAX_AVERAGE)
-#define CALIBRATION_START_ADRESS (EEPROM_SIZE - (MAX_ANALOG_INPUTS * 2) - 1) // base adress for storing calibration data
-#define CALIBRATION_TIME         5000                                        // time for calibration, within this time pot must be moved from min to max several time
+#define ADC_MAX_AVERAGE          8                                        // must be 2^n
+#define ADC_MAX_AVERAGE_LOG2     3                                        // please calculate LOG2(ADC_MAX_AVERAGE)
+#define CALIBRATION_START_ADRESS (EEPROM_SIZE - (MAX_ANALOG_PIN * 4) - 1) // base adress for storing calibration data, each calibration data needs 4 Byte (2 * uint16_t)
+#define CALIBRATION_TIME         5000                                     // time for calibration, within this time pot must be moved from min to max several time
 
 extern "C" {
 // callback functions
@@ -29,8 +29,8 @@ public:
     void        update();
     void        retrigger();
     void        readBuffer();
-    void        doCalibration(uint8_t deviceID);
-    void        sendCalibration(uint8_t deviceID);
+    void        doCalibration();
+    void        sendCalibration();
     const char *_name;
     uint8_t     _pin;
 

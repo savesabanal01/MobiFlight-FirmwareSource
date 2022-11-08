@@ -57,7 +57,7 @@ void MFAnalog::retrigger()
     readChannel(true);
 }
 
-void MFAnalog::doCalibration(uint8_t deviceID)
+void MFAnalog::doCalibration()
 {
     uint32_t startMillis = millis();
     uint16_t actualValue = 0;
@@ -73,15 +73,15 @@ void MFAnalog::doCalibration(uint8_t deviceID)
         if (actualValue > CalibrationData.maxValue)
             CalibrationData.maxValue = actualValue;
     }
-    // store min and max value to EEPROM, consider deviceID for EEPROM adress
-    if (!MFeeprom.write_block(CALIBRATION_START_ADRESS + deviceID * 4, CalibrationData)) {
+    // store min and max value to EEPROM, consider pin number for EEPROM adress
+    if (!MFeeprom.write_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData)) {
         cmdMessenger.sendCmd(kStatus, F("Failure on writing analog calibration data"));
     }
 }
 
-void MFAnalog::sendCalibration(uint8_t deviceID)
+void MFAnalog::sendCalibration()
 {
-    if (!MFeeprom.read_block(CALIBRATION_START_ADRESS + deviceID * 4, CalibrationData))
+    if (!MFeeprom.read_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData))
         cmdMessenger.sendCmd(kStatus, F("Failure on reading analog calibration data"));
     // check if calibration has been done
     if (CalibrationData.minValue > 1023 || CalibrationData.maxValue > 1023 || CalibrationData.maxValue <= CalibrationData.minValue) {
@@ -89,7 +89,7 @@ void MFAnalog::sendCalibration(uint8_t deviceID)
         CalibrationData.maxValue = 1023;
     }
     cmdMessenger.sendCmdStart(kReadAnalogCalibration);
-    cmdMessenger.sendCmdArg(deviceID);
+    cmdMessenger.sendCmdArg(_name);
     cmdMessenger.sendCmdArg(CalibrationData.minValue);
     cmdMessenger.sendCmdArg(CalibrationData.maxValue);
     cmdMessenger.sendCmdEnd();

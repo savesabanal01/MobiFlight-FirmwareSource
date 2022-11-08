@@ -59,6 +59,8 @@
 #define MEMLEN_CONFIG       440  // max. size for config which wil be stored in EEPROM
 #define MEMLEN_NAMES_BUFFER 350  // max. size for configBuffer, contains only names from inputs
 #define MF_MAX_DEVICEMEM    400  // max. memory size for devices
+#define FIRST_ANALOG_PIN    18   // first pin of anlog in, needed to calculate the position of calibration data in EEPROM
+#define MAX_ANALOG_PIN      4    // max. numbers of analog pins, could be different from MAX_ANALOG_INPUTS, needed for calibration data in EEPROM
 
 #define RANDOM_SEED_INPUT A0
 
