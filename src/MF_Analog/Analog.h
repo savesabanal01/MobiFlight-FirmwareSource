@@ -14,6 +14,8 @@ namespace Analog
     void read();
     void readAverage();
     void OnTrigger();
+    void OnSetCalibration();
+    void OnReadCalibration();
 }
 
 // Analog.h

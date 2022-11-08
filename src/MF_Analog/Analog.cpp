@@ -70,6 +70,19 @@ namespace Analog
         }
     }
 
+    void OnSetCalibration()
+    {
+        int deviceID = cmdMessenger.readInt16Arg();
+        analog[deviceID]->doCalibration(deviceID);
+        setLastCommandMillis();
+    }
+
+    void OnReadCalibration()
+    {
+        int deviceID = cmdMessenger.readInt16Arg();
+        analog[deviceID]->sendCalibration(deviceID);
+        setLastCommandMillis();
+    }
 } // namespace Analog
 #endif
 

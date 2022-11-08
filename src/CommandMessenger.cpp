@@ -78,8 +78,13 @@ void attachCommandCallbacks()
     cmdMessenger.attach(kSetLcdDisplayI2C, LCDDisplay::OnSet);
 #endif
 
-#if MF_OUTPUT_SHIFTER_SUPPORT
+#if MF_OUTPUT_SHIFTER_SUPPORT == 1
     cmdMessenger.attach(kSetShiftRegisterPins, OutputShifter::OnSet);
+#endif
+
+#if MF_ANALOG_SUPPORT == 1
+    cmdMessenger.attach(kSetAnalogCalibration, Analog::OnSetCalibration);
+    cmdMessenger.attach(kReadAnalogCalibration, Analog::OnReadCalibration);
 #endif
 
 #ifdef DEBUG2CMDMESSENGER
