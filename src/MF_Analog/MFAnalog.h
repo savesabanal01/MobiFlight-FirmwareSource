@@ -30,7 +30,7 @@ public:
     void        retrigger();
     void        readBuffer();
     void        doCalibration();
-    void        sendCalibration();
+    void        readCalibration();
     const char *_name;
     uint8_t     _pin;
 
@@ -43,6 +43,11 @@ private:
     uint16_t         ADC_Average_Total           = 0;   // sum of sampled values, must be divided by ADC_MAX_AVERAGE to get actual value
     volatile uint8_t ADC_Average_Pointer         = 0;   // points to the actual position in ADC_BUFFER
     uint32_t         _lastReadBuffer;
+
+    struct {
+        uint16_t minValue = 512;
+        uint16_t maxValue = 512;
+    } CalibrationData;
 
     void readChannel(uint8_t compare);
     bool valueHasChanged(int16_t newValue);

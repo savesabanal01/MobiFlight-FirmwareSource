@@ -80,7 +80,7 @@ namespace Analog
     void OnReadCalibration()
     {
         int deviceID = cmdMessenger.readInt16Arg();
-        analog[deviceID]->sendCalibration();
+        analog[deviceID]->readCalibration();
         setLastCommandMillis();
     }
 } // namespace Analog
