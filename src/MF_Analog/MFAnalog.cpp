@@ -36,7 +36,7 @@ void MFAnalog::readChannel(uint8_t alwaysTrigger)
 {
     int16_t newValue = ADC_Average_Total >> ADC_MAX_AVERAGE_LOG2;
     if (alwaysTrigger || valueHasChanged(newValue)) {
-        _lastValue = map(_lastValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
+        newValue = map(newValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
         _lastValue = newValue;
         if (_handler != NULL) {
             (*_handler)(_lastValue, _pin, _name);
