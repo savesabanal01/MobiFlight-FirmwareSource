@@ -30,7 +30,7 @@ public:
     bool read_block(uint16_t adr, T &t, uint16_t len)
     {
         if (adr + len > _eepromLength) return false;
-        uint8_t *ptr = (uint8_t *)&t;
+        uint8_t *ptr = (uint8_t*) &t;
         for (uint16_t i = 0; i < len; i++) {
             *ptr++ = EEPROM.read(adr + i);
         }
@@ -49,9 +49,8 @@ public:
     const bool write_block(uint16_t adr, const T &t, uint16_t len)
     {
         if (adr + len > _eepromLength) return false;
-        const uint8_t *ptr = (const uint8_t *)&t;
         for (uint16_t i = 0; i < len; i++) {
-            EEPROM.put(adr + i, *ptr++);
+            EEPROM.put(adr + i, t[i]);
         }
         return true;
     }
