@@ -36,7 +36,7 @@ void MFAnalog::readChannel(uint8_t alwaysTrigger)
 {
     int16_t newValue = ADC_Average_Total >> ADC_MAX_AVERAGE_LOG2;
     if (alwaysTrigger || valueHasChanged(newValue)) {
-        newValue = map(newValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
+//        newValue = map(newValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
         _lastValue = newValue;
         if (_handler != NULL) {
             (*_handler)(_lastValue, _pin, _name);
@@ -71,22 +71,12 @@ void MFAnalog::doCalibration()
             CalibrationData.maxValue = actualValue;
     }
     // store min and max value to EEPROM, consider pin number for EEPROM adress
-    uint8_t writeout[4];
-    writeout[0] = CalibrationData.minValue >> 8;
-    writeout[1] = CalibrationData.minValue;
-    writeout[2] = (CalibrationData.maxValue >> 8);
-    writeout[3] = CalibrationData.maxValue;
-
-    MFeeprom.write_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), writeout, sizeof(writeout));
+    MFeeprom.write_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
 }
 
 void MFAnalog::readCalibration()
 {
-    uint8_t readin[4];
-    MFeeprom.read_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), readin, sizeof(readin));
-
-    CalibrationData.minValue = (readin[0] << 8) + readin[1];
-    CalibrationData.maxValue = (readin[2] << 8) + readin[3];
+    MFeeprom.read_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
     // check if calibration has been done, otherwise use max. range
     if (CalibrationData.minValue > 1023 || CalibrationData.maxValue > 1023 || CalibrationData.maxValue <= CalibrationData.minValue) {
         CalibrationData.minValue = 0;
