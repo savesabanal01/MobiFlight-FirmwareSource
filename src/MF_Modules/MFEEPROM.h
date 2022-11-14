@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <EEPROM.h>
 
 class MFEEPROM
 {
@@ -15,21 +15,20 @@ public:
     MFEEPROM();
     void     init(void);
     uint16_t get_length(void);
+    /*
     bool     read_block(uint16_t addr, uint8_t data[], uint16_t len);
     bool     read_block(uint16_t addr, char data[], uint16_t len);
     bool     write_block(uint16_t addr, uint8_t data[], uint16_t len);
     bool     write_block(uint16_t addr, char data[], uint16_t len);
     uint8_t  read_byte(uint16_t adr);
     bool     write_byte(uint16_t adr, char data);
-    /*
+    */
+
         template <typename T>
         bool read_block(uint16_t adr, T &t)
         {
             if (adr + sizeof(T) > _eepromLength) return false;
-            char *ptr = (uint8_t *)&t;
-            for (uint16_t i = 0; i < sizeof(T); i++) {
-                *ptr++ =EEPROM.read(adr + i);
-            }
+            EEPROM.get(adr, t);
             return true;
         }
 
@@ -37,7 +36,7 @@ public:
         bool read_block(uint16_t adr, T &t, uint16_t len)
         {
             if (adr + len > _eepromLength) return false;
-            uint8_t *ptr = (uint8_t *)&t;
+            uint8_t *ptr = (uint8_t* )&t;
             for (uint16_t i = 0; i < len; i++) {
                 *ptr++ =EEPROM.read(adr + i);
             }
@@ -48,10 +47,7 @@ public:
         const bool write_block(uint16_t adr, const T &t)
         {
             if (adr + sizeof(T) > _eepromLength) return false;
-            const uint8_t *ptr = (const uint8_t *)&t;
-            for (uint16_t i = 0; i < sizeof(T); i++) {
-                EEPROM.put(adr + i, *ptr++);
-            }
+            EEPROM.put(adr, t);
             return true;
         }
 
@@ -66,11 +62,11 @@ public:
             return true;
         }
 
-        template <typename T>
-        T read_byte(uint16_t adr)
+        template <typename T = char>
+        const T read_byte(uint16_t adr)
         {
             if (adr >= _eepromLength) return 0;
-            return EEPROM.read(adr);
+            return (T)EEPROM.read(adr);
         }
 
         template <typename T>
@@ -81,7 +77,6 @@ public:
             EEPROM.put(adr, *ptr);
             return true;
         }
-    */
 
 private:
     uint16_t _eepromLength = 0;

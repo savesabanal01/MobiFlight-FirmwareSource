@@ -6,7 +6,6 @@
 
 #include <Arduino.h>
 #include "MFEEPROM.h"
-#include <EEPROM.h>
 
 MFEEPROM::MFEEPROM() {}
 
@@ -19,7 +18,7 @@ uint16_t MFEEPROM::get_length(void)
 {
     return _eepromLength;
 }
-
+/*
 bool MFEEPROM::read_block(uint16_t adr, uint8_t data[], uint16_t len)
 {
     if (adr + len > _eepromLength) return false;
@@ -68,5 +67,5 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
     EEPROM.put(adr, data);
     return true;
 }
-
+*/
 // MFEEPROM.cpp
