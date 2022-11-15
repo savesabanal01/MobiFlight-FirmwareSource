@@ -73,20 +73,18 @@ void _activateConfig();
 // reads the EEPROM until NUL terminator and returns the number of characters incl. terminator, starting from given address
 bool readConfigLength()
 {
-    char     temp       = 0;
     uint16_t addreeprom = MEM_OFFSET_CONFIG;
     uint16_t length     = MFeeprom.get_length();
     configLength        = 0;
-    do {
-        temp = MFeeprom.read_byte(addreeprom++);
+
+    while (MFeeprom.read_byte(addreeprom++) != 0x00) {
         configLength++;
         if (addreeprom > length) // abort if EEPROM size will be exceeded
         {
             cmdMessenger.sendCmd(kStatus, F("Loading config failed")); // text or "-1" like config upload?
             return false;
         }
-    } while (temp != 0x00); // reads until NULL
-    configLength--;
+    }
     return true;
 }
 
@@ -164,17 +162,17 @@ void OnResetConfig()
 void OnSaveConfig()
 {
     cmdMessenger.sendCmd(kConfigSaved, F("OK"));
-//  Uncomment the if{} part to reset and load the config via serial terminal for testing w/o the GUI
-//    1: Type "13" to reset the config
-//    2: Type "14" to get the config length
-//    3: Type "16" to load the config
-/*
-    if (readConfigLength())
-    {
-        readConfig();
-        _activateConfig();
-    }
-*/
+    //  Uncomment the if{} part to reset and load the config via serial terminal for testing w/o the GUI
+    //    1: Type "13" to reset the config
+    //    2: Type "14" to get the config length
+    //    3: Type "16" to load the config
+    /*
+        if (readConfigLength())
+        {
+            readConfig();
+            _activateConfig();
+        }
+    */
 }
 
 void OnActivateConfig()
