@@ -55,7 +55,7 @@ public:
         return true;
     }
 
-    template <typename T = uint8_t>
+    template <typename T = char>
     const T read_byte(uint16_t adr)
     {
         if (adr >= _eepromLength) return 0;
@@ -63,7 +63,7 @@ public:
     }
 
     template <typename T>
-    bool write_byte(uint16_t adr, const T &t)
+    const bool write_byte(uint16_t adr, const T &t)
     {
         if (adr >= _eepromLength) return false;
         const uint8_t *ptr = (const uint8_t *)&t;
