@@ -289,8 +289,8 @@ namespace AttitudeIndicator
                 widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
                 TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
 
+                spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 0, LIGHT_GREY);
                 spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
-                spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 2, LIGHT_GREY);
                 spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
 
                 drawScale(sel);
