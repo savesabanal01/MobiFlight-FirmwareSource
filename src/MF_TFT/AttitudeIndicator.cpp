@@ -131,7 +131,7 @@ namespace AttitudeIndicator
     {
         // Roll is in degrees in range +/-180
         // roll = random(361) - 180;
-        //roll++;
+        roll++;
         if (roll == 180) roll = -180;
 
         // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
@@ -242,7 +242,7 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                /*   Hmmmhmmm, have to re-think how to do this...
+                /*   //Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS);
                 for (uint8_t i = 6; i > 0; i--) {
                     xdn    = i * xd;
@@ -301,11 +301,12 @@ namespace AttitudeIndicator
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                tft.fillRect(0, 20, 20, 140 - pitch - 1, SKY_BLUE);
-                tft.fillRect(0, 160 - pitch, 20, 140 + pitch, BROWN);
 
-                tft.fillRect(220, 20, 20, 140 - pitch - 1, SKY_BLUE);
-                tft.fillRect(220, 160 - pitch, 20, 140 + pitch, BROWN);
+                tft.fillRect(0, 20, 18, 140 - pitch - 1, SKY_BLUE);
+                tft.fillRect(0, 160 - pitch, 18, 140 + pitch, BROWN);
+
+                tft.fillRect(222, 20, 18, 140 - pitch - 1, SKY_BLUE);
+                tft.fillRect(222, 160 - pitch, 18, 140 + pitch, BROWN);
 
                 // draw inner moving part
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
@@ -323,21 +324,23 @@ namespace AttitudeIndicator
                     widthY = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
                 }
-
+                /*
                 posX   = INSTRUMENT_CENTER_X0_RECT - x0;
                 posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
                 widthX = INSTRUMENT_CENTER_X0_RECT + x0;
                 widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
                 TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
-
-                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-
+                */
+                
                 drawScale(sel);
 
                 tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
+
+                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+                tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+
             }
         }
     }
