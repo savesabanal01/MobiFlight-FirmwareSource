@@ -4,7 +4,7 @@
     "Device": "atmega328p",
     "BaudRate": "115200",
     "Programmer": "arduino",
-    "FirmwareBaseName": "mobiflight_nano",
+    "FirmwareBaseName": "mobiflight_uno",
     "Timeout": 15000
   },
   "Connection": {
@@ -14,7 +14,7 @@
     "EEPROMSize": 286,
     "ExtraConnectionRetry": true,
     "ForceResetOnFirmwareUpdate": false,
-    "MessageSize": 32
+    "MessageSize": 64
   },
   "HardwareIds": [
     "^VID_2341&PID_0043",
@@ -32,17 +32,17 @@
     "MobiFlightType": "Mobiflight Nano"
   },
   "ModuleLimits": {
-    "MaxAnalogInputs": 5,
+    "MaxAnalogInputs": 6,
     "MaxButtons": 18,
-    "MaxEncoders": 5,
+    "MaxEncoders": 9,
     "MaxInputShifters": 2,
     "MaxLcdI2C": 2,
     "MaxLedSegments": 1,
     "MaxOutputs": 18,
-    "MaxServos": 3,
+    "MaxServos": 2,
     "MaxShifters": 2,
-    "MaxSteppers": 3,
-    "MaxDigInputMuxes": 1
+    "MaxSteppers": 2,
+    "MaxDigInputMuxes": 3
   },
   "Pins": [
     {
