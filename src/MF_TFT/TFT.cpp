@@ -146,24 +146,22 @@ namespace TFT
     ***************************************************************************************/
     void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     {
-        // First check upper and lower limits, it's quite easy
-        if (clippingRadiusOuter > 0) {
-            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
-        } else {
-            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
-        }
-        // always draw from left to right
+        // draw always from left to right
         if (w < 0) {
             x -= w;
             w *= -1;
         }
         int32_t xE = x + w;
-        // check if pixel is inside the radius
+        
         if (clippingRadiusOuter == 0) {
+            // First check upper and lower limits, it's quite easy
+            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
             // check left and right limit and set start / end point accordingly
             if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
             if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
         } else {
+            // First check upper and lower limits, it's quite easy
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
             // check left and right limit and set start / end point accordingly from look up table for the given x position
             if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
             if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
@@ -172,6 +170,19 @@ namespace TFT
             // at this point we have already the x/y coordinates for the outer circle
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
             // this should be the case if y is bigger than the inner radius
+
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter)
+            {
+                // draw the line as calculated above
+            } else {
+                // now calculate the x/y coordinates for the inner circle to split into two lines
+                // x coordinate is known, nothing to change
+                // y axis must be split up according the inner radius
+                int32_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
+                spr[sel].drawFastHLine(x, y, tempxE - x + 1, color);
+                x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
+            }
+
         }
 
         spr[sel].drawFastHLine(x, y, xE - x + 1, color);
@@ -183,30 +194,39 @@ namespace TFT
     ***************************************************************************************/
     void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     {
-        // First check left and right limits, it's quite easy
-        if (clippingRadiusOuter > 0) {
-            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
-        } else {
-            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
-        }
+        // draw always from top to down
         if (h < 0) {
             y -= h;
             h *= -1;
         }
         int32_t yE = y + h;
         if (clippingRadiusOuter == 0) {
+            // First check left and right limits, it's quite easy
+            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
             // check left and right limit and set start / end point accordingly
             if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
             if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
         } else {
+            // First check left and right limits, it's quite easy
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
             if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
-            // at this point we have already the x/y coordinates for the outer circle
-            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
-            // this should be the case if x is bigger/smaller than the inner radius
+   
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter)
+            {
+                // draw the line as calculated above
+            } else {
+                // now calculate the x/y coordinates for the inner circle to split into two lines
+                // y coordinate is known, nothing to change
+                // x axis must be split up according the inner radius
+                int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                spr[sel].drawFastHLine(x, y, tempyE - x + 1, color);
+                y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
+            }
+
         }
 
         spr[sel].drawFastVLine(x, y, yE - y + 1, color);
