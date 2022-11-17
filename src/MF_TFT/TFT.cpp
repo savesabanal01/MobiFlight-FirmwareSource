@@ -159,17 +159,19 @@ namespace TFT
         }
         int32_t xE = x + w;
         // check if pixel is inside the radius
-        if (clippingRadiusInner == 0) {
+        if (clippingRadiusOuter == 0) {
             // check left and right limit and set start / end point accordingly
             if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
             if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
         } else {
             // check left and right limit and set start / end point accordingly from look up table for the given x position
-            if (!(x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)])) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
-            if (!(xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)])) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
+            if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
         }
         if (clippingRadiusInner > 0) {
-            // check
+            // at this point we have already the x/y coordinates for the outer circle
+            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
+            // this should be the case if y is bigger than the inner radius
         }
 
         spr[sel].drawFastHLine(x, y, xE - x + 1, color);
@@ -192,17 +194,19 @@ namespace TFT
             h *= -1;
         }
         int32_t yE = y + h;
-        if (clippingRadiusInner == 0) {
+        if (clippingRadiusOuter == 0) {
             // check left and right limit and set start / end point accordingly
             if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
             if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
         } else {
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
-            // if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
-            // if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
+            if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
-            // check
+            // at this point we have already the x/y coordinates for the outer circle
+            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
+            // this should be the case if x is bigger/smaller than the inner radius
         }
 
         spr[sel].drawFastVLine(x, y, yE - y + 1, color);
