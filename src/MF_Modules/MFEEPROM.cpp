@@ -8,6 +8,9 @@
 #include "MFEEPROM.h"
 #include <EEPROM.h>
 #include "MFBoards.h"
+#if defined(ARDUINO_ARCH_RP2040)
+#include "Core1.h"
+#endif
 
 MFEEPROM::MFEEPROM() {}
 
