@@ -37,7 +37,6 @@ namespace OutputShifter
         for (uint8_t i = 0; i < outputShifterRegistered; i++) {
             outputShifters[i]->detach();
         }
-
         outputShifterRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared Output Shifter"));

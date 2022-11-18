@@ -25,7 +25,6 @@ namespace Button
     {
         if (buttonsRegistered == MAX_BUTTONS)
             return;
-
         if (!FitInMemory(sizeof(MFButton))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Button does not fit in Memory"));
@@ -51,6 +50,13 @@ namespace Button
     {
         for (uint8_t i = 0; i < buttonsRegistered; i++) {
             buttons[i]->update();
+        }
+    }
+
+    void poll(void)
+    {
+        for (uint8_t i = 0; i < buttonsRegistered; i++) {
+            buttons[i]->poll();
         }
     }
 

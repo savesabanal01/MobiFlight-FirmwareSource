@@ -8,7 +8,7 @@
 #include "MFEEPROM.h"
 
 #include "Button.h"
-#include "Encoder.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
 
 #if MF_ANALOG_SUPPORT == 1
@@ -152,7 +152,9 @@ void resetConfig()
 #endif
     configLength    = 0;
     configActivated = false;
+#if !defined(STANDARD_NEW)
     ClearMemory();
+#endif
 }
 
 void OnResetConfig()

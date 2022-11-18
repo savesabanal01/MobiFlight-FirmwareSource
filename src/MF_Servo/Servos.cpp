@@ -17,7 +17,6 @@ namespace Servos
     {
         if (servosRegistered == MAX_MFSERVOS)
             return;
-
         if (!FitInMemory(sizeof(MFServo))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Servo does not fit in Memory!"));

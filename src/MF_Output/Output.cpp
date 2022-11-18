@@ -17,7 +17,6 @@ namespace Output
     {
         if (outputsRegistered == MAX_OUTPUTS)
             return;
-
         if (!FitInMemory(sizeof(MFOutput))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Output does not fit in Memory"));

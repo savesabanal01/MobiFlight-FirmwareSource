@@ -25,7 +25,6 @@ namespace Encoder
     {
         if (encodersRegistered == MAX_ENCODERS)
             return;
-
         if (!FitInMemory(sizeof(MFEncoder))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Encoders does not fit in Memory"));
@@ -52,6 +51,13 @@ namespace Encoder
     {
         for (uint8_t i = 0; i < encodersRegistered; i++) {
             encoders[i]->update();
+        }
+    }
+
+    void poll()
+    {
+        for (uint8_t i = 0; i < encodersRegistered; i++) {
+            encoders[i]->poll();
         }
     }
 } // namespace encoder
