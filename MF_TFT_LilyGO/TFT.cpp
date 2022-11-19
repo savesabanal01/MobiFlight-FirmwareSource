@@ -105,26 +105,34 @@ namespace TFT
         } while (millis() - demoMillis < 100000);
     }
 
-    int32_t checkClippingArea[MAX_CLIPPING_RADIUS];
+    int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS];
+    int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS];
 
     int32_t clippingCenterX;
     int32_t clippingCenterY;
     int32_t clippingWidthX;
     int32_t clippingWidthY;
-    int32_t clippingRadius;
+    int32_t clippingRadiusOuter;
+    int32_t clippingRadiusInner;
 
     // setup clipping area
-    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadius)
+    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadiusOuter, int32_t ClippingRadiusInner)
     {
-        checkClippingArea[0] = ClippingRadius;
-        for (uint8_t i = 1; i < ClippingRadius; i++) {
-            checkClippingArea[i] = sqrt(ClippingRadius * ClippingRadius - i * i);
+        clippingCenterX     = ClippingX0;
+        clippingCenterY     = ClippingY0;
+        clippingWidthX      = ClippingXwidth;
+        clippingWidthY      = ClippingYwidth;
+        clippingRadiusOuter = ClippingRadiusOuter;
+        clippingRadiusInner = ClippingRadiusInner;
+
+        checkClippingRoundOuter[0] = clippingRadiusOuter;
+        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+            checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
         }
-        clippingCenterX = ClippingX0;
-        clippingCenterY = ClippingY0;
-        clippingWidthX  = ClippingXwidth;
-        clippingWidthY  = ClippingYwidth;
-        clippingRadius  = ClippingRadius;
+        checkClippingRoundInner[0] = clippingRadiusOuter;
+        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+            checkClippingRoundInner[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+        }
     }
 
     // #########################################################################
@@ -202,28 +210,45 @@ namespace TFT
     ***************************************************************************************/
     void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     {
-        // First check upper and lower limits, it's quite easy
-        if (clippingRadius > 0) {
-            if (y <= clippingCenterY - clippingRadius || y >= clippingCenterY + clippingRadius) return;
-        } else {
-            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
-        }
-        // always draw from left to right
+        // draw always from left to right
         if (w < 0) {
             x -= w;
             w *= -1;
         }
         int32_t xE = x + w;
-        // check if pixel is inside the radius
-        if (clippingRadius > 0) {
-            // check left and right limit and set start / end point accordingly from look up table for the given x position
-            if (x <= clippingCenterX - checkClippingArea[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingArea[abs(y - clippingCenterY)];
-            if (xE >= clippingCenterX + checkClippingArea[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingArea[abs(y - clippingCenterY)];
-        } else {
+        
+        if (clippingRadiusOuter == 0) {
+            // First check upper and lower limits, it's quite easy
+            if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
             // check left and right limit and set start / end point accordingly
             if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
             if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
+        } else {
+            // First check upper and lower limits, it's quite easy
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
+            // check left and right limit and set start / end point accordingly from look up table for the given x position
+            if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
         }
+        if (clippingRadiusInner > 0) {
+            // at this point we have already the x/y coordinates for the outer circle
+            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
+            // this should be the case if y is bigger than the inner radius
+
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter)
+            {
+                // draw the line as calculated above
+            } else {
+                // now calculate the x/y coordinates for the inner circle to split into two lines
+                // x coordinate is known, nothing to change
+                // y axis must be split up according the inner radius
+                int32_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
+                gfx->drawFastHLine(x, y, tempxE - x + 1, color);
+                x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
+            }
+
+        }
+
         gfx->drawFastHLine(x, y, xE - x + 1, color);
     }
 
@@ -233,25 +258,41 @@ namespace TFT
     ***************************************************************************************/
     void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     {
-        if (clippingRadius > 0) {
-            if (x <= clippingCenterX - clippingRadius || x >= clippingCenterX + clippingRadius) return;
-        } else {
-            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
-        }
+        // draw always from top to down
         if (h < 0) {
             y -= h;
             h *= -1;
         }
         int32_t yE = y + h;
-        if (clippingRadius > 0) {
-            // check upper and lower limit and set start / end point accordingly from look up table for the given x position
-            if (y <= clippingCenterY - checkClippingArea[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingArea[abs(x - clippingCenterX)];
-            if (yE >= clippingCenterY + checkClippingArea[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingArea[abs(x - clippingCenterX)];
-        } else {
+        if (clippingRadiusOuter == 0) {
+            // First check left and right limits, it's quite easy
+            if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
             // check left and right limit and set start / end point accordingly
             if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
             if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
+        } else {
+            // First check left and right limits, it's quite easy
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
+            // check upper and lower limit and set start / end point accordingly from look up table for the given x position
+            if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
+        if (clippingRadiusInner > 0) {
+   
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter)
+            {
+                // draw the line as calculated above
+            } else {
+                // now calculate the x/y coordinates for the inner circle to split into two lines
+                // y coordinate is known, nothing to change
+                // x axis must be split up according the inner radius
+                int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                gfx->drawFastHLine(x, y, tempyE - x + 1, color);
+                y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
+            }
+
+        }
+
         gfx->drawFastVLine(x, y, yE - y + 1, color);
     }
 
@@ -261,17 +302,25 @@ namespace TFT
     ***************************************************************************************/
     void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
     {
-        if (clippingRadius > 0) {
-            // First do a rect clipping
-            if (x <= clippingCenterX - clippingRadius || x >= clippingCenterX + clippingRadius) return;
-            if (y <= clippingCenterY - clippingRadius || y >= clippingCenterY + clippingRadius) return;
-            // next check if Pixel is within circel or outside
-            if (y < clippingCenterY - checkClippingArea[abs(x - clippingCenterX)]) return;
-            if (y > clippingCenterY + checkClippingArea[abs(x - clippingCenterX)]) return;
-        } else {
+        if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit
             if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
+        } else {
+            // First do a rect clipping
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
+            // next check if Pixel is within circel or outside
+            if (y < clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) return;
+            if (y > clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) return;
+        }
+        if (clippingRadiusInner > 0) {
+            // First do a rect clipping, check if we are INSIDE both radi
+            if (!(x <= clippingCenterX - clippingRadiusInner || x >= clippingCenterX + clippingRadiusInner)) return;
+            if (!(y <= clippingCenterY - clippingRadiusInner || y >= clippingCenterY + clippingRadiusInner)) return;
+            // next check if Pixel is within circel or outside
+            if (!(y < clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)])) return;
+            if (!(y > clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)])) return;
         }
         gfx->drawPixel(x, y, color);
     }

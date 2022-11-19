@@ -183,7 +183,7 @@ namespace AttitudeIndicator
             }
 
             drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 0);
-            drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
+            //drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
 
             last_roll  = roll;
             last_pitch = pitch;
@@ -229,8 +229,8 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                /*   //Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS);
+                   //Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS, INSTRUMENT_MOVING_RADIUS);
                 for (uint8_t i = 6; i > 0; i--) {
                     xdn    = i * xd;
                     ydn    = i * yd;
@@ -251,10 +251,10 @@ namespace AttitudeIndicator
                 widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
                 widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer;
                 TFT::drawLine(posX, posY, widthX, widthY, WHITE, sel);
-                */
+
 
                 // draw inner moving part
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS);
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS, 0);
                 for (uint8_t i = 6; i > 0; i--) {
                     xdn    = i * xd;
                     ydn    = i * yd;
@@ -294,7 +294,7 @@ namespace AttitudeIndicator
                 gfx->fillRect(222, 160 - pitch, 18, 140 + pitch, BROWN);
 
                 // draw inner moving part
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0);
+                TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0, 0), 0;
                 for (uint8_t i = 6; i > 0; i--) {
                     xdn    = i * xd;
                     ydn    = i * yd;
