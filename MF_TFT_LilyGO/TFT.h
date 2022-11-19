@@ -4,7 +4,7 @@
 
 #define TFT_WIDTH           480
 #define TFT_HEIGHT          480
-#define MAX_CLIPPING_RADIUS 200
+#define MAX_CLIPPING_RADIUS 300
 
 extern Arduino_GFX *gfx;
 

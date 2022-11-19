@@ -29,29 +29,21 @@
 #define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
 #define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
 #define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
-#define SPRITE_DIM_RADIUS            240                    // dimension for x and y direction of sprite, including outer part
-#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
-#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
-#define INSTRUMENT_CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_OUTER_RADIUS      240                    // radius of outer part of instrument
-#define INSTRUMENT_MOVING_RADIUS     200                     // radius of moving part of instrument
-#define CLIPPING_RADIUS              200                    // radius of clipping area for round instrument including the outer part!
-#define HOR                          350                    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
-#define MAX_PITCH                    100                    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
-#define BROWN                        0xFD20                 // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE                     0x02B5                 // 0x0318 //0x039B //0x34BF
-#define DARK_RED                     RED                    // 0x8000
-#define DARK_GREY                    BLACK                  // ILI9341_DARKGREY
-#define LIGHT_GREY                   BLACK                  // ILI9341_LIGHTGREY
-// TFT_TRANSPARENT check how to use
-// gfx->fillSprite(TFT_TRANSPARENT);
-// gfx->setColorDepth(int8_t b);
-// gfx->createSprite(70, 80);
-// gfx->fillSprite(TFT_TRANSPARENT);
-// gfx->pushSprite(x, y, TFT_TRANSPARENT);
-// gfx->getColorDepth(void);
-// gfx->deleteSprite();
+//#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
+//#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
+//#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
+#define INSTRUMENT_CENTER_X0_ROUND 240                          // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_CENTER_Y0_ROUND 240                  // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_OUTER_RADIUS    120                  // radius of outer part of instrument
+#define INSTRUMENT_MOVING_RADIUS   99  // radius of moving part of instrument
+//#define CLIPPING_RADIUS              220                    // radius of clipping area for round instrument including the outer part!
+#define HOR        400    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
+#define MAX_PITCH  100    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
+#define BROWN      0xFD20 // 0x5140 // 0x5960 the other are not working??
+#define SKY_BLUE   0x02B5 // 0x0318 //0x039B //0x34BF
+#define DARK_RED   RED    // 0x8000
+#define DARK_GREY  BLACK  // ILI9341_DARKGREY
+#define LIGHT_GREY BLACK  // ILI9341_LIGHTGREY
 
 #define DEG2RAD 0.0174532925
 
@@ -89,9 +81,6 @@ namespace AttitudeIndicator
         last_pitch     = 0;
         last_roll      = 0;
         gfx->fillScreen(BLACK);
-
-        // gfx->setTextDatum(MC_DATUM);
-
         gfx->startWrite(); // TFT chip select held low permanently
 
         // draw outer part of instrument
@@ -183,7 +172,6 @@ namespace AttitudeIndicator
             }
 
             drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 0);
-            //drawHorizon(last_roll + delta_roll, last_pitch + delta_pitch, 1);
 
             last_roll  = roll;
             last_pitch = pitch;
@@ -229,29 +217,30 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                   //Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS, INSTRUMENT_MOVING_RADIUS);
-                for (uint8_t i = 6; i > 0; i--) {
-                    xdn    = i * xd;
-                    ydn    = i * yd;
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn;
+                // Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
+                /*
+                                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS, INSTRUMENT_MOVING_RADIUS);
+                                for (uint8_t i = 6; i > 0; i--) {
+                                    xdn    = i * xd;
+                                    ydn    = i * yd;
+                                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
+                                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn;
+                                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
+                                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn;
 
-                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn;
-                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
-                }
-                posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
-                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer;
-                widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
-                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer;
-                TFT::drawLine(posX, posY, widthX, widthY, WHITE, sel);
-
+                                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
+                                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn;
+                                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
+                                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn;
+                                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                                }
+                                posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
+                                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer;
+                                widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
+                                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer;
+                                TFT::drawLine(posX, posY, widthX, widthY, WHITE, sel);
+                */
 
                 // draw inner moving part
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS, 0);
@@ -417,7 +406,7 @@ namespace AttitudeIndicator
         }
 
         // Display justified roll value near bottom of screen
-        //gfx->setTextPadding(24);                                             // Padding width to wipe previous number
+        // gfx->setTextPadding(24);                                             // Padding width to wipe previous number
         char message[40];                                                    // buffer for message
         sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
         drawCentreString(message, TFT_WIDTH / 2, TFT_HEIGHT - 9, 1);
@@ -430,8 +419,8 @@ namespace AttitudeIndicator
             TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 0);
             TFT::fillHalfCircleSprite(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN, 1);
             // and now the "static" area
-            TFT::fillHalfCircleTFT(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
-            gfx->drawCircle(SPRITE_X0_ROUND + SPRITE_DIM_RADIUS, SPRITE_Y0_ROUND + SPRITE_DIM_RADIUS, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
+            TFT::fillHalfCircleTFT(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
+            gfx->drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
