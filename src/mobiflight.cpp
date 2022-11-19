@@ -35,6 +35,9 @@
 #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
 #include "Core1.h"
 #endif
+#if defined(ARDUINO_ARCH_ESP32)
+#include "TFT.h"
+#endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
 #define MF_ENCODER_DEBOUNCE_MS    1  // time between encoder updates
@@ -167,6 +170,9 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
+#if defined(ARDUINO_ARCH_ESP32)
+    TFT::init();
+#endif
 #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
     core1_init();
     multicore_launch_core1(core1_loop);
