@@ -19,7 +19,7 @@ public:
     uint16_t get_length(void);
 
     template <typename T>
-    bool read_block(uint16_t adr, T &t)
+    bool get(uint16_t adr, T &t)
     {
         if (adr + sizeof(T) > _eepromLength) return false;
         EEPROM.get(adr, t);
@@ -27,7 +27,7 @@ public:
     }
 
     template <typename T>
-    bool read_block(uint16_t adr, T &t, uint16_t len)
+    bool get(uint16_t adr, T &t, uint16_t len)
     {
         if (adr + len > _eepromLength) return false;
         uint8_t *ptr = (uint8_t*) &t;
@@ -38,7 +38,7 @@ public:
     }
 
     template <typename T>
-    const bool write_block(uint16_t adr, const T &t)
+    const bool put(uint16_t adr, const T &t)
     {
         if (adr + sizeof(T) > _eepromLength) return false;
         EEPROM.put(adr, t);
@@ -46,7 +46,7 @@ public:
     }
 
     template <typename T>
-    const bool write_block(uint16_t adr, const T &t, uint16_t len)
+    const bool put(uint16_t adr, const T &t, uint16_t len)
     {
         if (adr + len > _eepromLength) return false;
         for (uint16_t i = 0; i < len; i++) {
@@ -56,14 +56,14 @@ public:
     }
 
     template <typename T = char>
-    const T read_byte(uint16_t adr)
+    const T read(uint16_t adr)
     {
         if (adr >= _eepromLength) return 0;
         return (T)EEPROM.read(adr);
     }
 
     template <typename T>
-    const bool write_byte(uint16_t adr, const T &t)
+    const bool write(uint16_t adr, const T &t)
     {
         if (adr >= _eepromLength) return false;
         const uint8_t *ptr = (const uint8_t *)&t;
