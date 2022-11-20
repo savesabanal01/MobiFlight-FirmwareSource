@@ -17,6 +17,8 @@ public:
     MFEEPROM();
     void     init(void);
     uint16_t get_length(void);
+    uint8_t read(uint16_t adr);
+    bool write(uint16_t adr, const uint8_t data);
 
     template <typename T>
     bool get(uint16_t adr, T &t)
@@ -52,22 +54,6 @@ public:
         for (uint16_t i = 0; i < len; i++) {
             EEPROM.put(adr + i, t[i]);
         }
-        return true;
-    }
-
-    template <typename T = char>
-    const T read(uint16_t adr)
-    {
-        if (adr >= _eepromLength) return 0;
-        return (T)EEPROM.read(adr);
-    }
-
-    template <typename T>
-    const bool write(uint16_t adr, const T &t)
-    {
-        if (adr >= _eepromLength) return false;
-        const uint8_t *ptr = (const uint8_t *)&t;
-        EEPROM.put(adr, *ptr);
         return true;
     }
 };
