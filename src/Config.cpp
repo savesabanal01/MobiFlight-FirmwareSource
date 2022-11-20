@@ -77,7 +77,7 @@ bool readConfigLength()
     uint16_t length     = MFeeprom.get_length();
     configLength        = 0;
 
-    while (MFeeprom.read(addreeprom++) != 0x00) {
+    while (MFeeprom.read_byte(addreeprom++) != 0x00) {
         configLength++;
         if (addreeprom > length) // abort if EEPROM size will be exceeded
         {
@@ -109,7 +109,7 @@ void OnSetConfig()
     uint8_t cfgLen = strlen(cfg);
 
     if (configLength + cfgLen + 1 < MEM_LEN_CONFIG) {
-        MFeeprom.put(MEM_OFFSET_CONFIG + configLength, cfg, cfgLen + 1); // save the received config string including the terminatung NULL (+1) to EEPROM
+        MFeeprom.write_block(MEM_OFFSET_CONFIG + configLength, cfg, cfgLen + 1); // save the received config string including the terminatung NULL (+1) to EEPROM
         configLength += cfgLen;
         cmdMessenger.sendCmd(kStatus, configLength);
     } else
@@ -193,7 +193,7 @@ uint8_t readUintFromEEPROM(volatile uint16_t *addreeprom)
     char    params[4] = {0}; // max 3 (255) digits NULL terminated
     uint8_t counter   = 0;
     do {
-        params[counter++] = MFeeprom.read((*addreeprom)++);           // read character from eeprom and locate next buffer and eeprom location
+        params[counter++] = MFeeprom.read_byte((*addreeprom)++);           // read character from eeprom and locate next buffer and eeprom location
     } while (params[counter - 1] != '.' && counter < sizeof(params)); // reads until limiter '.' and for safety reason not more then size of params[]
     params[counter - 1] = 0x00;                                       // replace '.' by NULL to terminate the string
     return atoi(params);
@@ -205,7 +205,7 @@ bool readNameFromEEPROM(uint16_t *addreeprom, char *buffer, uint16_t *addrbuffer
 {
     char temp = 0;
     do {
-        temp                    = MFeeprom.read((*addreeprom)++); // read the first character
+        temp                    = MFeeprom.read_byte((*addreeprom)++); // read the first character
         buffer[(*addrbuffer)++] = temp;                           // save character and locate next buffer position
         if (*addrbuffer >= MEMLEN_NAMES_BUFFER) {                 // nameBuffer will be exceeded
             return false;                                         // abort copying from EEPROM to nameBuffer
@@ -221,7 +221,7 @@ bool readEndCommandFromEEPROM(uint16_t *addreeprom)
     char     temp   = 0;
     uint16_t length = MFeeprom.get_length();
     do {
-        temp = MFeeprom.read((*addreeprom)++);
+        temp = MFeeprom.read_byte((*addreeprom)++);
         if (*addreeprom > length) // abort if EEPROM size will be exceeded
             return false;
     } while (temp != ':'); // reads until limiter ':'
@@ -408,9 +408,9 @@ void OnGetConfig()
     setLastCommandMillis();
     cmdMessenger.sendCmdStart(kInfo);
     if (configLength > 0) {
-        cmdMessenger.sendCmdArg((char)MFeeprom.read(MEM_OFFSET_CONFIG));
+        cmdMessenger.sendCmdArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG));
         for (uint16_t i = 1; i < configLength; i++) {
-            cmdMessenger.sendArg((char)MFeeprom.read(MEM_OFFSET_CONFIG + i));
+            cmdMessenger.sendArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG + i));
         }
     }
     cmdMessenger.sendCmdEnd();
@@ -437,15 +437,15 @@ bool getStatusConfig()
 // ************************************************************
 void generateSerial(bool force)
 {
-    MFeeprom.get(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
+    MFeeprom.read_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
     if (!force && serial[0] == 'S' && serial[1] == 'N')
         return;
     randomSeed(analogRead(RANDOM_SEED_INPUT));
     sprintf(serial, "SN-%03x-", (unsigned int)random(4095));
     sprintf(&serial[7], "%03x", (unsigned int)random(4095));
-    MFeeprom.put(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
+    MFeeprom.write_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
     if (!force) {
-        MFeeprom.write(MEM_OFFSET_CONFIG, 0x00); // First byte of config to 0x00 to ensure to start 1st time with empty config, but not if forced from the connector to generate a new one
+        MFeeprom.write_block(MEM_OFFSET_CONFIG, 0x00); // First byte of config to 0x00 to ensure to start 1st time with empty config, but not if forced from the connector to generate a new one
     }
 }
 
@@ -461,15 +461,15 @@ void OnGenNewSerial()
 void storeName()
 {
     uint8_t prefix = '#';
-    MFeeprom.write(MEM_OFFSET_NAME, prefix);
-    MFeeprom.put(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
+    MFeeprom.write_block(MEM_OFFSET_NAME, prefix);
+    MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
 }
 
 void restoreName()
 {
-    if (MFeeprom.read(MEM_OFFSET_NAME) != '#')
+    if (MFeeprom.read_byte(MEM_OFFSET_NAME) != '#')
         return;
-    MFeeprom.get(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
+    MFeeprom.read_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
 }
 
 void OnSetName()

@@ -19,13 +19,13 @@ uint16_t MFEEPROM::get_length(void)
     return _eepromLength;
 }
 
-uint8_t MFEEPROM::read(uint16_t adr)
+uint8_t MFEEPROM::read_byte(uint16_t adr)
 {
     if (adr >= _eepromLength) return 0;
     return EEPROM.read(adr);
 }
 
-bool MFEEPROM::write(uint16_t adr, const uint8_t data)
+bool MFEEPROM::write_byte(uint16_t adr, const uint8_t data)
 {
     if (adr >= _eepromLength) return false;
     EEPROM.write(adr, data);

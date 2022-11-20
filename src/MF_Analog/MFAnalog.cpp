@@ -71,12 +71,12 @@ void MFAnalog::doCalibration()
             CalibrationData.maxValue = actualValue;
     }
     // store min and max value to EEPROM, consider pin number for EEPROM adress
-    MFeeprom.put(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
+    MFeeprom.write_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
 }
 
 void MFAnalog::readCalibration()
 {
-    MFeeprom.get(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
+    MFeeprom.read_block(CALIBRATION_START_ADRESS + (_pin - FIRST_ANALOG_PIN) * sizeof(CalibrationData), CalibrationData);
     // check if calibration has been done, otherwise use max. range
     if (CalibrationData.minValue > 1023 || CalibrationData.maxValue > 1023 || CalibrationData.maxValue <= CalibrationData.minValue) {
         CalibrationData.minValue = 0;
