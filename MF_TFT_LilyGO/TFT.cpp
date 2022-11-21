@@ -129,9 +129,9 @@ namespace TFT
         for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
             checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
         }
-        checkClippingRoundInner[0] = clippingRadiusOuter;
+        checkClippingRoundInner[0] = clippingRadiusInner;
         for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
-            checkClippingRoundInner[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+            checkClippingRoundInner[i] = sqrt(clippingRadiusInner * clippingRadiusInner - i * i);
         }
     }
 

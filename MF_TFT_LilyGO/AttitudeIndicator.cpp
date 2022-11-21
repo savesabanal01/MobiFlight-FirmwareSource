@@ -32,10 +32,10 @@
 //#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
 //#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
 //#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
-#define INSTRUMENT_CENTER_X0_ROUND 240                          // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_CENTER_Y0_ROUND 240                  // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_OUTER_RADIUS    120                  // radius of outer part of instrument
-#define INSTRUMENT_MOVING_RADIUS   99  // radius of moving part of instrument
+#define INSTRUMENT_CENTER_X0_ROUND 240 // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_CENTER_Y0_ROUND 240 // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define INSTRUMENT_OUTER_RADIUS    240 // radius of outer part of instrument
+#define INSTRUMENT_MOVING_RADIUS   200 // radius of moving part of instrument
 //#define CLIPPING_RADIUS              220                    // radius of clipping area for round instrument including the outer part!
 #define HOR        400    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
 #define MAX_PITCH  100    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
