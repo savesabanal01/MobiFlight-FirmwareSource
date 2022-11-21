@@ -211,8 +211,8 @@ namespace AttitudeIndicator
         // Calculate coordinates for line start
         int16_t x0      = (float)cos(roll * DEG2RAD) * HOR;
         int16_t y0      = (float)sin(roll * DEG2RAD) * HOR;
-        int16_t x0outer = (float)cos(roll * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
-        int16_t y0outer = (float)sin(roll * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
+        int16_t x0outer = INSTRUMENT_OUTER_RADIUS; // (float)cos(0 * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
+        int16_t y0outer = 0;                       // (float)sin(0 * DEG2RAD) * INSTRUMENT_OUTER_RADIUS;
 
         // check in which direction to move
         int16_t xd  = 0;
@@ -242,29 +242,31 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                   //Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
+                // Hmmmhmmm, have to re-think how to do this... Seems that an additional clipping radius for the inner circle is required...
+
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS, INSTRUMENT_MOVING_RADIUS);
                 for (uint8_t i = 6; i > 0; i--) {
-                    xdn    = i * xd;
-                    ydn    = i * yd;
+                    //xdn    = i * xd;
+                    //ydn    = i * yd;
+                    xdn    = i * 0;
+                    ydn    = i * 1;
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn - pitch;
 
                     TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn;
+                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn - pitch;
                     widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn;
+                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn - pitch;
                     TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
                 }
                 posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
-                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer;
+                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - pitch;
                 widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
-                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer;
+                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - pitch;
                 TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
-                
 
                 // draw inner moving part
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS, 0);
@@ -331,7 +333,7 @@ namespace AttitudeIndicator
                 widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
                 TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
                 */
-                
+
                 drawScale(sel);
 
                 tft.pushImageDMA(SPRITE_X0_RECT, SPRITE_Y0_RECT + (SPRITE_HEIGTH_RECT / 2) * sel, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, sprPtr[sel]);
@@ -340,7 +342,6 @@ namespace AttitudeIndicator
                 tft.drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
                 tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
                 tft.drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-
             }
         }
     }

@@ -10,6 +10,16 @@ uint16_t *sprPtr[2];
 
 namespace TFT
 {
+    int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS] = {0};
+    int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS] = {0};
+
+    int32_t clippingCenterX;
+    int32_t clippingCenterY;
+    int32_t clippingWidthX;
+    int32_t clippingWidthY;
+    int32_t clippingRadiusOuter;
+    int32_t clippingRadiusInner;
+
     void init()
     {
         // #########################################################################
@@ -41,15 +51,6 @@ namespace TFT
         tft.setRotation(0);
         randomSeed(analogRead(A0));
     }
-    int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS];
-    int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS];
-
-    int32_t clippingCenterX;
-    int32_t clippingCenterY;
-    int32_t clippingWidthX;
-    int32_t clippingWidthY;
-    int32_t clippingRadiusOuter;
-    int32_t clippingRadiusInner;
 
     // setup clipping area
     void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadiusOuter, int32_t ClippingRadiusInner)
@@ -61,13 +62,17 @@ namespace TFT
         clippingRadiusOuter = ClippingRadiusOuter;
         clippingRadiusInner = ClippingRadiusInner;
 
-        checkClippingRoundOuter[0] = clippingRadiusOuter;
-        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
-            checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+        if (checkClippingRoundOuter[0] != ClippingRadiusOuter) {
+            checkClippingRoundOuter[0] = clippingRadiusOuter;
+            for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+                checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+            }
         }
-        checkClippingRoundInner[0] = clippingRadiusOuter;
-        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
-            checkClippingRoundInner[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+        if (checkClippingRoundInner[0] != ClippingRadiusInner) {
+            checkClippingRoundInner[0] = clippingRadiusInner;
+            for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+                checkClippingRoundInner[i] = sqrt(clippingRadiusInner * clippingRadiusInner - i * i);
+            }
         }
     }
 
@@ -152,7 +157,7 @@ namespace TFT
             w *= -1;
         }
         int32_t xE = x + w;
-        
+
         if (clippingRadiusOuter == 0) {
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
@@ -171,8 +176,7 @@ namespace TFT
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
             // this should be the case if y is bigger than the inner radius
 
-            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter)
-            {
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) {
                 // draw the line as calculated above
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -182,7 +186,6 @@ namespace TFT
                 spr[sel].drawFastHLine(x, y, tempxE - x + 1, color);
                 x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
             }
-
         }
 
         spr[sel].drawFastHLine(x, y, xE - x + 1, color);
@@ -214,9 +217,8 @@ namespace TFT
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
-   
-            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter)
-            {
+
+            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) {
                 // draw the line as calculated above
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -226,7 +228,6 @@ namespace TFT
                 spr[sel].drawFastHLine(x, y, tempyE - x + 1, color);
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
-
         }
 
         spr[sel].drawFastVLine(x, y, yE - y + 1, color);
