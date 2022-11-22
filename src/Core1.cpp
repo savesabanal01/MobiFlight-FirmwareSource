@@ -88,7 +88,7 @@ void core1_loop()
     uint32_t demoMillis = millis();
 
     while (1) {
-        /*
+
         demoMillis = millis();
         BouncingCircles::init();
         do {
@@ -112,7 +112,7 @@ void core1_loop()
             checkDataFromCore0();
         } while (millis() - demoMillis < 5000);
         Compass::stop();
-        */
+
         demoMillis = millis();
         AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
