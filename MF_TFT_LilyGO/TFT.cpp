@@ -6,7 +6,6 @@
 #include "AttitudeIndicator.h"
 //#include "Compass.h"
 
-
 #include "pin_config.h"
 #include "XL9535_driver.h"
 
@@ -110,11 +109,11 @@ namespace TFT
         delay(2000);
         */
         uint32_t demoMillis = millis();
-        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
+        AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE /*ROUND_SHAPE*/);
         do {
             AttitudeIndicator::loop();
-            //checkDataFromCore0();
-        } while (millis() - demoMillis < 100000);
+            // checkDataFromCore0();
+        } while (millis() - demoMillis < 1000000);
     }
 
     // setup clipping area
@@ -222,7 +221,7 @@ namespace TFT
             w *= -1;
         }
         int16_t xE = x + w;
-        
+
         if (clippingRadiusOuter == 0) {
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
@@ -233,17 +232,15 @@ namespace TFT
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
             // check left and right limit and set start / end point accordingly from look up table for the given x position
-            //if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
-            //if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
-            /*if (x <= clippingCenterX - 20)*/ x = clippingCenterX - 20;
-            /*if (xE >= clippingCenterX + 20)*/ xE = clippingCenterX + 20;
+            if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
             // this should be the case if y is bigger or smaller than the inner radius
             if (y <= clippingCenterY - clippingRadiusInner || y >= clippingCenterY + clippingRadiusInner) {
-                x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+                x  = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
                 xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -252,12 +249,12 @@ namespace TFT
                 int16_t tempxA = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
                 int16_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
                 // draw the left short line
-                gfx->drawFastHLine(tempxA, y, tempxE - x + 1, color);
+                gfx->writeFastHLine(tempxA, y, tempxE - x + 1, color);
                 // and calculate the coordinates for the right short line
                 x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
             }
         }
-        gfx->drawFastHLine(x, y, xE - x + 1, color);
+        gfx->writeFastHLine(x, y, xE - x + 1, color);
     }
 
     /***************************************************************************************
@@ -282,17 +279,16 @@ namespace TFT
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
-            //if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
-            //if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
-            /*if (y <= clippingCenterY - 20)*/ y = clippingCenterY - 20;
-            /*if (yE >= clippingCenterY + 20)*/ yE = clippingCenterY + 20;
+            if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
+             // Serial.print("Negative Länge VLine"); Serial.println(checkClippingRoundOuter[abs(x - clippingCenterX)]);
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
             // this should be the case if x is bigger or smaller than the inner radius
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) {
-                y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                y  = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -301,12 +297,12 @@ namespace TFT
                 int16_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 int16_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
                 // draw the upper short line
-                gfx->drawFastVLine(x, y, tempyE - x + 1, color);
+                gfx->writeFastVLine(x, y, tempyE - x + 1, color);
                 // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
         }
-        gfx->drawFastVLine(x, y, yE - y + 1, color);
+        //gfx->writeFastVLine(x, y, yE - y + 1, color);
     }
 
     /***************************************************************************************
@@ -335,7 +331,7 @@ namespace TFT
             if (!(y < clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)])) return;
             if (!(y > clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)])) return;
         }
-        //gfx->drawPixel(x, y, color);
+        // gfx->drawPixel(x, y, color);
     }
 
     /***************************************************************************************
@@ -351,13 +347,13 @@ namespace TFT
         int16_t dy = r + r;
         int16_t p  = -(r >> 1);
 
-        gfx->drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
+        gfx->writeFastHLine(x0 - r, y0, dy + 1, colorUpper);
 
         while (x < r) {
 
             if (p >= 0) {
-                gfx->drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
-                gfx->drawFastHLine(x0 - x, y0 + r, dx, colorLower);
+                gfx->writeFastHLine(x0 - x, y0 - r, dx, colorUpper);
+                gfx->writeFastHLine(x0 - x, y0 + r, dx, colorLower);
                 dy -= 2;
                 p -= dy;
                 r--;
@@ -367,8 +363,8 @@ namespace TFT
             p += dx;
             x++;
 
-            gfx->drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
-            gfx->drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
+            gfx->writeFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
+            gfx->writeFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
         }
     }
 

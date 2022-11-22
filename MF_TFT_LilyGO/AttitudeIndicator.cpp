@@ -12,17 +12,17 @@
 
 #define WIDTH_RECT_INNER  200
 #define HEIGTH_RECT_INNER 280                   // with this dimensions 112.5kBytes are required
-#define X0_RECT_INNER     20                    // upper left x position where to plot
-#define Y0_RECT_INNER     20                    // upper left y position where to plot
-#define CENTER_X0_RECT    WIDTH_RECT_INNER / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define CENTER_Y0_RECT    HEIGTH_RECT_INNER / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define X0_RECT_INNER     100 //20                    // upper left x position where to plot
+#define Y0_RECT_INNER     100 //20                    // upper left y position where to plot
+#define CENTER_X0_RECT    240 //WIDTH_RECT_INNER / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define CENTER_Y0_RECT    240 //HEIGTH_RECT_INNER / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
 #define WIDTH_RECT_OUTER  240                   // width of clipping area for rect instrument around CENTER_X0_RECT, if higher than Sprite dimension not considered
 #define HEIGTH_RECT_OUTER 320                   // height of clipping area for rect instrument around CENTER_Y0_RECT, if higher than Sprite dimension not considered
 #define CENTER_X0_ROUND   240                   // x mid point in sprite for instrument, complete drawing must be inside sprite
 #define CENTER_Y0_ROUND   240                   // y mid point in sprite for instrument, complete drawing must be inside sprite
 #define OUTER_RADIUS      120 //230                   // radius of outer part of instrument
 #define INNER_RADIUS      99 //190                   // radius of moving part of instrument
-#define HOR               350 //600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
+#define HOR               150 //600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
 #define MAX_PITCH         100 //200                   // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN             0xFD20                // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE          0x02B5                // 0x0318 //0x039B //0x34BF
@@ -97,7 +97,8 @@ namespace AttitudeIndicator
         // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
         // Maximum pitch shouls be in range +/- 80 with HOR = 172
         // pitch = 10; //random(2 * CENTER_Y0_RECT) - CENTER_Y0_RECT;
-        pitch++;
+//pitch++;
+//delay(1000);
 
         // check for overflow, if so then move step by step
         // to lower pitch
@@ -249,7 +250,7 @@ namespace AttitudeIndicator
                 posY  = CENTER_Y0_ROUND - y0 - pitch;
                 posXE = CENTER_X0_ROUND + x0;
                 posYE = CENTER_Y0_ROUND + y0 - pitch;
-                TFT::drawLine(posX, posY, posXE, posYE, WHITE, sel);
+                TFT::drawLine(posX, posY, posXE, posYE, WHITE, 1);
 
                 // draw a border around the inner moving part
                 gfx->drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 0, LIGHT_GREY);
