@@ -219,15 +219,21 @@ namespace TFT
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
-
-            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) {
-                // draw the line as calculated above
+            // at this point we have already the x/y coordinates for the outer circle
+            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
+            // this should be the case if x is bigger or smaller than the inner radius
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) {
+                y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
-                // y coordinate is known, nothing to change
-                // x axis must be split up according the inner radius
+                // x coordinate is known, nothing to change
+                // y axis must be split up according the inner radius
+                int32_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                // draw the upper short line
                 spr[sel].drawFastHLine(x, y, tempyE - x + 1, color);
+                // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
         }
