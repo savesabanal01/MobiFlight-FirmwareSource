@@ -20,11 +20,10 @@ swap_coord(T &a, T &b)
 namespace TFT
 {
     void init();
-    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t clippingRadiusOuter, int32_t clippingRadiusInner);
-    void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel);
-    void fillHalfCircleSprite(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower, bool sel);
-    void fillHalfCircleTFT(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower);
-    void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel);
-    void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel);
-    void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
+    void setClippingArea(int16_t ClippingX0, int16_t ClippingY0, int16_t ClippingXwidth, int16_t ClippingYwidth, int16_t clippingRadiusOuter, int16_t clippingRadiusInner);
+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel);
+    void fillHalfCircleTFT(int16_t x0, int16_t y0, int16_t r, uint16_t colorUpper, uint16_t colorLower);
+    void drawPixel(int16_t x, int16_t y, uint16_t color, bool sel);
+    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel);
+    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel);
 }

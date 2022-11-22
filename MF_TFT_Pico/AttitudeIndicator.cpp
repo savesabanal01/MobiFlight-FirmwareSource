@@ -221,7 +221,7 @@ namespace AttitudeIndicator
         int16_t ydn = 0;
 
         // positions to draw lines
-        int16_t posX, posY, widthX, widthY;
+        int16_t posX, posY, posXE, posYE;
 
         if (roll > 45 && roll < 135) {
             xd = -1;
@@ -251,21 +251,21 @@ namespace AttitudeIndicator
 
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
                     posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
 
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
                     posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
                 posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - pitch;
-                widthX = INSTRUMENT_CENTER_X0_ROUND + x0outer;
-                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0outer - pitch;
-                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+                posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer;
+                posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer - pitch;
+                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
 
                 // draw inner moving part
                 TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS, 0);
@@ -274,21 +274,21 @@ namespace AttitudeIndicator
                     ydn    = i * yd;
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0 - xdn;
                     posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0 - xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0 - xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX   = INSTRUMENT_CENTER_X0_ROUND - x0 + xdn;
                     posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_ROUND + x0 + xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0 + xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX   = INSTRUMENT_CENTER_X0_ROUND - x0;
                 posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch;
-                widthX = INSTRUMENT_CENTER_X0_ROUND + x0;
-                widthY = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
-                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+                posXE = INSTRUMENT_CENTER_X0_ROUND + x0;
+                posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
+                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw a border around the inner moving part
                 spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 0, LIGHT_GREY);
                 spr[sel].drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
@@ -317,21 +317,21 @@ namespace AttitudeIndicator
                     ydn    = i * yd;
                     posX   = INSTRUMENT_CENTER_X0_RECT - x0 - xdn;
                     posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_RECT + x0 - xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, SKY_BLUE, sel);
+                    posXE = INSTRUMENT_CENTER_X0_RECT + x0 - xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX   = INSTRUMENT_CENTER_X0_RECT - x0 + xdn;
                     posY   = INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch;
-                    widthX = INSTRUMENT_CENTER_X0_RECT + x0 + xdn;
-                    widthY = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
-                    TFT::drawLine(posX, posY, widthX, widthY, BROWN, sel);
+                    posXE = INSTRUMENT_CENTER_X0_RECT + x0 + xdn;
+                    posYE = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
+                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX   = INSTRUMENT_CENTER_X0_RECT - x0;
                 posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
-                widthX = INSTRUMENT_CENTER_X0_RECT + x0;
-                widthY = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
-                TFT::drawLine(posX, posY, widthX, widthY, TFT_WHITE, sel);
+                posXE = INSTRUMENT_CENTER_X0_RECT + x0;
+                posYE = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
+                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw the scale
                 drawScale(sel);
 

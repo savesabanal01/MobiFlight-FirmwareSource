@@ -79,6 +79,16 @@ namespace TFT
         {0x29, {0x00}, 0x80},
         {0, {0}, 0xff}};
 
+    int16_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS] = {0};
+    int16_t checkClippingRoundInner[MAX_CLIPPING_RADIUS] = {0};
+
+    int16_t clippingCenterX;
+    int16_t clippingCenterY;
+    int16_t clippingWidthX;
+    int16_t clippingWidthY;
+    int16_t clippingRadiusOuter;
+    int16_t clippingRadiusInner;
+
     void init()
     {
         Wire.begin(IIC_SDA_PIN, IIC_SCL_PIN, (uint32_t)800000);
@@ -92,11 +102,13 @@ namespace TFT
         gfx->begin();
         tft_init();
         gfx->fillScreen(BLACK);
+        /*
         gfx->setCursor(100, 240);
         gfx->setTextColor(WHITE);
         gfx->setTextSize(3);
         gfx->println("Mobiflight rocks!");
         delay(2000);
+        */
         uint32_t demoMillis = millis();
         AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
@@ -105,18 +117,8 @@ namespace TFT
         } while (millis() - demoMillis < 100000);
     }
 
-    int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS];
-    int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS];
-
-    int32_t clippingCenterX;
-    int32_t clippingCenterY;
-    int32_t clippingWidthX;
-    int32_t clippingWidthY;
-    int32_t clippingRadiusOuter;
-    int32_t clippingRadiusInner;
-
     // setup clipping area
-    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadiusOuter, int32_t ClippingRadiusInner)
+    void setClippingArea(int16_t ClippingX0, int16_t ClippingY0, int16_t ClippingXwidth, int16_t ClippingYwidth, int16_t ClippingRadiusOuter, int16_t ClippingRadiusInner)
     {
         clippingCenterX     = ClippingX0;
         clippingCenterY     = ClippingY0;
@@ -125,13 +127,17 @@ namespace TFT
         clippingRadiusOuter = ClippingRadiusOuter;
         clippingRadiusInner = ClippingRadiusInner;
 
-        checkClippingRoundOuter[0] = clippingRadiusOuter;
-        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
-            checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+        if (checkClippingRoundOuter[0] != ClippingRadiusOuter) {
+            checkClippingRoundOuter[0] = clippingRadiusOuter;
+            for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+                checkClippingRoundOuter[i] = sqrt(clippingRadiusOuter * clippingRadiusOuter - i * i);
+            }
         }
-        checkClippingRoundInner[0] = clippingRadiusInner;
-        for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
-            checkClippingRoundInner[i] = sqrt(clippingRadiusInner * clippingRadiusInner - i * i);
+        if (checkClippingRoundInner[0] != ClippingRadiusInner) {
+            checkClippingRoundInner[0] = clippingRadiusInner;
+            for (uint8_t i = 1; i < clippingRadiusOuter; i++) {
+                checkClippingRoundInner[i] = sqrt(clippingRadiusInner * clippingRadiusInner - i * i);
+            }
         }
     }
 
@@ -149,7 +155,7 @@ namespace TFT
     ***************************************************************************************/
     // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
     // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-    void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel)
     {
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -162,9 +168,9 @@ namespace TFT
             swap_coord(y0, y1);
         }
 
-        int32_t dx = x1 - x0, dy = abs(y1 - y0);
+        int16_t dx = x1 - x0, dy = abs(y1 - y0);
 
-        int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
+        int16_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
 
         if (y0 < y1) ystep = 1;
 
@@ -208,14 +214,14 @@ namespace TFT
     ** Function name:           drawFastHLine
     ** Description:             draw a horizontal line
     ***************************************************************************************/
-    void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
+    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel)
     {
         // draw always from left to right
         if (w < 0) {
             x -= w;
             w *= -1;
         }
-        int32_t xE = x + w;
+        int16_t xE = x + w;
         
         if (clippingRadiusOuter == 0) {
             // First check upper and lower limits, it's quite easy
@@ -233,22 +239,22 @@ namespace TFT
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
-            // this should be the case if y is bigger than the inner radius
-
-            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter)
-            {
-                // draw the line as calculated above
+            // this should be the case if y is bigger or smaller than the inner radius
+            if (y <= clippingCenterY - clippingRadiusInner || y >= clippingCenterY + clippingRadiusInner) {
+                x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+                xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
-                // x coordinate is known, nothing to change
-                // y axis must be split up according the inner radius
-                int32_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
-                gfx->drawFastHLine(x, y, tempxE - x + 1, color);
+                // y coordinate is known, nothing to change
+                // x axis must be split up according the inner radius
+                int16_t tempxA = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+                int16_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
+                // draw the left short line
+                gfx->drawFastHLine(tempxA, y, tempxE - x + 1, color);
+                // and calculate the coordinates for the right short line
                 x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
             }
-
         }
-
         gfx->drawFastHLine(x, y, xE - x + 1, color);
     }
 
@@ -256,14 +262,14 @@ namespace TFT
     ** Function name:           drawFastVLine
     ** Description:             draw a vertical line
     ***************************************************************************************/
-    void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
+    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel)
     {
         // draw always from top to down
         if (h < 0) {
             y -= h;
             h *= -1;
         }
-        int32_t yE = y + h;
+        int16_t yE = y + h;
         if (clippingRadiusOuter == 0) {
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
@@ -278,21 +284,24 @@ namespace TFT
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
-   
-            if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter)
-            {
-                // draw the line as calculated above
+            // at this point we have already the x/y coordinates for the outer circle
+            // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
+            // this should be the case if x is bigger or smaller than the inner radius
+            if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) {
+                y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
-                // y coordinate is known, nothing to change
-                // x axis must be split up according the inner radius
-                int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                // x coordinate is known, nothing to change
+                // y axis must be split up according the inner radius
+                int16_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                int16_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                // draw the upper short line
                 gfx->drawFastHLine(x, y, tempyE - x + 1, color);
+                // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
-
         }
-
         gfx->drawFastVLine(x, y, yE - y + 1, color);
     }
 
@@ -300,7 +309,7 @@ namespace TFT
     ** Function name:           drawPixel
     ** Description:             push a single pixel at an arbitrary position
     ***************************************************************************************/
-    void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
+    void drawPixel(int16_t x, int16_t y, uint16_t color, bool sel)
     {
         if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit
@@ -326,51 +335,17 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           fillHalfCircle
-    ** Description:             draw a filled circle, upper or lower part
-    ***************************************************************************************/
-    // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
-    // Improved algorithm avoids repetition of lines
-    void fillHalfCircleSprite(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower, bool sel)
-    {
-        int32_t x  = 0;
-        int32_t dx = 1;
-        int32_t dy = r + r;
-        int32_t p  = -(r >> 1);
-
-        gfx->drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
-
-        while (x < r) {
-
-            if (p >= 0) {
-                gfx->drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
-                gfx->drawFastHLine(x0 - x, y0 + r, dx, colorLower);
-                dy -= 2;
-                p -= dy;
-                r--;
-            }
-
-            dx += 2;
-            p += dx;
-            x++;
-
-            gfx->drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
-            gfx->drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
-        }
-    }
-
-    /***************************************************************************************
      ** Function name:           fillHalfCircle
      ** Description:             draw a filled circle, upper or lower part
      ***************************************************************************************/
     // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
     // Improved algorithm avoids repetition of lines
-    void fillHalfCircleTFT(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower)
+    void fillHalfCircleTFT(int16_t x0, int16_t y0, int16_t r, uint16_t colorUpper, uint16_t colorLower)
     {
-        int32_t x  = 0;
-        int32_t dx = 1;
-        int32_t dy = r + r;
-        int32_t p  = -(r >> 1);
+        int16_t x  = 0;
+        int16_t dx = 1;
+        int16_t dy = r + r;
+        int16_t p  = -(r >> 1);
 
         gfx->drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
 
