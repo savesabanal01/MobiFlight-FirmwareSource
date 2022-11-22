@@ -297,7 +297,7 @@ namespace TFT
                 int16_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 int16_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
                 // draw the upper short line
-                gfx->drawFastHLine(x, y, tempyE - x + 1, color);
+                gfx->drawFastVLine(x, y, tempyE - x + 1, color);
                 // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }

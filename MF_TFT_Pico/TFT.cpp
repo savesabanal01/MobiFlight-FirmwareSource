@@ -232,7 +232,7 @@ namespace TFT
                 int32_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
                 // draw the upper short line
-                spr[sel].drawFastHLine(x, y, tempyE - x + 1, color);
+                spr[sel].drawFastVLine(x, y, tempyE - x + 1, color);
                 // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
