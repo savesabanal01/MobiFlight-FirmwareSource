@@ -233,8 +233,10 @@ namespace TFT
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
             // check left and right limit and set start / end point accordingly from look up table for the given x position
-            if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
-            if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
+            //if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            //if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
+            /*if (x <= clippingCenterX - 20)*/ x = clippingCenterX - 20;
+            /*if (xE >= clippingCenterX + 20)*/ xE = clippingCenterX + 20;
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
@@ -280,8 +282,10 @@ namespace TFT
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
-            if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
-            if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
+            //if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            //if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
+            /*if (y <= clippingCenterY - 20)*/ y = clippingCenterY - 20;
+            /*if (yE >= clippingCenterY + 20)*/ yE = clippingCenterY + 20;
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
@@ -331,7 +335,7 @@ namespace TFT
             if (!(y < clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)])) return;
             if (!(y > clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)])) return;
         }
-        gfx->drawPixel(x, y, color);
+        //gfx->drawPixel(x, y, color);
     }
 
     /***************************************************************************************

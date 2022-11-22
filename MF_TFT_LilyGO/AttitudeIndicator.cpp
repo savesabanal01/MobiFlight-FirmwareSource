@@ -20,10 +20,10 @@
 #define HEIGTH_RECT_OUTER 320                   // height of clipping area for rect instrument around CENTER_Y0_RECT, if higher than Sprite dimension not considered
 #define CENTER_X0_ROUND   240                   // x mid point in sprite for instrument, complete drawing must be inside sprite
 #define CENTER_Y0_ROUND   240                   // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define OUTER_RADIUS      230                   // radius of outer part of instrument
-#define INNER_RADIUS      190                   // radius of moving part of instrument
-#define HOR               600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
-#define MAX_PITCH         200                   // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
+#define OUTER_RADIUS      120 //230                   // radius of outer part of instrument
+#define INNER_RADIUS      99 //190                   // radius of moving part of instrument
+#define HOR               350 //600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
+#define MAX_PITCH         100 //200                   // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN             0xFD20                // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE          0x02B5                // 0x0318 //0x039B //0x34BF
 #define DARK_RED          RED                   // 0x8000
@@ -203,7 +203,7 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part, only pitch to be considered
-
+/*
                 TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, OUTER_RADIUS, INNER_RADIUS);
                 for (uint8_t i = 3; i > 0; i--) {
                     // just go into y-direction
@@ -227,7 +227,7 @@ namespace AttitudeIndicator
                 posXE = CENTER_X0_ROUND + x0outer;
                 posYE = CENTER_Y0_ROUND + y0outer - pitch;
                 TFT::drawLine(posX, posY, posXE, posYE, WHITE, sel);
-
+*/
                 // draw inner moving part
                 TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, INNER_RADIUS, 0);
                 for (uint8_t i = 6; i > 0; i--) {
