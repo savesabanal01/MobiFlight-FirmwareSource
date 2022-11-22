@@ -4,45 +4,31 @@
 // 16/8/16
 // Adapted to use sprites and DMA transfer for RP2040
 // additionally rect and round instrument implemented
+// and adapted to LilyGo 480x480 round display on ESP32
 
 #include <Arduino.h>
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
-//  The sprites will require:
-//     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
-// Note: for a 240 * 320 area this is 150 Kbytes!
-
-// Hmhm, but an outer rand should not get changed
-// so dimension of 200 x 200 should be OK and
-// no rect clipping would be required...
-// It's also valid for the round clipping area
-// sprite must be max. 2 * Radius in x and y direction...
-// But adapt Sprite center position...
-#define SPRITE_WIDTH_RECT            200
-#define SPRITE_HEIGTH_RECT           280                    // with this dimensions 112.5kBytes are required
-#define SPRITE_X0_RECT               20                     // upper left x position where to plot
-#define SPRITE_Y0_RECT               20                     // upper left y position where to plot
-#define INSTRUMENT_CENTER_X0_RECT    SPRITE_WIDTH_RECT / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_CENTER_Y0_RECT    SPRITE_HEIGTH_RECT / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_OUTER_WIDTH_RECT  240                    // width of outer part of instrument
-#define INSTRUMENT_OUTER_HEIGHT_RECT 280                    // height of outer part of instrument
-#define CLIPPING_XWIDTH              240                    // width of clipping area for rect instrument around INSTRUMENT_CENTER_X0_RECT, if higher than Sprite dimension not considered
-#define CLIPPING_YWIDTH              320                    // height of clipping area for rect instrument around INSTRUMENT_CENTER_Y0_RECT, if higher than Sprite dimension not considered
-//#define SPRITE_DIM_RADIUS            120                    // dimension for x and y direction of sprite, including outer part
-//#define SPRITE_X0_ROUND              0                      // upper left x position where to plot
-//#define SPRITE_Y0_ROUND              40                     // upper left y position where to plot
-#define INSTRUMENT_CENTER_X0_ROUND 240    // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_CENTER_Y0_ROUND 240    // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define INSTRUMENT_OUTER_RADIUS    240    // radius of outer part of instrument
-#define INSTRUMENT_MOVING_RADIUS   200    // radius of moving part of instrument
-#define HOR                        400    // Horizon vector line, length must be at least sqrt(SPRITE_WIDTH_RECT^2 + SPRITE_HEIGTH_RECT^2) = 344
-#define MAX_PITCH                  100    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
-#define BROWN                      0xFD20 // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE                   0x02B5 // 0x0318 //0x039B //0x34BF
-#define DARK_RED                   RED    // 0x8000
-#define DARK_GREY                  BLACK  // ILI9341_DARKGREY
-#define LIGHT_GREY                 BLACK  // ILI9341_LIGHTGREY
+#define WIDTH_RECT_INNER  200
+#define HEIGTH_RECT_INNER 280                   // with this dimensions 112.5kBytes are required
+#define X0_RECT_INNER     20                    // upper left x position where to plot
+#define Y0_RECT_INNER     20                    // upper left y position where to plot
+#define CENTER_X0_RECT    WIDTH_RECT_INNER / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define CENTER_Y0_RECT    HEIGTH_RECT_INNER / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define WIDTH_RECT_OUTER  240                   // width of clipping area for rect instrument around CENTER_X0_RECT, if higher than Sprite dimension not considered
+#define HEIGTH_RECT_OUTER 320                   // height of clipping area for rect instrument around CENTER_Y0_RECT, if higher than Sprite dimension not considered
+#define CENTER_X0_ROUND   240                   // x mid point in sprite for instrument, complete drawing must be inside sprite
+#define CENTER_Y0_ROUND   240                   // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define OUTER_RADIUS      240                   // radius of outer part of instrument
+#define INNER_RADIUS      200                   // radius of moving part of instrument
+#define HOR               600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
+#define MAX_PITCH         200                   // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
+#define BROWN             0xFD20                // 0x5140 // 0x5960 the other are not working??
+#define SKY_BLUE          0x02B5                // 0x0318 //0x039B //0x34BF
+#define DARK_RED          RED                   // 0x8000
+#define DARK_GREY         BLACK                 // ILI9341_DARKGREY
+#define LIGHT_GREY        BLACK                 // ILI9341_LIGHTGREY
 
 #define DEG2RAD 0.0174532925
 
@@ -110,7 +96,7 @@ namespace AttitudeIndicator
 
         // Pitch is in y coord (pixel) steps, 20 steps = 10 degrees on drawn scale
         // Maximum pitch shouls be in range +/- 80 with HOR = 172
-        // pitch = 10; //random(2 * INSTRUMENT_CENTER_Y0_RECT) - INSTRUMENT_CENTER_Y0_RECT;
+        // pitch = 10; //random(2 * CENTER_Y0_RECT) - CENTER_Y0_RECT;
         pitch++;
 
         // check for overflow, if so then move step by step
@@ -185,7 +171,7 @@ namespace AttitudeIndicator
         int16_t x0 = (float)cos(roll * DEG2RAD) * HOR;
         int16_t y0 = (float)sin(roll * DEG2RAD) * HOR;
         // Calculate coordinates for line start for outer part, roll has not to be considered
-        int16_t x0outer = INSTRUMENT_OUTER_RADIUS;
+        int16_t x0outer = OUTER_RADIUS;
         int16_t y0outer = 0;
 
         // check in which direction to move
@@ -218,57 +204,57 @@ namespace AttitudeIndicator
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part, only pitch to be considered
 
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_OUTER_RADIUS, INSTRUMENT_MOVING_RADIUS);
+                TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, OUTER_RADIUS, INNER_RADIUS);
                 for (uint8_t i = 3; i > 0; i--) {
                     // just go into y-direction
                     xdn = i * 0;
                     ydn = i * 1;
 
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer - xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer - xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer - ydn - pitch;
+                    posX  = CENTER_X0_ROUND - x0outer - xdn;
+                    posY  = CENTER_Y0_ROUND - y0outer - ydn - pitch;
+                    posXE = CENTER_X0_ROUND + x0outer - xdn;
+                    posYE = CENTER_Y0_ROUND + y0outer - ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
 
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer + xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer + ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer + xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer + ydn - pitch;
+                    posX  = CENTER_X0_ROUND - x0outer + xdn;
+                    posY  = CENTER_Y0_ROUND - y0outer + ydn - pitch;
+                    posXE = CENTER_X0_ROUND + x0outer + xdn;
+                    posYE = CENTER_Y0_ROUND + y0outer + ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
-                posX   = INSTRUMENT_CENTER_X0_ROUND - x0outer;
-                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0outer - pitch;
-                posXE = INSTRUMENT_CENTER_X0_ROUND + x0outer;
-                posYE = INSTRUMENT_CENTER_Y0_ROUND + y0outer - pitch;
+                posX  = CENTER_X0_ROUND - x0outer;
+                posY  = CENTER_Y0_ROUND - y0outer - pitch;
+                posXE = CENTER_X0_ROUND + x0outer;
+                posYE = CENTER_Y0_ROUND + y0outer - pitch;
                 TFT::drawLine(posX, posY, posXE, posYE, WHITE, sel);
 
                 // draw inner moving part
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, 0, 0, INSTRUMENT_MOVING_RADIUS, 0);
+                TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, INNER_RADIUS, 0);
                 for (uint8_t i = 6; i > 0; i--) {
-                    xdn    = i * xd;
-                    ydn    = i * yd;
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0 - xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0 - xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 - ydn - pitch;
+                    xdn   = i * xd;
+                    ydn   = i * yd;
+                    posX  = CENTER_X0_ROUND - x0 - xdn;
+                    posY  = CENTER_Y0_ROUND - y0 - ydn - pitch;
+                    posXE = CENTER_X0_ROUND + x0 - xdn;
+                    posYE = CENTER_Y0_ROUND + y0 - ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
-                    posX   = INSTRUMENT_CENTER_X0_ROUND - x0 + xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 + ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_ROUND + x0 + xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 + ydn - pitch;
+                    posX  = CENTER_X0_ROUND - x0 + xdn;
+                    posY  = CENTER_Y0_ROUND - y0 + ydn - pitch;
+                    posXE = CENTER_X0_ROUND + x0 + xdn;
+                    posYE = CENTER_Y0_ROUND + y0 + ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
-                posX   = INSTRUMENT_CENTER_X0_ROUND - x0;
-                posY   = INSTRUMENT_CENTER_Y0_ROUND - y0 - pitch;
-                posXE = INSTRUMENT_CENTER_X0_ROUND + x0;
-                posYE = INSTRUMENT_CENTER_Y0_ROUND + y0 - pitch;
+                posX  = CENTER_X0_ROUND - x0;
+                posY  = CENTER_Y0_ROUND - y0 - pitch;
+                posXE = CENTER_X0_ROUND + x0;
+                posYE = CENTER_Y0_ROUND + y0 - pitch;
                 TFT::drawLine(posX, posY, posXE, posYE, WHITE, sel);
 
                 // draw a border around the inner moving part
-                gfx->drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 0, LIGHT_GREY);
-                gfx->drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_MOVING_RADIUS - 1, LIGHT_GREY);
-                gfx->drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
+                gfx->drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 0, LIGHT_GREY);
+                gfx->drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 1, LIGHT_GREY);
+                gfx->drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY);
 
                 drawScale(sel);
             }
@@ -277,42 +263,42 @@ namespace AttitudeIndicator
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
                 // left side
-                gfx->fillRect(0, SPRITE_Y0_RECT, SPRITE_Y0_RECT - 2, (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch - 1, SKY_BLUE);
-                gfx->fillRect(0, SPRITE_Y0_RECT + (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch, SPRITE_Y0_RECT - 2, (INSTRUMENT_OUTER_HEIGHT_RECT / 2) + pitch, BROWN);
-                gfx->drawFastHLine(0, SPRITE_Y0_RECT + (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch, SPRITE_Y0_RECT - 2, WHITE);
+                gfx->fillRect(0, Y0_RECT_INNER, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) - pitch - 1, SKY_BLUE);
+                gfx->fillRect(0, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) + pitch, BROWN);
+                gfx->drawFastHLine(0, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, WHITE);
                 // right side
-                gfx->fillRect(SPRITE_Y0_RECT + SPRITE_WIDTH_RECT + 2, SPRITE_Y0_RECT, SPRITE_Y0_RECT - 2, (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch - 1, SKY_BLUE);
-                gfx->fillRect(SPRITE_Y0_RECT + SPRITE_WIDTH_RECT + 2, SPRITE_Y0_RECT + (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch, SPRITE_Y0_RECT - 2, (INSTRUMENT_OUTER_HEIGHT_RECT / 2) + pitch, BROWN);
-                gfx->drawFastHLine(SPRITE_Y0_RECT + SPRITE_WIDTH_RECT + 2, SPRITE_Y0_RECT + (INSTRUMENT_OUTER_HEIGHT_RECT / 2) - pitch, SPRITE_Y0_RECT - 2, WHITE);
+                gfx->fillRect(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) - pitch - 1, SKY_BLUE);
+                gfx->fillRect(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) + pitch, BROWN);
+                gfx->drawFastHLine(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, WHITE);
                 // draw inner moving part
-                TFT::setClippingArea(INSTRUMENT_CENTER_X0_RECT, INSTRUMENT_CENTER_Y0_RECT, CLIPPING_XWIDTH, CLIPPING_YWIDTH, 0, 0);
+                TFT::setClippingArea(CENTER_X0_RECT, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER, 0, 0);
                 for (uint8_t i = 6; i > 0; i--) {
-                    xdn    = i * xd;
-                    ydn    = i * yd;
-                    posX   = INSTRUMENT_CENTER_X0_RECT - x0 - xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_RECT + x0 - xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_RECT + y0 - ydn - pitch;
+                    xdn   = i * xd;
+                    ydn   = i * yd;
+                    posX  = CENTER_X0_RECT - x0 - xdn;
+                    posY  = CENTER_Y0_RECT - y0 - ydn - pitch;
+                    posXE = CENTER_X0_RECT + x0 - xdn;
+                    posYE = CENTER_Y0_RECT + y0 - ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
-                    posX   = INSTRUMENT_CENTER_X0_RECT - x0 + xdn;
-                    posY   = INSTRUMENT_CENTER_Y0_RECT - y0 + ydn - pitch;
-                    posXE = INSTRUMENT_CENTER_X0_RECT + x0 + xdn;
-                    posYE = INSTRUMENT_CENTER_Y0_RECT + y0 + ydn - pitch;
+                    posX  = CENTER_X0_RECT - x0 + xdn;
+                    posY  = CENTER_Y0_RECT - y0 + ydn - pitch;
+                    posXE = CENTER_X0_RECT + x0 + xdn;
+                    posYE = CENTER_Y0_RECT + y0 + ydn - pitch;
                     TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
-                posX   = INSTRUMENT_CENTER_X0_RECT - x0;
-                posY   = INSTRUMENT_CENTER_Y0_RECT - y0 - pitch;
-                posXE = INSTRUMENT_CENTER_X0_RECT + x0;
-                posYE = INSTRUMENT_CENTER_Y0_RECT + y0 - pitch;
+                posX  = CENTER_X0_RECT - x0;
+                posY  = CENTER_Y0_RECT - y0 - pitch;
+                posXE = CENTER_X0_RECT + x0;
+                posYE = CENTER_Y0_RECT + y0 - pitch;
                 TFT::drawLine(posX, posY, posXE, posYE, WHITE, sel);
                 // draw the scale
                 drawScale(sel);
 
-                gfx->drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-                gfx->drawRect(SPRITE_X0_RECT - 1, SPRITE_Y0_RECT - 1, SPRITE_WIDTH_RECT + 2, SPRITE_HEIGTH_RECT + 2, DARK_GREY);
-                gfx->drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
-                gfx->drawRect(SPRITE_X0_RECT - 2, SPRITE_Y0_RECT - 2, SPRITE_WIDTH_RECT + 4, SPRITE_HEIGTH_RECT + 4, DARK_GREY);
+                gfx->drawRect(X0_RECT_INNER - 1, Y0_RECT_INNER - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
+                gfx->drawRect(X0_RECT_INNER - 1, Y0_RECT_INNER - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
+                gfx->drawRect(X0_RECT_INNER - 2, Y0_RECT_INNER - 2, WIDTH_RECT_INNER + 4, HEIGTH_RECT_INNER + 4, DARK_GREY);
+                gfx->drawRect(X0_RECT_INNER - 2, Y0_RECT_INNER - 2, WIDTH_RECT_INNER + 4, HEIGTH_RECT_INNER + 4, DARK_GREY);
             }
         }
     }
@@ -325,41 +311,41 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             // Update things near middle of screen first (most likely to get obscured)
             // Level wings graphic
-            gfx->fillRect(INSTRUMENT_CENTER_X0_ROUND - 1, INSTRUMENT_CENTER_Y0_ROUND - 1, 3, 3, RED);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 30, INSTRUMENT_CENTER_Y0_ROUND, 24, RED);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND + 30 - 24, INSTRUMENT_CENTER_Y0_ROUND, 24, RED);
-            gfx->drawFastVLine(INSTRUMENT_CENTER_X0_ROUND - 30 + 24, INSTRUMENT_CENTER_Y0_ROUND, 3, RED);
-            gfx->drawFastVLine(INSTRUMENT_CENTER_X0_ROUND + 30 - 24, INSTRUMENT_CENTER_Y0_ROUND, 3, RED);
+            gfx->fillRect(CENTER_X0_ROUND - 1, CENTER_Y0_ROUND - 1, 3, 3, RED);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 30, CENTER_Y0_ROUND, 24, RED);
+            gfx->drawFastHLine(CENTER_X0_ROUND + 30 - 24, CENTER_Y0_ROUND, 24, RED);
+            gfx->drawFastVLine(CENTER_X0_ROUND - 30 + 24, CENTER_Y0_ROUND, 3, RED);
+            gfx->drawFastVLine(CENTER_X0_ROUND + 30 - 24, CENTER_Y0_ROUND, 3, RED);
 
             // Pitch scale
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND - 40, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND - 30, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND - 20, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND - 10, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 12, CENTER_Y0_ROUND - 40, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 6, CENTER_Y0_ROUND - 30, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 12, CENTER_Y0_ROUND - 20, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 6, CENTER_Y0_ROUND - 10, 12, WHITE);
 
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND + 10, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND + 20, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 6, INSTRUMENT_CENTER_Y0_ROUND + 30, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_ROUND - 12, INSTRUMENT_CENTER_Y0_ROUND + 40, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 6, CENTER_Y0_ROUND + 10, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 12, CENTER_Y0_ROUND + 20, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 6, CENTER_Y0_ROUND + 30, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_ROUND - 12, CENTER_Y0_ROUND + 40, 24, WHITE);
 
             // Pitch scale values
             gfx->setTextColor(WHITE);
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND - 20 - 3);
+            gfx->setCursor(CENTER_X0_ROUND - 12 - 13, CENTER_Y0_ROUND - 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND - 20 - 3);
+            gfx->setCursor(CENTER_X0_ROUND + 12 + 1, CENTER_Y0_ROUND - 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND + 20 - 3);
+            gfx->setCursor(CENTER_X0_ROUND - 12 - 13, CENTER_Y0_ROUND + 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND + 20 - 3);
+            gfx->setCursor(CENTER_X0_ROUND + 12 + 1, CENTER_Y0_ROUND + 20 - 3);
             gfx->print("10");
 
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND - 40 - 3);
+            gfx->setCursor(CENTER_X0_ROUND - 12 - 13, CENTER_Y0_ROUND - 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND - 40 - 3);
+            gfx->setCursor(CENTER_X0_ROUND + 12 + 1, CENTER_Y0_ROUND - 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND - 12 - 13, INSTRUMENT_CENTER_Y0_ROUND + 40 - 3);
+            gfx->setCursor(CENTER_X0_ROUND - 12 - 13, CENTER_Y0_ROUND + 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_ROUND + 12 + 1, INSTRUMENT_CENTER_Y0_ROUND + 40 - 3);
+            gfx->setCursor(CENTER_X0_ROUND + 12 + 1, CENTER_Y0_ROUND + 40 - 3);
             gfx->print("20");
 
             gfx->setTextColor(WHITE, BLACK); // Text with background
@@ -367,41 +353,41 @@ namespace AttitudeIndicator
         if (instrumentType == RECT_SHAPE) {
             // Update things near middle of screen first (most likely to get obscured)
             // Level wings graphic
-            gfx->fillRect(INSTRUMENT_CENTER_X0_RECT - 1, INSTRUMENT_CENTER_Y0_RECT - 1, 3, 3, RED);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 30, INSTRUMENT_CENTER_Y0_RECT, 24, RED);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT + 30 - 24, INSTRUMENT_CENTER_Y0_RECT, 24, RED);
-            gfx->drawFastVLine(INSTRUMENT_CENTER_X0_RECT - 30 + 24, INSTRUMENT_CENTER_Y0_RECT, 3, RED);
-            gfx->drawFastVLine(INSTRUMENT_CENTER_X0_RECT + 30 - 24, INSTRUMENT_CENTER_Y0_RECT, 3, RED);
+            gfx->fillRect(CENTER_X0_RECT - 1, CENTER_Y0_RECT - 1, 3, 3, RED);
+            gfx->drawFastHLine(CENTER_X0_RECT - 30, CENTER_Y0_RECT, 24, RED);
+            gfx->drawFastHLine(CENTER_X0_RECT + 30 - 24, CENTER_Y0_RECT, 24, RED);
+            gfx->drawFastVLine(CENTER_X0_RECT - 30 + 24, CENTER_Y0_RECT, 3, RED);
+            gfx->drawFastVLine(CENTER_X0_RECT + 30 - 24, CENTER_Y0_RECT, 3, RED);
 
             // Pitch scale
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT - 40, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT - 30, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT - 20, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT - 10, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 12, CENTER_Y0_RECT - 40, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 6, CENTER_Y0_RECT - 30, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 12, CENTER_Y0_RECT - 20, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 6, CENTER_Y0_RECT - 10, 12, WHITE);
 
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT + 10, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT + 20, 24, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 6, INSTRUMENT_CENTER_Y0_RECT + 30, 12, WHITE);
-            gfx->drawFastHLine(INSTRUMENT_CENTER_X0_RECT - 12, INSTRUMENT_CENTER_Y0_RECT + 40, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 6, CENTER_Y0_RECT + 10, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 12, CENTER_Y0_RECT + 20, 24, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 6, CENTER_Y0_RECT + 30, 12, WHITE);
+            gfx->drawFastHLine(CENTER_X0_RECT - 12, CENTER_Y0_RECT + 40, 24, WHITE);
 
             // Pitch scale values
             gfx->setTextColor(WHITE);
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT - 20 - 3);
+            gfx->setCursor(CENTER_X0_RECT - 12 - 13, CENTER_Y0_RECT - 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT - 20 - 3);
+            gfx->setCursor(CENTER_X0_RECT + 12 + 1, CENTER_Y0_RECT - 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT + 20 - 3);
+            gfx->setCursor(CENTER_X0_RECT - 12 - 13, CENTER_Y0_RECT + 20 - 3);
             gfx->print("10");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT + 20 - 3);
+            gfx->setCursor(CENTER_X0_RECT + 12 + 1, CENTER_Y0_RECT + 20 - 3);
             gfx->print("10");
 
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT - 40 - 3);
+            gfx->setCursor(CENTER_X0_RECT - 12 - 13, CENTER_Y0_RECT - 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT - 40 - 3);
+            gfx->setCursor(CENTER_X0_RECT + 12 + 1, CENTER_Y0_RECT - 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT - 12 - 13, INSTRUMENT_CENTER_Y0_RECT + 40 - 3);
+            gfx->setCursor(CENTER_X0_RECT - 12 - 13, CENTER_Y0_RECT + 40 - 3);
             gfx->print("20");
-            gfx->setCursor(INSTRUMENT_CENTER_X0_RECT + 12 + 1, INSTRUMENT_CENTER_Y0_RECT + 40 - 3);
+            gfx->setCursor(CENTER_X0_RECT + 12 + 1, CENTER_Y0_RECT + 40 - 3);
             gfx->print("20");
             gfx->setTextColor(BLACK, BROWN); // Text with background
         }
@@ -417,18 +403,18 @@ namespace AttitudeIndicator
     {
         if (instrumentType == ROUND_SHAPE) {
             // fill sprite with not moving area
-            TFT::fillHalfCircleTFT(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
-            TFT::fillHalfCircleTFT(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
+            TFT::fillHalfCircleTFT(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, SKY_BLUE, BROWN);
+            TFT::fillHalfCircleTFT(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, SKY_BLUE, BROWN);
             // and now the "static" area
-            TFT::fillHalfCircleTFT(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, SKY_BLUE, BROWN);
-            gfx->drawCircle(INSTRUMENT_CENTER_X0_ROUND, INSTRUMENT_CENTER_Y0_ROUND, INSTRUMENT_OUTER_RADIUS, LIGHT_GREY);
+            TFT::fillHalfCircleTFT(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, SKY_BLUE, BROWN);
+            gfx->drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
-            gfx->fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT - SPRITE_HEIGTH_RECT / 2, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, SKY_BLUE);
-            gfx->fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, BROWN);
-            gfx->fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT - SPRITE_HEIGTH_RECT / 2, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, SKY_BLUE);
-            gfx->fillRect(INSTRUMENT_CENTER_X0_RECT - SPRITE_WIDTH_RECT / 2, INSTRUMENT_CENTER_Y0_RECT, SPRITE_WIDTH_RECT, SPRITE_HEIGTH_RECT / 2, BROWN);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, SKY_BLUE);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, BROWN);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, SKY_BLUE);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, BROWN);
             // fill area outside sprite with not moving area
             gfx->fillRect(0, 0, TFT_WIDTH, TFT_HEIGHT / 2, SKY_BLUE);
             gfx->fillRect(0, 160, TFT_WIDTH, TFT_HEIGHT / 2, BROWN);
