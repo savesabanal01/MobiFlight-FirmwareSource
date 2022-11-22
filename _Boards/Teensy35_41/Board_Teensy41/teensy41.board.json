@@ -23,7 +23,7 @@
     "Info": {
       "CanInstallFirmware": true,
       "FriendlyName": "Teensy41",
-      "LatestFirmwareVersion": "2.2.2",
+      "LatestFirmwareVersion": "2.3.0",
       "MobiFlightType": "MobiFlight Teensy41"
     },
     "ModuleLimits": {

@@ -21,7 +21,7 @@
     "Info": {
       "CanInstallFirmware": true,
       "FriendlyName": "RaspiTufty2040",
-      "LatestFirmwareVersion": "2.2.2",
+      "LatestFirmwareVersion": "2.3.0",
       "MobiFlightType": "MobiFlight RaspiTufty2040"
     },
     "ModuleLimits": {
