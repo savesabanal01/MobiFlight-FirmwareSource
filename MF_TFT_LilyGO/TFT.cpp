@@ -1,59 +1,124 @@
 #include <Arduino.h>
+#include "Wire.h"
+#include "SPI.h"
 #include "TFT.h"
+//#include "bouncingCircles.h"
+#include "AttitudeIndicator.h"
+//#include "Compass.h"
 
-// Library instance
-TFT_eSPI tft = TFT_eSPI();
-// Create two sprites for a DMA toggle buffer
-TFT_eSprite spr[2] = {TFT_eSprite(&tft), TFT_eSprite(&tft)};
-// Pointers to start of Sprites in RAM (these are then "image" pointers)
-uint16_t *sprPtr[2];
+
+#include "pin_config.h"
+#include "XL9535_driver.h"
+
+Arduino_ESP32RGBPanel *bus = new Arduino_ESP32RGBPanel(
+    -1, -1, -1, EXAMPLE_PIN_NUM_DE, EXAMPLE_PIN_NUM_VSYNC, EXAMPLE_PIN_NUM_HSYNC, EXAMPLE_PIN_NUM_PCLK,
+    EXAMPLE_PIN_NUM_DATA1, EXAMPLE_PIN_NUM_DATA2, EXAMPLE_PIN_NUM_DATA3, EXAMPLE_PIN_NUM_DATA4, EXAMPLE_PIN_NUM_DATA5,
+    EXAMPLE_PIN_NUM_DATA6, EXAMPLE_PIN_NUM_DATA7, EXAMPLE_PIN_NUM_DATA8, EXAMPLE_PIN_NUM_DATA9, EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
+    EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14, EXAMPLE_PIN_NUM_DATA15, EXAMPLE_PIN_NUM_DATA16, EXAMPLE_PIN_NUM_DATA17);
+Arduino_GFX *gfx = new Arduino_ST7701_RGBPanel(bus, GFX_NOT_DEFINED, 0 /* rotation */, false /* IPS */, 480, 480,
+                                               st7701_type2_init_operations, sizeof(st7701_type2_init_operations), true,
+                                               50, 1, 30, 20, 1, 30);
+
+XL9535 xl;
 
 namespace TFT
 {
-    int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS] = {0};
-    int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS] = {0};
 
-    int32_t clippingCenterX;
-    int32_t clippingCenterY;
-    int32_t clippingWidthX;
-    int32_t clippingWidthY;
-    int32_t clippingRadiusOuter;
-    int32_t clippingRadiusInner;
+    void tft_init(void);
+    void lcd_cmd(const uint8_t cmd);
+    void lcd_data(const uint8_t *data, int len);
+
+    typedef struct {
+        uint8_t cmd;
+        uint8_t data[16];
+        uint8_t databytes; // No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+    } lcd_init_cmd_t;
+
+    DRAM_ATTR static const lcd_init_cmd_t st_init_cmds[] = {
+        {0xFF, {0x77, 0x01, 0x00, 0x00, 0x10}, 0x05},
+        {0xC0, {0x3b, 0x00}, 0x02},
+        {0xC1, {0x0b, 0x02}, 0x02},
+        {0xC2, {0x07, 0x02}, 0x02},
+        {0xCC, {0x10}, 0x01},
+        {0xCD, {0x08}, 0x01}, // 用565时屏蔽    666打开
+        {0xb0, {0x00, 0x11, 0x16, 0x0e, 0x11, 0x06, 0x05, 0x09, 0x08, 0x21, 0x06, 0x13, 0x10, 0x29, 0x31, 0x18}, 0x10},
+        {0xb1, {0x00, 0x11, 0x16, 0x0e, 0x11, 0x07, 0x05, 0x09, 0x09, 0x21, 0x05, 0x13, 0x11, 0x2a, 0x31, 0x18}, 0x10},
+        {0xFF, {0x77, 0x01, 0x00, 0x00, 0x11}, 0x05},
+        {0xb0, {0x6d}, 0x01},
+        {0xb1, {0x37}, 0x01},
+        {0xb2, {0x81}, 0x01},
+        {0xb3, {0x80}, 0x01},
+        {0xb5, {0x43}, 0x01},
+        {0xb7, {0x85}, 0x01},
+        {0xb8, {0x20}, 0x01},
+        {0xc1, {0x78}, 0x01},
+        {0xc2, {0x78}, 0x01},
+        {0xc3, {0x8c}, 0x01},
+        {0xd0, {0x88}, 0x01},
+        {0xe0, {0x00, 0x00, 0x02}, 0x03},
+        {0xe1, {0x03, 0xa0, 0x00, 0x00, 0x04, 0xa0, 0x00, 0x00, 0x00, 0x20, 0x20}, 0x0b},
+        {0xe2, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 0x0d},
+        {0xe3, {0x00, 0x00, 0x11, 0x00}, 0x04},
+        {0xe4, {0x22, 0x00}, 0x02},
+        {0xe5, {0x05, 0xec, 0xa0, 0xa0, 0x07, 0xee, 0xa0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 0x10},
+        {0xe6, {0x00, 0x00, 0x11, 0x00}, 0x04},
+        {0xe7, {0x22, 0x00}, 0x02},
+        {0xe8, {0x06, 0xed, 0xa0, 0xa0, 0x08, 0xef, 0xa0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 0x10},
+        {0xeb, {0x00, 0x00, 0x40, 0x40, 0x00, 0x00, 0x00}, 0x07},
+        {0xed, {0xff, 0xff, 0xff, 0xba, 0x0a, 0xbf, 0x45, 0xff, 0xff, 0x54, 0xfb, 0xa0, 0xab, 0xff, 0xff, 0xff}, 0x10},
+        {0xef, {0x10, 0x0d, 0x04, 0x08, 0x3f, 0x1f}, 0x06},
+        {0xFF, {0x77, 0x01, 0x00, 0x00, 0x13}, 0x05},
+        {0xef, {0x08}, 0x01},
+        {0xFF, {0x77, 0x01, 0x00, 0x00, 0x00}, 0x05},
+        {0x36, {0x08}, 0x01},
+        {0x3a, {0x66}, 0x01},
+        {0x11, {0x00}, 0x80},
+        // {0xFF, {0x77, 0x01, 0x00, 0x00, 0x12}, 0x05},
+        // {0xd1, {0x81}, 0x01},
+        // {0xd2, {0x06}, 0x01},
+        {0x29, {0x00}, 0x80},
+        {0, {0}, 0xff}};
+
+    int16_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS] = {0};
+    int16_t checkClippingRoundInner[MAX_CLIPPING_RADIUS] = {0};
+
+    int16_t clippingCenterX;
+    int16_t clippingCenterY;
+    int16_t clippingWidthX;
+    int16_t clippingWidthY;
+    int16_t clippingRadiusOuter;
+    int16_t clippingRadiusInner;
 
     void init()
     {
-        // #########################################################################
-        //  reduce systemfrequency to 125MHz to get max SPI speed for 62.5 MHz
-        //  which is the maximum for most displays.
-        //  The SPI clock rate can only be set to an integer division of the processor clock.
-        //  The library will drop the clock to the next lower nearest SPI frequency.
-        //  So, when the processor frequency is increased to say 133MHz,
-        //  then the maximum SPI rate is now 66500000. This means if you specify 62500000
-        //  as the frequency then the library will drop the rate to the next lowest value of 33250000,
-        //  so you will see a speed drop.
-        //  REMERK!! Changing to 125MHz or using PIO for SPI disables servo functionality
-        //  as the servo implementation uses also the PIO
-        //  if servo is not needed, uncomment the following function
-        //  this will speed up SPI transfer
-        //  For this example 24.7fps will be increased to 40fps
-        //  Using PIO for SPI will additionally free up the MISO pin
-        //  running on 133MHz gives 26.2fps, running on 125MHz gives 40.3fps
-        // #########################################################################
-        // set_sys_clock_khz(125000, false);
-
-        // Changing SPI frequency to clk_sys/2
-        // clk_peri does not have a divider, so in and out frequencies must be the same
-        clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS, clock_get_hz(clk_sys), clock_get_hz(clk_sys));
-
-        tft.init();
-        tft.initDMA();
-        tft.fillScreen(TFT_BLACK);
-        tft.setRotation(0);
-        randomSeed(analogRead(A0));
+        Wire.begin(IIC_SDA_PIN, IIC_SCL_PIN, (uint32_t)800000);
+        xl.begin();
+        uint8_t pin = (1 << PWR_EN_PIN) | (1 << LCD_CS_PIN) | (1 << TP_RES_PIN) | (1 << LCD_SDA_PIN) | (1 << LCD_CLK_PIN) |
+                      (1 << LCD_RST_PIN) | (1 << SD_CS_PIN);
+        xl.pinMode8(0, pin, OUTPUT);
+        xl.digitalWrite(PWR_EN_PIN, 1);
+        pinMode(EXAMPLE_PIN_NUM_BK_LIGHT, OUTPUT);
+        digitalWrite(EXAMPLE_PIN_NUM_BK_LIGHT, EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
+        gfx->begin();
+        tft_init();
+        gfx->fillScreen(BLACK);
+        /*
+        gfx->setCursor(100, 240);
+        gfx->setTextColor(WHITE);
+        gfx->setTextSize(3);
+        gfx->println("Mobiflight rocks!");
+        delay(2000);
+        */
+        uint32_t demoMillis = millis();
+        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
+        do {
+            AttitudeIndicator::loop();
+            //checkDataFromCore0();
+        } while (millis() - demoMillis < 100000);
     }
 
     // setup clipping area
-    void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadiusOuter, int32_t ClippingRadiusInner)
+    void setClippingArea(int16_t ClippingX0, int16_t ClippingY0, int16_t ClippingXwidth, int16_t ClippingYwidth, int16_t ClippingRadiusOuter, int16_t ClippingRadiusInner)
     {
         clippingCenterX     = ClippingX0;
         clippingCenterY     = ClippingY0;
@@ -90,7 +155,7 @@ namespace TFT
     ***************************************************************************************/
     // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
     // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-    void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel)
     {
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -103,9 +168,9 @@ namespace TFT
             swap_coord(y0, y1);
         }
 
-        int32_t dx = x1 - x0, dy = abs(y1 - y0);
+        int16_t dx = x1 - x0, dy = abs(y1 - y0);
 
-        int32_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
+        int16_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
 
         if (y0 < y1) ystep = 1;
 
@@ -149,15 +214,15 @@ namespace TFT
     ** Function name:           drawFastHLine
     ** Description:             draw a horizontal line
     ***************************************************************************************/
-    void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
+    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel)
     {
         // draw always from left to right
         if (w < 0) {
             x -= w;
             w *= -1;
         }
-        int32_t xE = x + w;
-
+        int16_t xE = x + w;
+        
         if (clippingRadiusOuter == 0) {
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
@@ -182,29 +247,29 @@ namespace TFT
                 // now calculate the x/y coordinates for the inner circle to split into two lines
                 // y coordinate is known, nothing to change
                 // x axis must be split up according the inner radius
-                int32_t tempxA = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
-                int32_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
+                int16_t tempxA = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+                int16_t tempxE = clippingCenterX - checkClippingRoundInner[abs(y - clippingCenterY)];
                 // draw the left short line
-                spr[sel].drawFastHLine(tempxA, y, tempxE - x + 1, color);
+                gfx->drawFastHLine(tempxA, y, tempxE - x + 1, color);
                 // and calculate the coordinates for the right short line
                 x = clippingCenterX + checkClippingRoundInner[abs(y - clippingCenterY)];
             }
         }
-        spr[sel].drawFastHLine(x, y, xE - x + 1, color);
+        gfx->drawFastHLine(x, y, xE - x + 1, color);
     }
 
     /***************************************************************************************
     ** Function name:           drawFastVLine
     ** Description:             draw a vertical line
     ***************************************************************************************/
-    void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
+    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel)
     {
         // draw always from top to down
         if (h < 0) {
             y -= h;
             h *= -1;
         }
-        int32_t yE = y + h;
+        int16_t yE = y + h;
         if (clippingRadiusOuter == 0) {
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
@@ -229,23 +294,22 @@ namespace TFT
                 // now calculate the x/y coordinates for the inner circle to split into two lines
                 // x coordinate is known, nothing to change
                 // y axis must be split up according the inner radius
-                int32_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
-                int32_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
+                int16_t tempyA = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                int16_t tempyE = clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)];
                 // draw the upper short line
-                spr[sel].drawFastHLine(x, y, tempyE - x + 1, color);
+                gfx->drawFastHLine(x, y, tempyE - x + 1, color);
                 // and calculate the coordinates for the lower short line
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
         }
-
-        spr[sel].drawFastVLine(x, y, yE - y + 1, color);
+        gfx->drawFastVLine(x, y, yE - y + 1, color);
     }
 
     /***************************************************************************************
     ** Function name:           drawPixel
     ** Description:             push a single pixel at an arbitrary position
     ***************************************************************************************/
-    void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
+    void drawPixel(int16_t x, int16_t y, uint16_t color, bool sel)
     {
         if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit
@@ -267,41 +331,7 @@ namespace TFT
             if (!(y < clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)])) return;
             if (!(y > clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)])) return;
         }
-        spr[sel].drawPixel(x, y, color);
-    }
-
-    /***************************************************************************************
-    ** Function name:           fillHalfCircle
-    ** Description:             draw a filled circle, upper or lower part
-    ***************************************************************************************/
-    // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
-    // Improved algorithm avoids repetition of lines
-    void fillHalfCircleSprite(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower, bool sel)
-    {
-        int32_t x  = 0;
-        int32_t dx = 1;
-        int32_t dy = r + r;
-        int32_t p  = -(r >> 1);
-
-        spr[sel].drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
-
-        while (x < r) {
-
-            if (p >= 0) {
-                spr[sel].drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
-                spr[sel].drawFastHLine(x0 - x, y0 + r, dx, colorLower);
-                dy -= 2;
-                p -= dy;
-                r--;
-            }
-
-            dx += 2;
-            p += dx;
-            x++;
-
-            spr[sel].drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
-            spr[sel].drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
-        }
+        gfx->drawPixel(x, y, color);
     }
 
     /***************************************************************************************
@@ -310,20 +340,20 @@ namespace TFT
      ***************************************************************************************/
     // Optimised midpoint circle algorithm, changed to horizontal lines (faster in sprites)
     // Improved algorithm avoids repetition of lines
-    void fillHalfCircleTFT(int32_t x0, int32_t y0, int32_t r, uint32_t colorUpper, uint32_t colorLower)
+    void fillHalfCircleTFT(int16_t x0, int16_t y0, int16_t r, uint16_t colorUpper, uint16_t colorLower)
     {
-        int32_t x  = 0;
-        int32_t dx = 1;
-        int32_t dy = r + r;
-        int32_t p  = -(r >> 1);
+        int16_t x  = 0;
+        int16_t dx = 1;
+        int16_t dy = r + r;
+        int16_t p  = -(r >> 1);
 
-        tft.drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
+        gfx->drawFastHLine(x0 - r, y0, dy + 1, colorUpper);
 
         while (x < r) {
 
             if (p >= 0) {
-                tft.drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
-                tft.drawFastHLine(x0 - x, y0 + r, dx, colorLower);
+                gfx->drawFastHLine(x0 - x, y0 - r, dx, colorUpper);
+                gfx->drawFastHLine(x0 - x, y0 + r, dx, colorLower);
                 dy -= 2;
                 p -= dy;
                 r--;
@@ -333,8 +363,75 @@ namespace TFT
             p += dx;
             x++;
 
-            tft.drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
-            tft.drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
+            gfx->drawFastHLine(x0 - r, y0 - x, dy + 1, colorUpper);
+            gfx->drawFastHLine(x0 - r, y0 + x, dy + 1, colorLower);
         }
     }
+
+    void tft_init(void)
+    {
+        xl.digitalWrite(LCD_CS_PIN, 1);
+        xl.digitalWrite(LCD_SDA_PIN, 1);
+        xl.digitalWrite(LCD_CLK_PIN, 1);
+
+        // Reset the display
+        xl.digitalWrite(LCD_RST_PIN, 1);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+        xl.digitalWrite(LCD_RST_PIN, 0);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+        xl.digitalWrite(LCD_RST_PIN, 1);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+        int cmd = 0;
+        while (st_init_cmds[cmd].databytes != 0xff) {
+            lcd_cmd(st_init_cmds[cmd].cmd);
+            lcd_data(st_init_cmds[cmd].data, st_init_cmds[cmd].databytes & 0x1F);
+            if (st_init_cmds[cmd].databytes & 0x80) {
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+            }
+            cmd++;
+        }
+        Serial.println("Register setup complete");
+    }
+
+    void lcd_send_data(uint8_t data)
+    {
+        uint8_t n;
+        for (n = 0; n < 8; n++) {
+            if (data & 0x80)
+                xl.digitalWrite(LCD_SDA_PIN, 1);
+            else
+                xl.digitalWrite(LCD_SDA_PIN, 0);
+
+            data <<= 1;
+            xl.digitalWrite(LCD_CLK_PIN, 0);
+            xl.digitalWrite(LCD_CLK_PIN, 1);
+        }
+    }
+
+    void lcd_cmd(const uint8_t cmd)
+    {
+        xl.digitalWrite(LCD_CS_PIN, 0);
+        xl.digitalWrite(LCD_SDA_PIN, 0);
+        xl.digitalWrite(LCD_CLK_PIN, 0);
+        xl.digitalWrite(LCD_CLK_PIN, 1);
+        lcd_send_data(cmd);
+        xl.digitalWrite(LCD_CS_PIN, 1);
+    }
+
+    void lcd_data(const uint8_t *data, int len)
+    {
+        uint32_t i = 0;
+        if (len == 0)
+            return; // no need to send anything
+        do {
+            xl.digitalWrite(LCD_CS_PIN, 0);
+            xl.digitalWrite(LCD_SDA_PIN, 1);
+            xl.digitalWrite(LCD_CLK_PIN, 0);
+            xl.digitalWrite(LCD_CLK_PIN, 1);
+            lcd_send_data(*(data + i));
+            xl.digitalWrite(LCD_CS_PIN, 1);
+            i++;
+        } while (len--);
+    }
+
 } // end of namespace TFT
