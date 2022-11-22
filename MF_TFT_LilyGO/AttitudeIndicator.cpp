@@ -20,8 +20,8 @@
 #define HEIGTH_RECT_OUTER 320                   // height of clipping area for rect instrument around CENTER_Y0_RECT, if higher than Sprite dimension not considered
 #define CENTER_X0_ROUND   240                   // x mid point in sprite for instrument, complete drawing must be inside sprite
 #define CENTER_Y0_ROUND   240                   // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define OUTER_RADIUS      240                   // radius of outer part of instrument
-#define INNER_RADIUS      200                   // radius of moving part of instrument
+#define OUTER_RADIUS      230                   // radius of outer part of instrument
+#define INNER_RADIUS      190                   // radius of moving part of instrument
 #define HOR               600                   // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
 #define MAX_PITCH         200                   // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN             0xFD20                // 0x5140 // 0x5960 the other are not working??
