@@ -253,7 +253,6 @@ namespace TFT
             if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
             // and lest check if only end of line is out of clipping area
             if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
-        //    Serial.print("Anfang X: "); Serial.print(x); Serial.print(" / Ende X: ");Serial.println(xE);
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
@@ -319,7 +318,6 @@ namespace TFT
             if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
             // and lest check if only end of line is out of clipping area
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
-        //    Serial.print("Anfang Y: "); Serial.print(y); Serial.print(" / Ende Y: ");Serial.println(yE);
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
