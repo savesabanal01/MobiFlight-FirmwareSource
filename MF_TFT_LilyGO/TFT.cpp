@@ -106,14 +106,15 @@ namespace TFT
         gfx->setTextColor(WHITE);
         gfx->setTextSize(3);
         gfx->println("Mobiflight rocks!");
-        delay(2000);
         */
+        delay(2000);
+
         uint32_t demoMillis = millis();
-        AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE /*ROUND_SHAPE*/);
+        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
             AttitudeIndicator::loop();
             // checkDataFromCore0();
-        } while (millis() - demoMillis < 1000000);
+        } while (millis() - demoMillis < 10000000);
     }
 
     // setup clipping area
@@ -232,8 +233,18 @@ namespace TFT
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
             // check left and right limit and set start / end point accordingly from look up table for the given x position
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (xE <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)])
+                return;
+            // next check if end of line is outside clipping area
+            if (x >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)])
+                return;
+            // next check if only start of line is out of clipping area
             if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            // and lest check if only end of line is out of clipping area
             if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
+        //    Serial.print("Anfang X: "); Serial.print(x); Serial.print(" / Ende X: ");Serial.println(xE);
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
@@ -279,9 +290,18 @@ namespace TFT
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (yE <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)])
+                return;
+            // next check if end of line is outside clipping area
+            if (y >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)])
+                return;
+            // next check if only start of line is out of clipping area
             if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            // and lest check if only end of line is out of clipping area
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
-             // Serial.print("Negative Länge VLine"); Serial.println(checkClippingRoundOuter[abs(x - clippingCenterX)]);
+        //    Serial.print("Anfang Y: "); Serial.print(y); Serial.print(" / Ende Y: ");Serial.println(yE);
         }
         if (clippingRadiusInner > 0) {
             // at this point we have already the x/y coordinates for the outer circle
@@ -302,7 +322,7 @@ namespace TFT
                 y = clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)];
             }
         }
-        //gfx->writeFastVLine(x, y, yE - y + 1, color);
+        gfx->writeFastVLine(x, y, yE - y + 1, color);
     }
 
     /***************************************************************************************
@@ -331,7 +351,7 @@ namespace TFT
             if (!(y < clippingCenterY - checkClippingRoundInner[abs(x - clippingCenterX)])) return;
             if (!(y > clippingCenterY + checkClippingRoundInner[abs(x - clippingCenterX)])) return;
         }
-        // gfx->drawPixel(x, y, color);
+        gfx->drawPixel(x, y, color);
     }
 
     /***************************************************************************************
