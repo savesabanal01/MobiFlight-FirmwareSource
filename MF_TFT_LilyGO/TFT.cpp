@@ -107,14 +107,15 @@ namespace TFT
         gfx->setTextSize(3);
         gfx->println("Mobiflight rocks!");
         */
-        delay(2000);
-
+//        delay(2000);
+/*
         uint32_t demoMillis = millis();
         AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
             AttitudeIndicator::loop();
             // checkDataFromCore0();
         } while (millis() - demoMillis < 10000000);
+*/
     }
 
     // setup clipping area

@@ -37,6 +37,7 @@
 #endif
 #if defined(ARDUINO_ARCH_ESP32)
 #include "TFT.h"
+#include "core0.h"
 #endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
@@ -57,6 +58,11 @@ extern MFEEPROM MFeeprom;
 #if MF_MUX_SUPPORT == 1
 MFMuxDriver MUX;
 #endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+TaskHandle_t Core0handle;
+#endif
+
 // ==================================================
 //   Polling interval counters
 // ==================================================
@@ -170,8 +176,16 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
-#if defined(ARDUINO_ARCH_ESP32)
-    TFT::init();
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
+    core0_init();
+    xTaskCreatePinnedToCore(
+        core0, /* Function to implement the task */
+        "Graphics", /* Name of the task */
+        10000,  /* Stack size in words */
+        NULL,  /* Task input parameter */
+        0,  /* Priority of the task */
+        &Core0handle,  /* Task handle. */
+        0); /* Core where the task should run */
 #endif
 #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
     core1_init();

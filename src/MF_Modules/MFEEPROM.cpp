@@ -11,7 +11,10 @@
 #if defined(ARDUINO_ARCH_RP2040)
 #include "Core1.h"
 #endif
-
+#if defined(ARDUINO_ARCH_ESP32)
+#include "Core0.h"
+extern TaskHandle_t Core0handle;
+#endif
 MFEEPROM::MFEEPROM() {}
 
 void MFEEPROM::init(void)
@@ -52,6 +55,11 @@ bool MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
     EEPROM.commit();
     multicore_lockout_end_blocking();
 #endif
+#if defined(ARDUINO_ARCH_ESP32)
+    // vTaskDelete(core0handle);
+    EEPROM.commit();
+    // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);
+#endif
 #if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
     EEPROM.commit();
 #endif
@@ -77,6 +85,11 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
     multicore_lockout_start_blocking();
     EEPROM.commit();
     multicore_lockout_end_blocking();
+#endif
+#if defined(ARDUINO_ARCH_ESP32)
+    // vTaskDelete(core0handle);
+    EEPROM.commit();
+    // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);
 #endif
 #if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
     EEPROM.commit();
