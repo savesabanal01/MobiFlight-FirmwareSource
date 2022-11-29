@@ -162,13 +162,31 @@ namespace TFT
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
             // check left and right limit and set start / end point accordingly
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (xE <= clippingCenterX - clippingWidthX / 2)
+                return;
+            // next check if end of line is outside clipping area
+            if (x >= clippingCenterX + clippingWidthX / 2)
+                return;
+            // next check if only start of line is out of clipping area
             if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
+            // and lest check if only end of line is out of clipping area
             if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
         } else {
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingRadiusOuter || y >= clippingCenterY + clippingRadiusOuter) return;
             // check left and right limit and set start / end point accordingly from look up table for the given x position
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (xE <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)])
+                return;
+            // next check if end of line is outside clipping area
+            if (x >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)])
+                return;
+            // next check if only start of line is out of clipping area
             if (x <= clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)]) x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+            // and lest check if only end of line is out of clipping area
             if (xE >= clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)]) xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
         }
         if (clippingRadiusInner > 0) {
@@ -209,13 +227,31 @@ namespace TFT
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
             // check left and right limit and set start / end point accordingly
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (yE <= clippingCenterY - clippingWidthY / 2)
+                return;
+            // next check if end of line is outside clipping area
+            if (y >= clippingCenterY + clippingWidthY / 2)
+                return;
+            // next check if only start of line is out of clipping area
             if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
+            // and lest check if only end of line is out of clipping area
             if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
         } else {
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) return;
             // check upper and lower limit and set start / end point accordingly from look up table for the given x position
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (yE <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)])
+                return;
+            // next check if end of line is outside clipping area
+            if (y >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)])
+                return;
+            // next check if only start of line is out of clipping area
             if (y <= clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)]) y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+            // and lest check if only end of line is out of clipping area
             if (yE >= clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)]) yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
         }
         if (clippingRadiusInner > 0) {
