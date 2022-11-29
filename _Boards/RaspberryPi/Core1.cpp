@@ -1,4 +1,4 @@
-#if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
+#if defined(USE_CORE1)
 
 #include <Arduino.h>
 #include "Core1.h"
