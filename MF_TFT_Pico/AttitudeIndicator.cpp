@@ -251,19 +251,19 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_ROUND - y0outer - ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0outer - xdn;
                     posYE = CENTER_Y0_ROUND + y0outer - ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
 
                     posX  = CENTER_X0_ROUND - x0outer + xdn;
                     posY  = CENTER_Y0_ROUND - y0outer + ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0outer + xdn;
                     posYE = CENTER_Y0_ROUND + y0outer + ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 posX  = CENTER_X0_ROUND - x0outer;
                 posY  = CENTER_Y0_ROUND - y0outer - pitch;
                 posXE = CENTER_X0_ROUND + x0outer;
                 posYE = CENTER_Y0_ROUND + y0outer - pitch;
-                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
 
                 // draw inner moving part
                 TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, INNER_RADIUS, 0);
@@ -274,19 +274,19 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_ROUND - y0 - ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0 - xdn;
                     posYE = CENTER_Y0_ROUND + y0 - ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX  = CENTER_X0_ROUND - x0 + xdn;
                     posY  = CENTER_Y0_ROUND - y0 + ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0 + xdn;
                     posYE = CENTER_Y0_ROUND + y0 + ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX  = CENTER_X0_ROUND - x0;
                 posY  = CENTER_Y0_ROUND - y0 - pitch;
                 posXE = CENTER_X0_ROUND + x0;
                 posYE = CENTER_Y0_ROUND + y0 - pitch;
-                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw a border around the inner moving part
                 spr[sel].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 0, LIGHT_GREY);
                 spr[sel].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 1, LIGHT_GREY);
@@ -317,19 +317,19 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_RECT - y0 - ydn - pitch;
                     posXE = CENTER_X0_RECT + x0 - xdn;
                     posYE = CENTER_Y0_RECT + y0 - ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX  = CENTER_X0_RECT - x0 + xdn;
                     posY  = CENTER_Y0_RECT - y0 + ydn - pitch;
                     posXE = CENTER_X0_RECT + x0 + xdn;
                     posYE = CENTER_Y0_RECT + y0 + ydn - pitch;
-                    TFT::drawLine(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX  = CENTER_X0_RECT - x0;
                 posY  = CENTER_Y0_RECT - y0 - pitch;
                 posXE = CENTER_X0_RECT + x0;
                 posYE = CENTER_Y0_RECT + y0 - pitch;
-                TFT::drawLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw the scale
                 drawScale(sel);
 

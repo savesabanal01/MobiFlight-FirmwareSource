@@ -85,12 +85,12 @@ namespace TFT
     // #########################################################################
 
     /***************************************************************************************
-    ** Function name:           drawLine
+    ** Function name:           drawLineClipped
     ** Description:             draw a line between 2 arbitrary points
     ***************************************************************************************/
     // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
     // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-    void drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
+    void drawLineClipped(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
     {
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -116,40 +116,40 @@ namespace TFT
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixel(y0, xs, color, sel);
+                        drawPixelClipped(y0, xs, color, sel);
                     else
-                        drawFastVLine(y0, xs, dlen, color, sel);
+                        drawFastVLineClipped(y0, xs, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
+            if (dlen) drawFastVLineClipped(y0, xs, dlen, color, sel);
         } else {
             for (; x0 <= x1; x0++) {
                 dlen++;
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixel(xs, y0, color, sel);
+                        drawPixelClipped(xs, y0, color, sel);
                     else
-                        drawFastHLine(xs, y0, dlen, color, sel);
+                        drawFastHLineClipped(xs, y0, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
+            if (dlen) drawFastHLineClipped(xs, y0, dlen, color, sel);
         }
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastHLine
+    ** Function name:           drawFastHLineClipped
     ** Description:             draw a horizontal line
     ***************************************************************************************/
-    void drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
+    void drawFastHLineClipped(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     {
         // draw always from left to right
         if (w < 0) {
@@ -194,10 +194,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastVLine
+    ** Function name:           drawFastVLineClipped
     ** Description:             draw a vertical line
     ***************************************************************************************/
-    void drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
+    void drawFastVLineClipped(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     {
         // draw always from top to down
         if (h < 0) {
@@ -242,10 +242,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawPixel
+    ** Function name:           drawPixelClipped
     ** Description:             push a single pixel at an arbitrary position
     ***************************************************************************************/
-    void drawPixel(int32_t x, int32_t y, uint32_t color, bool sel)
+    void drawPixelClipped(int32_t x, int32_t y, uint32_t color, bool sel)
     {
         if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit

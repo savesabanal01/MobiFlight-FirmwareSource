@@ -110,7 +110,7 @@ namespace TFT
         delay(2000);
 
         uint32_t demoMillis = millis();
-        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
+        AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE /*ROUND_SHAPE*/);
         do {
             AttitudeIndicator::loop();
             // checkDataFromCore0();
@@ -150,12 +150,12 @@ namespace TFT
     // #########################################################################
 
     /***************************************************************************************
-    ** Function name:           drawLine
+    ** Function name:           drawLineClipped
     ** Description:             draw a line between 2 arbitrary points
     ***************************************************************************************/
     // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
     // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel)
+    void drawLineClipped(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel)
     {
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -181,7 +181,7 @@ namespace TFT
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixel(y0, xs, color, sel);
+                        drawLineClipped(y0, xs, color, sel);
                     else
                         drawFastVLineClipped(y0, xs, dlen, color, sel);
                     dlen = 0;
@@ -197,7 +197,7 @@ namespace TFT
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixel(xs, y0, color, sel);
+                        drawLineClipped(xs, y0, color, sel);
                     else
                         drawFastHLineClipped(xs, y0, dlen, color, sel);
                     dlen = 0;
@@ -227,7 +227,16 @@ namespace TFT
             // First check upper and lower limits, it's quite easy
             if (y <= clippingCenterY - clippingWidthY / 2 || y >= clippingCenterY + clippingWidthY / 2) return;
             // check left and right limit and set start / end point accordingly
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (xE <= clippingCenterX - clippingWidthX / 2)
+                return;
+            // next check if end of line is outside clipping area
+            if (x >= clippingCenterX + clippingWidthX / 2)
+                return;
+            // next check if only start of line is out of clipping area
             if (x <= clippingCenterX - clippingWidthX / 2) x = clippingCenterX - clippingWidthX / 2 + 1;
+            // and lest check if only end of line is out of clipping area
             if (xE >= clippingCenterX + clippingWidthX / 2) xE = clippingCenterX + clippingWidthX / 2 - 1;
         } else {
             // First check upper and lower limits, it's quite easy
@@ -283,8 +292,17 @@ namespace TFT
         if (clippingRadiusOuter == 0) {
             // First check left and right limits, it's quite easy
             if (x <= clippingCenterX - clippingWidthX / 2 || x >= clippingCenterX + clippingWidthX / 2) return;
-            // check left and right limit and set start / end point accordingly
+            // check upper and lower limit and set start / end point accordingly
+            // ToDo so:
+            // first check if end of line is outside clipping area
+            if (yE <= clippingCenterY - clippingWidthY / 2)
+                return;
+            // next check if end of line is outside clipping area
+            if (y >= clippingCenterY + clippingWidthY / 2)
+                return;
+            // next check if only start of line is out of clipping area
             if (y <= clippingCenterY - clippingWidthY / 2) y = clippingCenterY - clippingWidthY / 2 + 1;
+            // and lest check if only end of line is out of clipping area
             if (yE >= clippingCenterY + clippingWidthY / 2) yE = clippingCenterY + clippingWidthY / 2 - 1;
         } else {
             // First check left and right limits, it's quite easy
@@ -326,10 +344,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawPixel
+    ** Function name:           drawLineClipped
     ** Description:             push a single pixel at an arbitrary position
     ***************************************************************************************/
-    void drawPixel(int16_t x, int16_t y, uint16_t color, bool sel)
+    void drawLineClipped(int16_t x, int16_t y, uint16_t color, bool sel)
     {
         if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit
