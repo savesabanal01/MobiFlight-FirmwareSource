@@ -183,14 +183,14 @@ namespace TFT
                     if (dlen == 1)
                         drawPixel(y0, xs, color, sel);
                     else
-                        drawFastVLine(y0, xs, dlen, color, sel);
+                        drawFastVLineClipped(y0, xs, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastVLine(y0, xs, dlen, color, sel);
+            if (dlen) drawFastVLineClipped(y0, xs, dlen, color, sel);
         } else {
             for (; x0 <= x1; x0++) {
                 dlen++;
@@ -199,22 +199,22 @@ namespace TFT
                     if (dlen == 1)
                         drawPixel(xs, y0, color, sel);
                     else
-                        drawFastHLine(xs, y0, dlen, color, sel);
+                        drawFastHLineClipped(xs, y0, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastHLine(xs, y0, dlen, color, sel);
+            if (dlen) drawFastHLineClipped(xs, y0, dlen, color, sel);
         }
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastHLine
+    ** Function name:           drawFastHLineClipped
     ** Description:             draw a horizontal line
     ***************************************************************************************/
-    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel)
+    void drawFastHLineClipped(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel)
     {
         // draw always from left to right
         if (w < 0) {
@@ -269,10 +269,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastVLine
+    ** Function name:           drawFastVLineClipped
     ** Description:             draw a vertical line
     ***************************************************************************************/
-    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel)
+    void drawFastVLineClipped(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel)
     {
         // draw always from top to down
         if (h < 0) {

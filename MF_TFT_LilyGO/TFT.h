@@ -24,6 +24,6 @@ namespace TFT
     void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool sel);
     void fillHalfCircleTFT(int16_t x0, int16_t y0, int16_t r, uint16_t colorUpper, uint16_t colorLower);
     void drawPixel(int16_t x, int16_t y, uint16_t color, bool sel);
-    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel);
-    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel);
+    void drawFastVLineClipped(int16_t x, int16_t y, int16_t h, uint16_t color, bool sel);
+    void drawFastHLineClipped(int16_t x, int16_t y, int16_t w, uint16_t color, bool sel);
 }
