@@ -110,7 +110,7 @@ namespace TFT
         delay(2000);
 
         uint32_t demoMillis = millis();
-        AttitudeIndicator::init(AttitudeIndicator::RECT_SHAPE /*ROUND_SHAPE*/);
+        AttitudeIndicator::init(AttitudeIndicator::ROUND_SHAPE);
         do {
             AttitudeIndicator::loop();
             // checkDataFromCore0();

@@ -10,20 +10,19 @@
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
-#define WIDTH_RECT_INNER  200
-#define HEIGTH_RECT_INNER 280    // with this dimensions 112.5kBytes are required
-#define X0_RECT_INNER     100    // 20                    // upper left x position where to plot
-#define Y0_RECT_INNER     100    // 20                    // upper left y position where to plot
-#define CENTER_X0_RECT    240    // WIDTH_RECT_INNER / 2  // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define CENTER_Y0_RECT    240    // HEIGTH_RECT_INNER / 2 // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define WIDTH_RECT_OUTER  240    // width of clipping area for rect instrument around CENTER_X0_RECT, if higher than Sprite dimension not considered
-#define HEIGTH_RECT_OUTER 320    // height of clipping area for rect instrument around CENTER_Y0_RECT, if higher than Sprite dimension not considered
-#define CENTER_X0_ROUND   240    // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define CENTER_Y0_ROUND   240    // y mid point in sprite for instrument, complete drawing must be inside sprite
+#define CENTER_X0_RECT    240    // center X position of rect instrument
+#define CENTER_Y0_RECT    240    // center Y position of rect instrument
+#define WIDTH_RECT_INNER  240    // width of inner moving rect instrument
+#define HEIGTH_RECT_INNER 320    // height of inner moving rect instrument
+#define WIDTH_RECT_OUTER  280    // width of outer rect instrument
+#define HEIGTH_RECT_OUTER 360    // height of outer rect instrument
+#define CENTER_X0_ROUND   240    // center X position of round instrument
+#define CENTER_Y0_ROUND   240    // center Y position of round instrument
 #define OUTER_RADIUS      230    // radius of outer part of instrument
 #define INNER_RADIUS      190    // radius of moving part of instrument
-#define HOR               400    // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) = 344
-#define MAX_PITCH         200    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
+#define HOR_RECT          520    // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) + MAX_PITCH = 520
+#define HOR_ROUND         400    // Horizon vector line, length must be at least sqrt(2)*INNER_RADIUS + MAX_PITCH = 520
+#define MAX_PITCH         120    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
 #define BROWN             0xFD20 // 0x5140 // 0x5960 the other are not working??
 #define SKY_BLUE          0x02B5 // 0x0318 //0x039B //0x34BF
 #define DARK_RED          RED    // 0x8000
@@ -168,8 +167,14 @@ namespace AttitudeIndicator
     void drawHorizon(int roll, int pitch, bool sel)
     {
         // Calculate coordinates for line start
-        int16_t x0 = (float)cos(roll * DEG2RAD) * HOR;
-        int16_t y0 = (float)sin(roll * DEG2RAD) * HOR;
+        int16_t x0, y0;
+        if (instrumentType == ROUND_SHAPE) {
+            x0 = (float)cos(roll * DEG2RAD) * HOR_ROUND;
+            y0 = (float)sin(roll * DEG2RAD) * HOR_ROUND;
+        } else {
+            x0 = (float)cos(roll * DEG2RAD) * HOR_RECT;
+            y0 = (float)sin(roll * DEG2RAD) * HOR_RECT;
+        }
         // Calculate coordinates for line start for outer part, roll has not to be considered
         int16_t x0outer = OUTER_RADIUS;
         int16_t y0outer = 0;
@@ -261,16 +266,17 @@ namespace AttitudeIndicator
         if (instrumentType == RECT_SHAPE) {
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
-                // left side
-                gfx->fillRect(0, Y0_RECT_INNER, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) - pitch - 1, SKY_BLUE);
-                gfx->fillRect(0, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) + pitch, BROWN);
-                gfx->drawFastHLine(0, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, WHITE);
-                // right side
-                gfx->fillRect(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) - pitch - 1, SKY_BLUE);
-                gfx->fillRect(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, (HEIGTH_RECT_OUTER / 2) + pitch, BROWN);
-                gfx->drawFastHLine(Y0_RECT_INNER + WIDTH_RECT_INNER + 2, Y0_RECT_INNER + (HEIGTH_RECT_OUTER / 2) - pitch, Y0_RECT_INNER - 2, WHITE);
+                // first left side
+                gfx->fillRect     (CENTER_X0_RECT - WIDTH_RECT_OUTER / 2,     CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE);
+                gfx->fillRect     (CENTER_X0_RECT - WIDTH_RECT_OUTER / 2,     CENTER_Y0_RECT - pitch                , (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN);
+                gfx->drawFastHLine(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2,     CENTER_Y0_RECT - pitch                , (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, WHITE);
+                // next right side
+                gfx->fillRect     (CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE);
+                gfx->fillRect     (CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - pitch                , (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN);
+                gfx->drawFastHLine(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - pitch                , (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, WHITE);
+
                 // draw inner moving part
-                TFT::setClippingArea(CENTER_X0_RECT, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER, 0, 0);
+                TFT::setClippingArea(CENTER_X0_RECT, CENTER_Y0_RECT, WIDTH_RECT_INNER, HEIGTH_RECT_INNER, 0, 0);
                 for (uint8_t i = 6; i > 0; i--) {
                     xdn   = i * xd;
                     ydn   = i * yd;
@@ -294,10 +300,11 @@ namespace AttitudeIndicator
                 // draw the scale
                 drawScale(sel);
 
-                gfx->drawRect(X0_RECT_INNER - 1, Y0_RECT_INNER - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
-                gfx->drawRect(X0_RECT_INNER - 1, Y0_RECT_INNER - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
-                gfx->drawRect(X0_RECT_INNER - 2, Y0_RECT_INNER - 2, WIDTH_RECT_INNER + 4, HEIGTH_RECT_INNER + 4, DARK_GREY);
-                gfx->drawRect(X0_RECT_INNER - 2, Y0_RECT_INNER - 2, WIDTH_RECT_INNER + 4, HEIGTH_RECT_INNER + 4, DARK_GREY);
+                // draw a border around the inner moving part
+                gfx->drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY);
+                gfx->drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY);
+                gfx->drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 1, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
+                gfx->drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 1, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
             }
         }
     }
@@ -392,7 +399,6 @@ namespace AttitudeIndicator
         }
 
         // Display justified roll value near bottom of screen
-        // gfx->setTextPadding(24);                                             // Padding width to wipe previous number
         char message[40];                                                    // buffer for message
         sprintf(message, " Roll: %4d / Pitch: %3d ", last_roll, last_pitch); // create message
         drawCentreString(message, TFT_WIDTH / 2, TFT_HEIGHT - 9, 1);
@@ -410,13 +416,9 @@ namespace AttitudeIndicator
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
-            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, SKY_BLUE);
-            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, BROWN);
-            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, SKY_BLUE);
-            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2, CENTER_Y0_RECT, WIDTH_RECT_INNER, HEIGTH_RECT_INNER / 2, BROWN);
-            // fill area outside sprite with not moving area
-            gfx->fillRect(0, 0, TFT_WIDTH, TFT_HEIGHT / 2, SKY_BLUE);
-            gfx->fillRect(0, 160, TFT_WIDTH, TFT_HEIGHT / 2, BROWN);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, SKY_BLUE);
+            gfx->fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, BROWN);
+            gfx->drawFastHLine(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2 - 1, CENTER_Y0_RECT, WIDTH_RECT_OUTER - 2, WHITE);
         }
         // Draw the horizon graphic
         drawHorizon(0, 0, 0);
