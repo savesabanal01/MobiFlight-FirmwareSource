@@ -9,44 +9,6 @@
 #include "TFT.h"
 #include "AttitudeIndicator.h"
 
-//  The sprites will require:
-//     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
-// Note: for a 240 * 320 area this is 150 Kbytes!
-
-#define X0_RECT           0                      // upper left x position where to plot
-#define Y0_RECT           20                     // upper left y position where to plot
-#define WIDTH_RECT_INNER  200                    // width of inner moving rect instrument
-#define HEIGTH_RECT_INNER 240                    // height of inner moving rect instrument
-#define WIDTH_RECT_OUTER  240                    // width of outer part of instrument
-#define HEIGTH_RECT_OUTER 280                    // height of outer part of instrument
-#define CENTER_X0_RECT    WIDTH_RECT_OUTER / 2   // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define CENTER_Y0_RECT    HEIGTH_RECT_OUTER / 2  // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define SPRITE_DIM_RADIUS 120                    // dimension for x and y direction of sprite, including outer part
-#define X0_ROUND          0                      // upper left x position where to plot
-#define Y0_ROUND          40                     // upper left y position where to plot
-#define CENTER_X0_ROUND   SPRITE_DIM_RADIUS      // x mid point in sprite for instrument, complete drawing must be inside sprite
-#define CENTER_Y0_ROUND   SPRITE_DIM_RADIUS      // y mid point in sprite for instrument, complete drawing must be inside sprite
-#define OUTER_RADIUS      SPRITE_DIM_RADIUS      // radius of outer part of instrument
-#define INNER_RADIUS      SPRITE_DIM_RADIUS - 21 // radius of moving part of instrument
-#define HOR_RECT          350                    // Horizon vector line, length must be at least sqrt(WIDTH_RECT_INNER^2 + HEIGTH_RECT_INNER^2) + MAX_PITCH = 520
-#define HOR_ROUND         350                    // Horizon vector line, length must be at least sqrt(2)*INNER_RADIUS + MAX_PITCH = 520
-#define MAX_PITCH         100                    // Maximum pitch shouls be in range +/- 80 with HOR = 172, 20 steps = 10 degrees on drawn scale
-#define BROWN             0xFD20                 // 0x5140 // 0x5960 the other are not working??
-#define SKY_BLUE          0x02B5                 // 0x0318 //0x039B //0x34BF
-#define DARK_RED          TFT_RED                // 0x8000
-#define DARK_GREY         TFT_BLACK              // ILI9341_DARKGREY
-#define LIGHT_GREY        TFT_BLACK              // ILI9341_LIGHTGREY
-// TFT_TRANSPARENT check how to use
-// spr[0].fillSprite(TFT_TRANSPARENT);
-// spr[0].setColorDepth(int8_t b);
-// spr[0].createSprite(70, 80);
-// spr[0].fillSprite(TFT_TRANSPARENT);
-// spr[0].pushSprite(x, y, TFT_TRANSPARENT);
-// spr[0].getColorDepth(void);
-// spr[0].deleteSprite();
-
-#define DEG2RAD 0.0174532925
-
 int     roll           = 0;
 int     pitch          = 0;
 int     last_roll      = 0;
@@ -69,50 +31,15 @@ namespace AttitudeIndicator
         roll           = 0;
         last_pitch     = 0;
         last_roll      = 0;
-        tft.fillScreen(TFT_BLACK);
 
-        spr[0].setRotation(0);
-        spr[1].setRotation(0);
-
-        if (instrumentType == ROUND_SHAPE) {
-            // Create the 2 sprites, each is half the size
-            sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
-            sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
-            // Move the sprite 1 coordinate datum upwards half the screen height
-            // so from coordinate point of view it occupies the bottom of screen
-            spr[1].setViewport(0, -SPRITE_DIM_RADIUS, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS * 2);
-        }
-        if (instrumentType == RECT_SHAPE) {
-            // Create the 2 sprites, each is half the size of the screen
-            sprPtr[0] = (uint16_t *)spr[0].createSprite(WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2);
-            sprPtr[1] = (uint16_t *)spr[1].createSprite(WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2);
-            // Move the sprite 1 coordinate datum upwards half the screen height
-            // so from coordinate point of view it occupies the bottom of screen
-            spr[1].setViewport(0, -HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER);
-        }
-        // Define text datum for each Sprite
-        spr[0].setTextDatum(MC_DATUM);
-        spr[1].setTextDatum(MC_DATUM);
-
-        tft.startWrite(); // TFT chip select held low permanently
-
+        TFT::initInstrument(instrumentType);
         // draw outer part of instrument
         drawOuter();
-
-        // Draw fixed text at top/bottom of screen
-        tft.setTextColor(TFT_WHITE);
-        tft.setTextDatum(TC_DATUM); // Centre middle justified
-        tft.drawString("Demo Attitude Indicator", TFT_WIDTH / 2, 1, 1);
-        tft.drawString("Based on Bodmer's example", TFT_WIDTH / 2, 10, 1);
-        tft.setTextColor(TFT_YELLOW);
     }
 
     void stop()
     {
-        tft.endWrite();
-        // Delete sprite to free up the RAM
-        spr[0].deleteSprite();
-        spr[1].deleteSprite();
+        TFT::stopInstrument();
     }
 
     // #########################################################################
@@ -252,19 +179,19 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_ROUND - y0outer - ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0outer - xdn;
                     posYE = CENTER_Y0_ROUND + y0outer - ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
 
                     posX  = CENTER_X0_ROUND - x0outer + xdn;
                     posY  = CENTER_Y0_ROUND - y0outer + ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0outer + xdn;
                     posYE = CENTER_Y0_ROUND + y0outer + ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 posX  = CENTER_X0_ROUND - x0outer;
                 posY  = CENTER_Y0_ROUND - y0outer - pitch;
                 posXE = CENTER_X0_ROUND + x0outer;
                 posYE = CENTER_Y0_ROUND + y0outer - pitch;
-                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawClippedLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
 
                 // draw inner moving part
                 TFT::setClippingArea(CENTER_X0_ROUND, CENTER_Y0_ROUND, 0, 0, INNER_RADIUS, 0);
@@ -275,23 +202,23 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_ROUND - y0 - ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0 - xdn;
                     posYE = CENTER_Y0_ROUND + y0 - ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX  = CENTER_X0_ROUND - x0 + xdn;
                     posY  = CENTER_Y0_ROUND - y0 + ydn - pitch;
                     posXE = CENTER_X0_ROUND + x0 + xdn;
                     posYE = CENTER_Y0_ROUND + y0 + ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX  = CENTER_X0_ROUND - x0;
                 posY  = CENTER_Y0_ROUND - y0 - pitch;
                 posXE = CENTER_X0_ROUND + x0;
                 posYE = CENTER_Y0_ROUND + y0 - pitch;
-                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawClippedLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw a border around the inner moving part
-                spr[sel].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 0, LIGHT_GREY);
-                spr[sel].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 1, LIGHT_GREY);
-                spr[sel].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY);
+                TFT::drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 0, LIGHT_GREY, sel);
+                TFT::drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, INNER_RADIUS - 1, LIGHT_GREY, sel);
+                TFT::drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY, sel);
                 // draw the scale
                 drawScale(sel);
 
@@ -302,12 +229,12 @@ namespace AttitudeIndicator
             if ((roll != last_roll) || (pitch != last_pitch)) {
                 // draw outer part
                 // left side
-                spr[sel].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE);
-                spr[sel].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN);
+                TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE, sel);
+                TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN, sel);
                 spr[sel].drawFastHLine(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, TFT_WHITE);
                 // next right side
-                spr[sel].fillRect(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE);
-                spr[sel].fillRect(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN);
+                TFT::fillRect(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 - pitch, SKY_BLUE, sel);
+                TFT::fillRect(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, HEIGTH_RECT_OUTER / 2 + pitch, BROWN, sel);
                 spr[sel].drawFastHLine(CENTER_X0_RECT + WIDTH_RECT_INNER / 2 + 1, CENTER_Y0_RECT - pitch, (WIDTH_RECT_OUTER - WIDTH_RECT_INNER) / 2 - 1, TFT_WHITE);
 
                 // draw inner moving part
@@ -319,26 +246,26 @@ namespace AttitudeIndicator
                     posY  = CENTER_Y0_RECT - y0 - ydn - pitch;
                     posXE = CENTER_X0_RECT + x0 - xdn;
                     posYE = CENTER_Y0_RECT + y0 - ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, SKY_BLUE, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, SKY_BLUE, sel);
                     posX  = CENTER_X0_RECT - x0 + xdn;
                     posY  = CENTER_Y0_RECT - y0 + ydn - pitch;
                     posXE = CENTER_X0_RECT + x0 + xdn;
                     posYE = CENTER_Y0_RECT + y0 + ydn - pitch;
-                    TFT::drawLineClipped(posX, posY, posXE, posYE, BROWN, sel);
+                    TFT::drawClippedLine(posX, posY, posXE, posYE, BROWN, sel);
                 }
                 // draw the white center line
                 posX  = CENTER_X0_RECT - x0;
                 posY  = CENTER_Y0_RECT - y0 - pitch;
                 posXE = CENTER_X0_RECT + x0;
                 posYE = CENTER_Y0_RECT + y0 - pitch;
-                TFT::drawLineClipped(posX, posY, posXE, posYE, TFT_WHITE, sel);
+                TFT::drawClippedLine(posX, posY, posXE, posYE, TFT_WHITE, sel);
                 // draw the scale
                 drawScale(sel);
 
                 // draw a border around the inner moving part
-                spr[sel].drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY);
-                spr[sel].drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY);
-                spr[sel].drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 1, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY);
+                TFT::drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY, sel);
+                TFT::drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 0, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 0, WIDTH_RECT_INNER + 0, HEIGTH_RECT_INNER + 0, DARK_GREY, sel);
+                TFT::drawRect(CENTER_X0_RECT - WIDTH_RECT_INNER / 2 - 1, CENTER_Y0_RECT - HEIGTH_RECT_INNER / 2 - 1, WIDTH_RECT_INNER + 2, HEIGTH_RECT_INNER + 2, DARK_GREY, sel);
                 tft.pushImageDMA(X0_RECT, Y0_RECT + (HEIGTH_RECT_OUTER / 2) * sel, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, sprPtr[sel]);
             }
         }
@@ -352,7 +279,7 @@ namespace AttitudeIndicator
         if (instrumentType == ROUND_SHAPE) {
             // Update things near middle of screen first (most likely to get obscured)
             // Level wings graphic
-            spr[sel].fillRect(CENTER_X0_ROUND - 1, CENTER_Y0_ROUND - 1, 3, 3, TFT_RED);
+            TFT::fillRect(CENTER_X0_ROUND - 1, CENTER_Y0_ROUND - 1, 3, 3, TFT_RED, sel);
             spr[sel].drawFastHLine(CENTER_X0_ROUND - 30, CENTER_Y0_ROUND, 24, TFT_RED);
             spr[sel].drawFastHLine(CENTER_X0_ROUND + 30 - 24, CENTER_Y0_ROUND, 24, TFT_RED);
             spr[sel].drawFastVLine(CENTER_X0_ROUND - 30 + 24, CENTER_Y0_ROUND, 3, TFT_RED);
@@ -394,7 +321,7 @@ namespace AttitudeIndicator
         if (instrumentType == RECT_SHAPE) {
             // Update things near middle of screen first (most likely to get obscured)
             // Level wings graphic
-            spr[sel].fillRect(CENTER_X0_RECT - 1, CENTER_Y0_RECT - 1, 3, 3, TFT_RED);
+            TFT::fillRect(CENTER_X0_RECT - 1, CENTER_Y0_RECT - 1, 3, 3, TFT_RED, sel);
             spr[sel].drawFastHLine(CENTER_X0_RECT - 30, CENTER_Y0_RECT, 24, TFT_RED);
             spr[sel].drawFastHLine(CENTER_X0_RECT + 30 - 24, CENTER_Y0_RECT, 24, TFT_RED);
             spr[sel].drawFastVLine(CENTER_X0_RECT - 30 + 24, CENTER_Y0_RECT, 3, TFT_RED);
@@ -449,16 +376,16 @@ namespace AttitudeIndicator
             TFT::fillHalfCircleSprite(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, SKY_BLUE, BROWN, 1);
             // and now the "static" area
             TFT::fillHalfCircleTFT(X0_ROUND + SPRITE_DIM_RADIUS, Y0_ROUND + SPRITE_DIM_RADIUS, OUTER_RADIUS, SKY_BLUE, BROWN);
-            spr[0].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY);
-            spr[1].drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY);
+            TFT::drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY, 0);
+            TFT::drawCircle(CENTER_X0_ROUND, CENTER_Y0_ROUND, OUTER_RADIUS, LIGHT_GREY, 1);
         }
         if (instrumentType == RECT_SHAPE) {
             // fill sprite with not moving area
-            spr[0].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, SKY_BLUE);
-            spr[0].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, BROWN);
+            TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, SKY_BLUE, 0);
+            TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, BROWN, 0);
             spr[0].drawFastHLine(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2 - 1, CENTER_Y0_RECT, WIDTH_RECT_OUTER - 2, TFT_WHITE);
-            spr[1].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, SKY_BLUE);
-            spr[1].fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, BROWN);
+            TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT - HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, SKY_BLUE, 1);
+            TFT::fillRect(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2, CENTER_Y0_RECT, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2, BROWN, 1);
             spr[1].drawFastHLine(CENTER_X0_RECT - WIDTH_RECT_OUTER / 2 - 1, CENTER_Y0_RECT, WIDTH_RECT_OUTER - 2, TFT_WHITE);
         }
         // Draw the horizon graphic

@@ -1,5 +1,19 @@
 #include <Arduino.h>
 #include "TFT.h"
+#include "AttitudeIndicator.h"
+
+// TFT_TRANSPARENT check how to use
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].setColorDepth(int8_t b);
+// spr[0].createSprite(70, 80);
+// spr[0].fillSprite(TFT_TRANSPARENT);
+// spr[0].pushSprite(x, y, TFT_TRANSPARENT);
+// spr[0].getColorDepth(void);
+// spr[0].deleteSprite();
+
+//  The sprites will require:
+//     SPRITE_WIDTH * SPRITE_HEIGTH * 2 bytes of RAM
+// Note: for a 240 * 320 area this is 150 Kbytes!
 
 // Library instance
 TFT_eSPI tft = TFT_eSPI();
@@ -12,13 +26,16 @@ namespace TFT
 {
     int32_t checkClippingRoundOuter[MAX_CLIPPING_RADIUS] = {0};
     int32_t checkClippingRoundInner[MAX_CLIPPING_RADIUS] = {0};
-
     int32_t clippingCenterX;
     int32_t clippingCenterY;
     int32_t clippingWidthX;
     int32_t clippingWidthY;
     int32_t clippingRadiusOuter;
     int32_t clippingRadiusInner;
+
+    void drawClippedPixel(int32_t x, int32_t y, uint32_t color, bool sel);
+    void drawClippedFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel);
+    void drawClippedFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel);
 
     void init()
     {
@@ -52,6 +69,65 @@ namespace TFT
         randomSeed(analogRead(A0));
     }
 
+    void initInstrument(uint8_t instrumentType)
+    {
+        tft.fillScreen(TFT_BLACK);
+
+        if (instrumentType == AttitudeIndicator::ROUND_SHAPE) {
+            // Create the 2 sprites, each is half the size
+            sprPtr[0] = (uint16_t *)spr[0].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
+            sprPtr[1] = (uint16_t *)spr[1].createSprite(SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS);
+            // Move the sprite 1 coordinate datum upwards half the screen height
+            // so from coordinate point of view it occupies the bottom of screen
+            spr[1].setViewport(0, -SPRITE_DIM_RADIUS, SPRITE_DIM_RADIUS * 2, SPRITE_DIM_RADIUS * 2);
+        }
+        if (instrumentType == AttitudeIndicator::RECT_SHAPE) {
+            // Create the 2 sprites, each is half the size of the screen
+            sprPtr[0] = (uint16_t *)spr[0].createSprite(WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2);
+            sprPtr[1] = (uint16_t *)spr[1].createSprite(WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER / 2);
+            // Move the sprite 1 coordinate datum upwards half the screen height
+            // so from coordinate point of view it occupies the bottom of screen
+            spr[1].setViewport(0, -HEIGTH_RECT_OUTER / 2, WIDTH_RECT_OUTER, HEIGTH_RECT_OUTER);
+        }
+        // Define text datum for each Sprite
+        spr[0].setTextDatum(MC_DATUM);
+        spr[1].setTextDatum(MC_DATUM);
+
+        spr[0].setRotation(0);
+        spr[1].setRotation(0);
+
+        tft.startWrite(); // TFT chip select held low permanently
+
+        // Draw fixed text at top/bottom of screen
+        tft.setTextColor(TFT_WHITE);
+        tft.setTextDatum(TC_DATUM); // Centre middle justified
+        tft.drawString("Demo Attitude Indicator", TFT_WIDTH / 2, 1, 1);
+        tft.drawString("Based on Bodmer's example", TFT_WIDTH / 2, 10, 1);
+        tft.setTextColor(TFT_YELLOW);
+    }
+
+    void stopInstrument()
+    {
+        tft.endWrite();
+        // Delete sprite to free up the RAM
+        spr[0].deleteSprite();
+        spr[1].deleteSprite();
+    }
+
+    void drawCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color, bool sel)
+    {
+        spr[sel].drawCircle(x0, y0, r, color);
+    }
+
+    void fillRect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t color, bool sel)
+    {
+        spr[sel].fillRect(x, y, w, h, color);
+    }
+
+    void drawRect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t color, bool sel)
+    {
+        spr[sel].drawRect(x, y, w, h, color);
+    }
     // setup clipping area
     void setClippingArea(int32_t ClippingX0, int32_t ClippingY0, int32_t ClippingXwidth, int32_t ClippingYwidth, int32_t ClippingRadiusOuter, int32_t ClippingRadiusInner)
     {
@@ -85,12 +161,12 @@ namespace TFT
     // #########################################################################
 
     /***************************************************************************************
-    ** Function name:           drawLineClipped
+    ** Function name:           drawClippedLine
     ** Description:             draw a line between 2 arbitrary points
     ***************************************************************************************/
     // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer to use
     // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
-    void drawLineClipped(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
+    void drawClippedLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color, bool sel)
     {
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -116,40 +192,40 @@ namespace TFT
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixelClipped(y0, xs, color, sel);
+                        drawClippedPixel(y0, xs, color, sel);
                     else
-                        drawFastVLineClipped(y0, xs, dlen, color, sel);
+                        drawClippedFastVLine(y0, xs, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastVLineClipped(y0, xs, dlen, color, sel);
+            if (dlen) drawClippedFastVLine(y0, xs, dlen, color, sel);
         } else {
             for (; x0 <= x1; x0++) {
                 dlen++;
                 err -= dy;
                 if (err < 0) {
                     if (dlen == 1)
-                        drawPixelClipped(xs, y0, color, sel);
+                        drawClippedPixel(xs, y0, color, sel);
                     else
-                        drawFastHLineClipped(xs, y0, dlen, color, sel);
+                        drawClippedFastHLine(xs, y0, dlen, color, sel);
                     dlen = 0;
                     y0 += ystep;
                     xs = x0 + 1;
                     err += dx;
                 }
             }
-            if (dlen) drawFastHLineClipped(xs, y0, dlen, color, sel);
+            if (dlen) drawClippedFastHLine(xs, y0, dlen, color, sel);
         }
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastHLineClipped
+    ** Function name:           drawClippedFastHLine
     ** Description:             draw a horizontal line
     ***************************************************************************************/
-    void drawFastHLineClipped(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
+    void drawClippedFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color, bool sel)
     {
         // draw always from left to right
         if (w < 0) {
@@ -194,7 +270,7 @@ namespace TFT
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" y-values still in one line
             // this should be the case if y is bigger or smaller than the inner radius
             if (y <= clippingCenterY - clippingRadiusInner || y >= clippingCenterY + clippingRadiusInner) {
-                x = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
+                x  = clippingCenterX - checkClippingRoundOuter[abs(y - clippingCenterY)];
                 xE = clippingCenterX + checkClippingRoundOuter[abs(y - clippingCenterY)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -212,10 +288,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawFastVLineClipped
+    ** Function name:           drawClippedFastVLine
     ** Description:             draw a vertical line
     ***************************************************************************************/
-    void drawFastVLineClipped(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
+    void drawClippedFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color, bool sel)
     {
         // draw always from top to down
         if (h < 0) {
@@ -259,7 +335,7 @@ namespace TFT
             // now calculate the x/y coordinates for the inner circle to split into two lines or for "big" x-values still in one line
             // this should be the case if x is bigger or smaller than the inner radius
             if (x <= clippingCenterX - clippingRadiusOuter || x >= clippingCenterX + clippingRadiusOuter) {
-                y = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
+                y  = clippingCenterY - checkClippingRoundOuter[abs(x - clippingCenterX)];
                 yE = clippingCenterY + checkClippingRoundOuter[abs(x - clippingCenterX)];
             } else {
                 // now calculate the x/y coordinates for the inner circle to split into two lines
@@ -278,10 +354,10 @@ namespace TFT
     }
 
     /***************************************************************************************
-    ** Function name:           drawPixelClipped
+    ** Function name:           drawClippedPixel
     ** Description:             push a single pixel at an arbitrary position
     ***************************************************************************************/
-    void drawPixelClipped(int32_t x, int32_t y, uint32_t color, bool sel)
+    void drawClippedPixel(int32_t x, int32_t y, uint32_t color, bool sel)
     {
         if (clippingRadiusOuter == 0) {
             // for a rect clipping area just check upper/lower and left/right limit
