@@ -55,7 +55,7 @@ bool MFEEPROM::write_block(uint16_t adr, char data[], uint16_t len)
     EEPROM.commit();
     multicore_lockout_end_blocking();
 #endif
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
     // vTaskDelete(core0handle);
     EEPROM.commit();
     // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);
@@ -86,7 +86,7 @@ bool MFEEPROM::write_byte(uint16_t adr, char data)
     EEPROM.commit();
     multicore_lockout_end_blocking();
 #endif
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
     // vTaskDelete(core0handle);
     EEPROM.commit();
     // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);

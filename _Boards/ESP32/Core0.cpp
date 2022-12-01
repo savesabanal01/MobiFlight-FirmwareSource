@@ -1,11 +1,11 @@
-#if defined(USE_CORE1)
+#if defined(USE_CORE0)
 
 #include <Arduino.h>
 #include "Core0.h"
 #include "TFT.h"
-#include "bouncingCircles.h"
+//#include "bouncingCircles.h"
 #include "AttitudeIndicator.h"
-#include "Compass.h"
+//#include "Compass.h"
 #include "commandmessenger.h"
 
 void     calculateFPS();
@@ -67,10 +67,10 @@ void OnSetCore1()
 void core0_init()
 {
     TFT::init();
-    BouncingCircles::initRandom(); // random seems not to work on core1
+    //BouncingCircles::initRandom(); // random seems not to work on core1
 }
 
-void core0_loop()
+void core0_loop(void * parameter)
 {
     uint32_t demoMillis = millis();
 
@@ -124,4 +124,4 @@ void     calculateFPS()
         startMillis = millis();
     }
 }
-#endif // #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
+#endif // #if defined(USE_CORE0)

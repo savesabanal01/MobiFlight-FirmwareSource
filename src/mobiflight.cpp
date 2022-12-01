@@ -59,7 +59,7 @@ extern MFEEPROM MFeeprom;
 MFMuxDriver MUX;
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
 TaskHandle_t Core0handle;
 #endif
 
@@ -178,14 +178,15 @@ void setup()
     initPollIntervals();
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
     core0_init();
-    xTaskCreatePinnedToCore(
-        core0, /* Function to implement the task */
-        "Graphics", /* Name of the task */
-        10000,  /* Stack size in words */
-        NULL,  /* Task input parameter */
-        0,  /* Priority of the task */
-        &Core0handle,  /* Task handle. */
-        0); /* Core where the task should run */
+    BaseType_t xReturned = xTaskCreatePinnedToCore(
+        core0_loop,   /* Function to implement the task */
+        "Graphics",   /* Name of the task */
+        10000,        /* Stack size in words */
+        NULL,         /* Task input parameter */
+        0,            /* Priority of the task */
+        &Core0handle, /* Task handle. */
+        0             /* Core where the task should run */
+    );
 #endif
 #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
     core1_init();
