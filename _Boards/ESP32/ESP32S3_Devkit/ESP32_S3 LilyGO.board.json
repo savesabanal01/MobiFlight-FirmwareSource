@@ -26,9 +26,9 @@
     "ModuleLimits": {
       "MaxAnalogInputs": 0,
       "MaxInputShifters": 0,
-      "MaxButtons": 0,
+      "MaxButtons": 1,
       "MaxEncoders": 0,
-      "MaxLcdI2C": 0,
+      "MaxLcdI2C": 1,
       "MaxLedSegments": 0,
       "MaxOutputs": 0,
       "MaxServos": 0,
@@ -36,6 +36,25 @@
       "MaxSteppers": 0,
       "MaxInputMultiplexer": 0
     },
-    "Pins": []
+    "Pins": [
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": false,
+        "Pin": 0
+      },
+      {
+        "isAnalog": false,
+        "isI2C": true,
+        "isPWM": false,
+        "Pin": 8
+      },
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": true,
+        "Pin": 48
+      }
+    ]
   }
   
