@@ -154,4 +154,4 @@ void     checkDataFromCore0()
         }
     }
 }
-#endif // #if defined(ARDUINO_ARCH_RP2040) && defined(USE_CORE1)
+#endif // #if defined(USE_CORE1)
