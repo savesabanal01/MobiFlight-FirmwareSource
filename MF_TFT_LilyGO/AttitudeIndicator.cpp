@@ -422,6 +422,5 @@ namespace AttitudeIndicator
         }
         // Draw the horizon graphic
         drawHorizon(0, 0, 0);
-        drawHorizon(0, 0, 1);
     }
 } // end of namespace
