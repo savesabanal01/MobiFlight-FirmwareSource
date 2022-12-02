@@ -1,50 +1,42 @@
-/*
- * MFKeyMatrix.h
- *
- * Created: 17.11.2021
- * Author: Ralf Kull
- * version 1.0 Initial release
- * Copyright (C) 2021
- * 
- * see also: https://ww1.microchip.com/downloads/en/AppNotes/01081a.pdf
- * for using interrupt functionality to get changed button
- * 
- */
+//
+// MFKeyMatrix.h
+//
+// (C) MobiFlight Project 2022
+//
 
 #pragma once
 
 #include <Arduino.h>
 #include <MFBoards.h>
-#include "MCP23017.h"
 
-//#define KEYMATRIX_BASE_BUTTON   100     // first button from matrix '0' will be reported as 100
-
-extern "C"
-{
-  // callback functions always follow the signature: void cmd(void);
-  typedef void (*keymatrixEvent) (byte, uint8_t, const char *);
+extern "C" {
+// callback functions always follow the signature: void cmd(void);
+typedef void (*keymatrixEvent)(byte, uint8_t, const char *);
 };
 
 class MFKeymatrix
 {
 private:
     bool                  _initialized = false;
-    uint8_t               _adress;
-    uint8_t               old_status[8] = {0x00};
-    MCP23017              _mcp;
+    uint8_t               _columnCount;
+    uint8_t              *_columnPins;
+    uint8_t               _rowCount;
+    uint8_t              *_rowPins;
+    uint8_t               _rowAllColumn;
+    uint8_t               old_status[MAX_COLUMN_KEYMATRIX] = {0x00};
     static keymatrixEvent _handler;
-    const char *          _name;
-    uint8_t               getBitLocation(uint8_t c);
-    uint8_t               _calculate = false;
+    const char           *_name;
+    void                  triggerOnPress(uint8_t pin);
+    void                  triggerOnRelease(uint8_t pin);
 
 public:
-    MFKeymatrix(uint8_t adress = 0x20, const char * name = "Button");
-    void          init(void);
-    void          update(void);
-    void          detach(void);
-    static void   attachHandler(keymatrixEvent newHandler);
+    MFKeymatrix(uint8_t columnCount, uint8_t columnPins[], uint8_t rowCount, uint8_t rowPins[], const char *name = "KeyMatrix");
+    void        init(void);
+    void        update(void);
+    void        trigger(uint8_t state, uint8_t pin);
+    void        detach(void);
+    static void attachHandler(keymatrixEvent newHandler);
 };
-
 
 /*******************************************************************************************
         Column  0   1   2   3   4   5   6   7   -> will be set column by column to output and LOW (Port A)
@@ -60,6 +52,6 @@ public:
          ^
         PortB
 
-Column is MCP23017 Port A, must be set to output, all LOW to get changed button
-Row is MCP23017 Port B, must be set to input with pullup
+Column must be set to output, all LOW to get changed button
+Row must be set to input with pullup
 *******************************************************************************************/

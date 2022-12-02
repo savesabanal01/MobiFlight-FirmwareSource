@@ -39,19 +39,21 @@
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
 
-#define MODULE_MAX_PINS     18
-#define MAX_OUTPUTS         18
-#define MAX_BUTTONS         18
-#define MAX_LEDSEGMENTS     1
-#define MAX_ENCODERS        9
-#define MAX_STEPPERS        2
-#define MAX_MFSERVOS        2
-#define MAX_MFLCD_I2C       2
-#define MAX_ANALOG_INPUTS   6
-#define MAX_OUTPUT_SHIFTERS 2
-#define MAX_INPUT_SHIFTERS  2
-#define MAX_DIGIN_MUX       3
-#define MAX_KEYMATRIX       1
+#define MODULE_MAX_PINS      18
+#define MAX_OUTPUTS          18
+#define MAX_BUTTONS          18
+#define MAX_LEDSEGMENTS      1
+#define MAX_ENCODERS         9
+#define MAX_STEPPERS         2
+#define MAX_MFSERVOS         2
+#define MAX_MFLCD_I2C        2
+#define MAX_ANALOG_INPUTS    6
+#define MAX_OUTPUT_SHIFTERS  2
+#define MAX_INPUT_SHIFTERS   2
+#define MAX_DIGIN_MUX        3
+#define MAX_KEYMATRIX        1
+#define MAX_COLUMN_KEYMATRIX 8
+#define MAX_ROW_KEYMATRIX    8
 
 #define STEPS         64
 #define STEPPER_SPEED 400 // 300 already worked, 467, too?

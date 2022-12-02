@@ -11,8 +11,8 @@
 #include "config.h"
 #include "allocateMem.h"
 #include "commandmessenger.h"
-#include "MFBitarray.h"
 
-extern MFBitArray BitArray;
+extern uint8_t keyMatrixColumnPins[];
+extern uint8_t keyMatrixRowPins[];
 
 // mobiflight.h

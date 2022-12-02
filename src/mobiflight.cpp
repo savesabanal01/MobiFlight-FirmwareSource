@@ -30,7 +30,6 @@
 #endif
 #if MF_KEYMATRIX_SUPPORT == 1
 #include "Keymatrix.h"
-#include "MFBitarray.h"
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1
 #include "DigInMux.h"
@@ -52,8 +51,8 @@ MFMuxDriver MUX;
 #endif
 
 #if MF_KEYMATRIX_SUPPORT == 1
-uint32_t lastKexmatrixRead = 0;
-MFBitArray BitArray;
+uint8_t keyMatrixColumnPins[MAX_COLUMN_KEYMATRIX];
+uint8_t keyMatrixRowPins[MAX_ROW_KEYMATRIX];
 #endif  
 
 // ==================================================
@@ -185,7 +184,7 @@ void loop()
     // to prevent mangling input for config (shared buffers)
     if (getStatusConfig()) {
 
-        timedUpdate(Button::readPin, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
+        timedUpdate(Button::read, &lastUpdate.Buttons, MF_BUTTON_DEBOUNCE_MS);
 
         timedUpdate(Encoder::read, &lastUpdate.Encoders, MF_ENCODER_DEBOUNCE_MS);
 

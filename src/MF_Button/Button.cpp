@@ -47,10 +47,10 @@ namespace Button
 #endif
     }
 
-    void readPin()
+    void read(void)
     {
-        for(int i=0; i!=buttonsRegistered; i++) {
-            buttons[i]->readPin();
+        for (uint8_t i = 0; i < buttonsRegistered; i++) {
+            buttons[i]->update();
         }
     }
 

@@ -1,129 +1,129 @@
-/*
- * MFKeyMatrix.cpp
- *
- * Created: 17.11.2021
- * Author: Ralf Kull
- * version 1.0 Initial release
- * Copyright (C) 2021
- * 
- * see also: https://ww1.microchip.com/downloads/en/AppNotes/01081a.pdf
- * for using interrupt functionality to get changed button
- * 
- */
+//
+// MFKeyMatrix.cpp
+//
+// (C) MobiFlight Project 2022
+//
 
-#include "Arduino.h"
 #include "MFBoards.h"
+#include "Arduino.h"
 #include "mobiflight.h"
-
-#if MF_KEYMATRIX_SUPPORT == 1
 #include "MFKeyMatrix.h"
 
-enum KeyMatrixState
-{
-  btnOnPress,
-  btnOnRelease,
+enum KeyMatrixState {
+    btnOnPress,
+    btnOnRelease,
 };
 
-keymatrixEvent   MFKeymatrix::_handler = NULL;
+keymatrixEvent MFKeymatrix::_handler = NULL;
 
-MFKeymatrix::MFKeymatrix (uint8_t address, const char * name) {
-    _adress = address;
-    _name = name;
+MFKeymatrix::MFKeymatrix(uint8_t columnCount, uint8_t columnPins[], uint8_t rowCount, uint8_t rowPins[], const char *name)
+{
+    _columnCount = columnCount;
+    _columnPins  = columnPins;
+    _rowCount    = rowCount;
+    _rowPins     = rowPins;
+    _name        = name;
     _initialized = false;
 }
 
-void MFKeymatrix::init(void) {
+void MFKeymatrix::init(void)
+{
     if (_initialized) return;
+
+    // set each column to INPUT
+    // columns will be set all to OUTPUT to check if a button has changed
+    for (uint8_t i = 0; i < _columnCount; i++) {
+        pinMode(_columnPins[i], OUTPUT);
+        digitalWrite(_columnPins[i], LOW);
+    }
+    // and set each row to input
+    for (uint8_t i = 0; i < _rowCount; i++) {
+        pinMode(_columnPins[i], INPUT_PULLUP);
+    }
+    _rowAllColumn = 0;
     _initialized = true;
-    Wire.setClock(400000);                                          // For Raspberry Pico setting speed must be before Wire.begin(), but check with newest framework
-    Wire.begin();
-    Wire.setClock(400000);
-    _mcp.init(_adress);
-    _mcp.portMode(MCP23017Port::A, 0x00);                           // Port A (columns) as output
-    _mcp.portMode(MCP23017Port::B, 0xFF, 0xFF, 0xFF);               // Port B (rows) as input, w/ PullUps, inverted mode
-    _mcp.interruptMode(MCP23017InterruptMode::Or);                  // Interrupt on one line, not really needed here as only Port B is input
-    _mcp.interrupt(MCP23017Port::B, CHANGE);                        // interrupt on changing
-    _mcp.writeRegister(MCP23017Register::GPIO_A, 0x00);             // Reset port A
-    _mcp.writeRegister(MCP23017Register::GPIO_B, 0x00);             // Reset port B
-    _mcp.clearInterrupts();                                         // And clear all interrupts which could come from initialization
-    for (uint8_t i = 0; i < 64; i++)
-    {
-        BitArray.setBit(MODULE_MAX_PINS + 1 + i);                    // set all bits to HIGH as reversed polarity compares to buttons
-    }
 }
 
-void MFKeymatrix::update(void) {
-    uint8_t actual_status = 0;                                      // reflects the actual status after read the row
-    uint8_t column4bit = 0;                                         // for calculation of button number, avoids multiplication of column by 8
-    uint8_t portB = 0;                                              // bit position is changed button
+void MFKeymatrix::update(void)
+{
+    uint8_t actual_status = 0; // reflects the actual status after reading the row
+    uint8_t column4bit    = 0; // for calculation button number
+
+    // All columns are set to LOW, read in the rows and check against the old status
+    // if the actual status is NOT the same as the old one a button press has changed
+    // otherwise just return as no button status has changed.
+    for (uint8_t i = 0; i < _rowCount; i++) {
+        actual_status ^= digitalRead(_rowPins[i]) << i;
+    }
+    // no button status has changed
+    if (actual_status == _rowAllColumn)
+        return;
     
-    portB= _mcp.readRegister(MCP23017Register::INTF_B);             // read interrupt register from portB to check if an interrupt has occur and from which row
-    if (!portB) return;                                             // if no interrupt occur do not check Keymatrix for changed button
-
-    if (_calculate == false)                                        // on interrupt do not calculate the button but wait one loop for debouncing
-    {
-        _calculate = true;                                          // set status to "calculating" to calculate the button on the next loop
-        return;                                                     // and in this loop do nothing
+    // button status has changed, save the actual one
+    _rowAllColumn = actual_status;
+    // and prepare for read in the row status for each column
+    actual_status = 0;
+    // each column will be set to LOW to avoid diodes in keymatrix
+    for (uint8_t i = 0; i < _columnCount; i++) {
+        pinMode(_columnPins[i], INPUT_PULLUP);
     }
 
-    for (uint8_t column=0; column<8; column++) {                    // Scan each column for pressed/released key
-        _mcp.portMode(MCP23017Port::A, ~(1<<column), 0xFF, 0xFF);   // set columns separate to output (no diodes needed), LOW due to inverted mode
-        actual_status = _mcp.readPort(MCP23017Port::B);             // and read the row
-        if ((actual_status&portB) != (old_status[column]&portB)) {  // check for correct column, row is already known from interrupt register
-// *********************************************************************************************
-//    At this point the changed button is determinied
-//    button = column4bit + bitLocation
-//    result could be stored as virtuell button to be handled in button routine
-//    in this case next both if() are not required here, would be done in button routine
-//    must be substituted by un-/setting the virtual button
-// *********************************************************************************************
-/*
-            if ((actual_status&portB) && _handler!= NULL) {         // check for pressed or released
-                (*_handler)(KeyMatrixState::btnOnPress, (column4bit + getBitLocation(portB)), _name);   // and send event
-            }
-            if (!(actual_status&portB) && _handler != NULL) {
-                (*_handler)(KeyMatrixState::btnOnRelease, (column4bit + getBitLocation(portB)), _name);
-            }
-*/
-// *****************************************************************************************
-            if (actual_status&portB)                                // check for pressed or released and save in array
-                BitArray.clearBit(column4bit + getBitLocation(portB) + MODULE_MAX_PINS + 1);    // status is reserved compared to buttons -> clearBit() and NOT setBit()
-            else
-                BitArray.setBit(column4bit + getBitLocation(portB) + MODULE_MAX_PINS + 1);
-// *****************************************************************************************
-            old_status[column] = actual_status;                     // store actual status as old status to detect next button change
+    // set each column one by one to OUTPUT and LOW to check if a button in this row has changed
+    for (uint8_t i = 0; i < _columnCount; i++) {
+        // set one column to OUTPUT and LOW to check the rows
+        pinMode(_columnPins[i], OUTPUT);
+        digitalWrite(_columnPins[i], LOW);
+        // each row pin will be read in and all will be saved in one byte
+        for (uint8_t j = 0; j < _rowCount; i++) {
+            actual_status ^= digitalRead(_rowPins[j]) << j;
         }
-        column4bit += 8;                                            // for calculating button number on next column
+        // check if one input has changed
+        if (actual_status != old_status[i]) {
+            // and if so check which row has changed
+            for (uint8_t j = 0; j < _rowCount; j++) {
+                // check bitwise the row
+                if ((actual_status & (1<<j)) != (old_status[i] & (1<<j))) {
+                    trigger(actual_status & (1<<j), column4bit + j);
+                    // set the actual column to INPUT to be prepares for next matrix reading
+                    pinMode(_columnPins[i], INPUT_PULLUP);
+                    return;
+                }
+            }
+            // save the new status
+            old_status[i] = actual_status;
+        }
+        // set the actual column to INPUT to be prepared for next column reading
+        pinMode(_columnPins[i], INPUT_PULLUP);
+        column4bit += _columnCount; // for calculating button number on next column
+        actual_status = 0;
     }
-    _mcp.portMode(MCP23017Port::A, 0x00);                           // Port A (columns) as output
-    _mcp.readRegister(MCP23017Register::INTCAP_B);                  // and clear the interrupt to capture the next interrupt
-    _calculate = false;                                             // on next interrupt do not calculate the button but wait one loop for debouncing
 }
 
+void MFKeymatrix::trigger(uint8_t state, uint8_t pin)
+{
+    (state == LOW) ? triggerOnPress(pin) : triggerOnRelease(pin);
+}
+
+void MFKeymatrix::triggerOnPress(uint8_t pin)
+{
+    if (_handler) {
+        (*_handler)(KeyMatrixState::btnOnPress, pin, _name);
+    }
+}
+
+void MFKeymatrix::triggerOnRelease(uint8_t pin)
+{
+    if (_handler) {
+        (*_handler)(KeyMatrixState::btnOnRelease, pin, _name);
+    }
+}
 
 void MFKeymatrix::detach()
 {
-  _initialized = false;
+    _initialized = false;
 }
-/*
+
 void MFKeymatrix::attachHandler(keymatrixEvent newHandler)
 {
-  _handler = newHandler;
+    _handler = newHandler;
 }
-*/
-/* **************************************************************************************************
-    see https://stackoverflow.com/questions/14429661/determine-which-single-bit-in-the-byte-is-set
-        http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
-
-    BUT a double press on same row may not be detected, maybe better a for() loop over the rows...
-    OR it is very unlikely that a button change happens exactly the same time
-    -> some more tests required
-*************************************************************************************************** */
-uint8_t MFKeymatrix::getBitLocation(uint8_t c) {
-  // c is in {1, 2, 4, 8, 16, 32, 64, 128}, returned values are {0, 1, ..., 7}
-  return (((c & 0xAA) != 0) |
-          (((c & 0xCC) != 0) << 1) |
-          (((c & 0xF0) != 0) << 2));
-}
-
-#endif

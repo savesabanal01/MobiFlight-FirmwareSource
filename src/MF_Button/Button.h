@@ -10,11 +10,10 @@
 
 namespace Button
 {
-void Add(uint8_t pin, char const *name);
-void Clear();
-void readPin();
-void readPin();
-void OnTrigger();
+    void Add(uint8_t pin, char const *name = "Button");
+    void Clear();
+    void read();
+    void OnTrigger();
 }
 
 // Button.h
