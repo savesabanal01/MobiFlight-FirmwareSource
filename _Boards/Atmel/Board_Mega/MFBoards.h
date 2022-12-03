@@ -38,6 +38,9 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
+#ifndef MF_KEYMATRIX_SUPPORT
+#define MF_KEYMATRIX_SUPPORT 1
+#endif
 
 #define MODULE_MAX_PINS      69
 #define MAX_OUTPUTS          40

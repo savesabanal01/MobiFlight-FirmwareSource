@@ -172,11 +172,23 @@ void ResetBoard()
 void setup()
 {
     Serial.begin(115200);
+while (!Serial) {delay(10);}
+delay(1000);
     MFeeprom.init();
     attachCommandCallbacks();
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
+    keyMatrixColumnPins[0] = 0;
+    keyMatrixColumnPins[1] = 1;
+    keyMatrixColumnPins[2] = 2;
+    keyMatrixColumnPins[3] = 3;
+
+    keyMatrixRowPins[0] = 5;
+    keyMatrixRowPins[1] = 6;
+    keyMatrixRowPins[2] = 7;
+    keyMatrixRowPins[3] = 8;
+    Keymatrix::Add(4, keyMatrixColumnPins, 4, keyMatrixRowPins, "Keymatrix");
 #ifdef USE_INTERRUPT
     setup_interrupt();
 #endif

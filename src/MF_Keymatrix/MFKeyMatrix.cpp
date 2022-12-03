@@ -18,12 +18,13 @@ keymatrixEvent MFKeymatrix::_handler = NULL;
 
 MFKeymatrix::MFKeymatrix(uint8_t columnCount, uint8_t columnPins[], uint8_t rowCount, uint8_t rowPins[], const char *name)
 {
-    _columnCount = columnCount;
-    _columnPins  = columnPins;
-    _rowCount    = rowCount;
-    _rowPins     = rowPins;
-    _name        = name;
-    _initialized = false;
+    _columnCount  = columnCount;
+    _columnPins   = columnPins;
+    _rowCount     = rowCount;
+    _rowPins      = rowPins;
+    _name         = name;
+    _rowAllColumn = 0;
+    _initialized  = false;
 }
 
 void MFKeymatrix::init(void)
@@ -35,17 +36,22 @@ void MFKeymatrix::init(void)
     for (uint8_t i = 0; i < _columnCount; i++) {
         pinMode(_columnPins[i], OUTPUT);
         digitalWrite(_columnPins[i], LOW);
+        for (uint8_t j = 0; j < _rowCount; j++) {
+            old_status[i] |= 1 << j;
+        }
     }
     // and set each row to input
     for (uint8_t i = 0; i < _rowCount; i++) {
-        pinMode(_columnPins[i], INPUT_PULLUP);
+        pinMode(_rowPins[i], INPUT_PULLUP);
+        _rowAllColumn |= (1 << i);
     }
-    _rowAllColumn = 0;
     _initialized = true;
 }
 
 void MFKeymatrix::update(void)
 {
+    if (!_initialized) return;
+
     uint8_t actual_status = 0; // reflects the actual status after reading the row
     uint8_t column4bit    = 0; // for calculation button number
 
@@ -53,12 +59,12 @@ void MFKeymatrix::update(void)
     // if the actual status is NOT the same as the old one a button press has changed
     // otherwise just return as no button status has changed.
     for (uint8_t i = 0; i < _rowCount; i++) {
-        actual_status ^= digitalRead(_rowPins[i]) << i;
+        actual_status |= digitalRead(_rowPins[i]) << i;
     }
     // no button status has changed
     if (actual_status == _rowAllColumn)
         return;
-    
+
     // button status has changed, save the actual one
     _rowAllColumn = actual_status;
     // and prepare for read in the row status for each column
@@ -74,19 +80,19 @@ void MFKeymatrix::update(void)
         pinMode(_columnPins[i], OUTPUT);
         digitalWrite(_columnPins[i], LOW);
         // each row pin will be read in and all will be saved in one byte
-        for (uint8_t j = 0; j < _rowCount; i++) {
-            actual_status ^= digitalRead(_rowPins[j]) << j;
+        for (uint8_t j = 0; j < _rowCount; j++) {
+            actual_status |= digitalRead(_rowPins[j]) << j;
         }
-        // check if one input has changed
+        // check which one input has changed
         if (actual_status != old_status[i]) {
             // and if so check which row has changed
             for (uint8_t j = 0; j < _rowCount; j++) {
                 // check bitwise the row
-                if ((actual_status & (1<<j)) != (old_status[i] & (1<<j))) {
-                    trigger(actual_status & (1<<j), column4bit + j);
+                if ((actual_status & (1 << j)) != (old_status[i] & (1 << j))) {
+                    trigger(actual_status & (1 << j), column4bit + j);
                     // set the actual column to INPUT to be prepares for next matrix reading
-                    pinMode(_columnPins[i], INPUT_PULLUP);
-                    return;
+                    old_status[i] = actual_status;
+  //                  return;
                 }
             }
             // save the new status
@@ -96,6 +102,12 @@ void MFKeymatrix::update(void)
         pinMode(_columnPins[i], INPUT_PULLUP);
         column4bit += _columnCount; // for calculating button number on next column
         actual_status = 0;
+    }
+
+    // and least set all columns back to OUTPUT and LOW
+    for (uint8_t i = 0; i < _columnCount; i++) {
+        pinMode(_columnPins[i], OUTPUT);
+        digitalWrite(_columnPins[i], LOW);
     }
 }
 

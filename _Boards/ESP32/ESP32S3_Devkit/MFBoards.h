@@ -29,6 +29,9 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
+#ifndef MF_KEYMATRIX_SUPPORT
+#define MF_KEYMATRIX_SUPPORT 1
+#endif
 
 #define MAX_OUTPUTS         15
 #define MAX_BUTTONS         26
