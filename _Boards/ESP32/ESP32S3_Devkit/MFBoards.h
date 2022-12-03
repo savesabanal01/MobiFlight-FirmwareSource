@@ -44,6 +44,9 @@
 #define MAX_OUTPUT_SHIFTERS 4
 #define MAX_INPUT_SHIFTERS  4
 #define MAX_DIGIN_MUX       2
+#define MAX_KEYMATRIX        1
+#define MAX_COLUMN_KEYMATRIX 8
+#define MAX_ROW_KEYMATRIX    8
 
 #define STEPS               64
 #define STEPPER_SPEED       400     // 300 already worked, 467, too?
