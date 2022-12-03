@@ -43,6 +43,7 @@ enum {
     kAnalogChange,         // 28
     kInputShifterChange,   // 29
     kDigInMuxChange,       // 30
+    kKeyMatrixChange,      // 31
     kDebug = 0xFF          // 255
 };
 

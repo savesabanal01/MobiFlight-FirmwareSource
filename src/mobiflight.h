@@ -12,4 +12,7 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 
+extern uint8_t keyMatrixColumnPins[];
+extern uint8_t keyMatrixRowPins[];
+
 // mobiflight.h

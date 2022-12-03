@@ -32,6 +32,9 @@
 #if MF_OUTPUT_SHIFTER_SUPPORT == 1
 #include "OutputShifter.h"
 #endif
+#if MF_KEYMATRIX_SUPPORT == 1
+#include "Keymatrix.h"
+#endif
 #if MF_MUX_SUPPORT == 1
 #include "MFMuxDriver.h"
 #endif
@@ -149,6 +152,9 @@ void resetConfig()
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1
     DigInMux::Clear();
+#endif
+#if MF_KEYMATRIX_SUPPORT == 1
+    Keymatrix::Clear();
 #endif
     configLength    = 0;
     configActivated = false;

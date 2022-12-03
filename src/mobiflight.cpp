@@ -29,6 +29,9 @@
 #if MF_OUTPUT_SHIFTER_SUPPORT == 1
 #include "OutputShifter.h"
 #endif
+#if MF_KEYMATRIX_SUPPORT == 1
+#include "Keymatrix.h"
+#endif
 #if MF_DIGIN_MUX_SUPPORT == 1
 #include "DigInMux.h"
 #endif
@@ -51,6 +54,12 @@ extern MFEEPROM MFeeprom;
 #if MF_MUX_SUPPORT == 1
 MFMuxDriver MUX;
 #endif
+
+#if MF_KEYMATRIX_SUPPORT == 1
+uint8_t keyMatrixColumnPins[MAX_COLUMN_KEYMATRIX];
+uint8_t keyMatrixRowPins[MAX_ROW_KEYMATRIX];
+#endif  
+
 // ==================================================
 //   Polling interval counters
 // ==================================================
@@ -72,6 +81,9 @@ typedef struct {
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     uint32_t DigInMux = 0;
+#endif
+#if MF_KEYMATRIX_SUPPORT == 1
+    uint32_t KeyMatrix = 0;
 #endif
 } lastUpdate_t;
 
@@ -99,6 +111,9 @@ void initPollIntervals(void)
 #if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     lastUpdate.DigInMux = millis() + 8;
 #endif
+#if MF_KEYMATRIX_SUPPORT == 1
+  lastUpdate.KeyMatrix  = millis();
+#endif  
 }
 
 void timedUpdate(void (*fun)(), uint32_t *last, uint8_t intv)
@@ -217,6 +232,9 @@ void loop()
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
 #endif
 
+#if MF_KEYMATRIX_SUPPORT == 1
+    timedUpdate(Keymatrix::read, &lastUpdate.KeyMatrix, MF_BUTTON_DEBOUNCE_MS);
+#endif
         // lcds, outputs, outputshifters, segments do not need update
     }
 }
