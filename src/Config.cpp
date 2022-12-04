@@ -402,6 +402,21 @@ void readConfig()
             break;
 #endif
 
+#if MF_KEYMATRIX_SUPPORT == 1
+        case kTypeKeyMatrix:
+            params[0] = readUintFromEEPROM(&addreeprom); // number of columns
+            for (uint8_t i = 0; i < params[0]; i++) {    // Pins for the columns
+                keyMatrixColumnPins[i] = readUintFromEEPROM(&addreeprom);
+            }
+            params[1] = readUintFromEEPROM(&addreeprom); // number of rows
+            for (uint8_t i = 0; i < params[1]; i++) {    // Pins for the rows
+                keyMatrixRowPins[i] = readUintFromEEPROM(&addreeprom);
+            }
+            Keymatrix::Add(params[0], keyMatrixColumnPins, params[1], keyMatrixRowPins, &nameBuffer[addrbuffer]);
+            copy_success = readNameFromEEPROM(&addreeprom, nameBuffer, &addrbuffer); // copy the NULL terminated name to to nameBuffer and set to next free memory location
+
+            // copy_success = readEndCommandFromEEPROM(&addreeprom);                 // once the nameBuffer is not required anymore uncomment this line and delete the line before
+#endif
         default:
             copy_success = readEndCommandFromEEPROM(&addreeprom); // check EEPROM until end of name
         }
