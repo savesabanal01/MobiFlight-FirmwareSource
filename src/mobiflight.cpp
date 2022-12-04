@@ -181,12 +181,20 @@ void setup()
     keyMatrixColumnPins[1] = 1;
     keyMatrixColumnPins[2] = 2;
     keyMatrixColumnPins[3] = 3;
+    keyMatrixColumnPins[4] = 4;
+    keyMatrixColumnPins[5] = 5;
+    keyMatrixColumnPins[6] = 6;
+    keyMatrixColumnPins[7] = 7;
 
-    keyMatrixRowPins[0] = 5;
-    keyMatrixRowPins[1] = 6;
-    keyMatrixRowPins[2] = 7;
-    keyMatrixRowPins[3] = 8;
-    Keymatrix::Add(4, keyMatrixColumnPins, 4, keyMatrixRowPins, "Keymatrix");
+    keyMatrixRowPins[0] = 8;
+    keyMatrixRowPins[1] = 9;
+    keyMatrixRowPins[2] = 10;
+    keyMatrixRowPins[3] = 11;
+    keyMatrixRowPins[4] = 12;
+    keyMatrixRowPins[5] = 13;
+    keyMatrixRowPins[6] = 14;
+    keyMatrixRowPins[7] = 15;
+    Keymatrix::Add(8, keyMatrixColumnPins, 8, keyMatrixRowPins, "Keymatrix");
 #ifdef USE_INTERRUPT
     setup_interrupt();
 #endif
