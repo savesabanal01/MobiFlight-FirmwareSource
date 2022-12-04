@@ -22,7 +22,7 @@ private:
     uint8_t              *_columnPins;
     uint8_t               _rowCount;
     uint8_t              *_rowPins;
-    uint8_t               _rowAllColumn;
+    uint8_t               _rowStatusAllColumn;
     uint8_t               old_status[MAX_COLUMN_KEYMATRIX] = {0x00};
     static keymatrixEvent _handler;
     const char           *_name;

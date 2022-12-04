@@ -18,13 +18,13 @@ keymatrixEvent MFKeymatrix::_handler = NULL;
 
 MFKeymatrix::MFKeymatrix(uint8_t columnCount, uint8_t columnPins[], uint8_t rowCount, uint8_t rowPins[], const char *name)
 {
-    _columnCount  = columnCount;
-    _columnPins   = columnPins;
-    _rowCount     = rowCount;
-    _rowPins      = rowPins;
-    _name         = name;
-    _rowAllColumn = 0;
-    _initialized  = false;
+    _columnCount        = columnCount;
+    _columnPins         = columnPins;
+    _rowCount           = rowCount;
+    _rowPins            = rowPins;
+    _name               = name;
+    _rowStatusAllColumn = 0;
+    _initialized        = false;
 }
 
 void MFKeymatrix::init(void)
@@ -36,16 +36,18 @@ void MFKeymatrix::init(void)
     for (uint8_t i = 0; i < _columnCount; i++) {
         pinMode(_columnPins[i], OUTPUT);
         digitalWrite(_columnPins[i], LOW);
-        for (uint8_t j = 0; j < _rowCount; j++) {
-            old_status[i] |= 1 << j;
-        }
+        old_status[i] = (1 << _rowCount) - 1;
+        //        for (uint8_t j = 0; j < _rowCount; j++) {
+        //            old_status[i] |= 1 << j;
+        //        }
     }
     // and set each row to input
     for (uint8_t i = 0; i < _rowCount; i++) {
         pinMode(_rowPins[i], INPUT_PULLUP);
-        _rowAllColumn |= (1 << i);
+        //        _rowStatusAllColumn |= (1 << i);
     }
-    _initialized = true;
+    _rowStatusAllColumn = (1 << _rowCount) - 1;
+    _initialized        = true;
 }
 
 void MFKeymatrix::update(void)
@@ -62,18 +64,17 @@ void MFKeymatrix::update(void)
         actual_status |= digitalRead(_rowPins[i]) << i;
     }
     // no button status has changed
-    if (actual_status == _rowAllColumn)
+    if (actual_status == _rowStatusAllColumn)
         return;
 
     // button status has changed, save the actual one
-    _rowAllColumn = actual_status;
+    _rowStatusAllColumn = actual_status;
     // and prepare for read in the row status for each column
     actual_status = 0;
-    // each column will be set to LOW to avoid diodes in keymatrix
+    // each column will be set to INPUT to avoid diodes in keymatrix
     for (uint8_t i = 0; i < _columnCount; i++) {
         pinMode(_columnPins[i], INPUT_PULLUP);
     }
-
     // set each column one by one to OUTPUT and LOW to check if a button in this row has changed
     for (uint8_t i = 0; i < _columnCount; i++) {
         // set one column to OUTPUT and LOW to check the rows
@@ -92,7 +93,12 @@ void MFKeymatrix::update(void)
                     trigger(actual_status & (1 << j), column4bit + j);
                     // set the actual column to INPUT to be prepares for next matrix reading
                     old_status[i] = actual_status;
-  //                  return;
+                    // and least set all columns back to OUTPUT and LOW
+                    for (uint8_t i = 0; i < _columnCount; i++) {
+                        pinMode(_columnPins[i], OUTPUT);
+                        digitalWrite(_columnPins[i], LOW);
+                    }
+                    return;
                 }
             }
             // save the new status
@@ -105,6 +111,9 @@ void MFKeymatrix::update(void)
     }
 
     // and least set all columns back to OUTPUT and LOW
+    // it should not come up to here as the button is calculated in the inner for loop and returned from there
+    // and the for loops are only entered if a button press is detected in front
+    // so it's just for safety reasons here if something weird happens
     for (uint8_t i = 0; i < _columnCount; i++) {
         pinMode(_columnPins[i], OUTPUT);
         digitalWrite(_columnPins[i], LOW);
