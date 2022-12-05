@@ -405,10 +405,12 @@ void readConfig()
 #if MF_KEYMATRIX_SUPPORT == 1
         case kTypeKeyMatrix:
             params[0] = readUintFromEEPROM(&addreeprom); // number of columns
+            keyMatrixColumnPins = new (allocateMemory(params[0])) uint8_t;
             for (uint8_t i = 0; i < params[0]; i++) {    // Pins for the columns
                 keyMatrixColumnPins[i] = readUintFromEEPROM(&addreeprom);
             }
             params[1] = readUintFromEEPROM(&addreeprom); // number of rows
+            keyMatrixRowPins = new (allocateMemory(params[1])) uint8_t;
             for (uint8_t i = 0; i < params[1]; i++) {    // Pins for the rows
                 keyMatrixRowPins[i] = readUintFromEEPROM(&addreeprom);
             }

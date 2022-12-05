@@ -56,8 +56,8 @@ MFMuxDriver MUX;
 #endif
 
 #if MF_KEYMATRIX_SUPPORT == 1
-uint8_t keyMatrixColumnPins[MAX_COLUMN_KEYMATRIX];
-uint8_t keyMatrixRowPins[MAX_ROW_KEYMATRIX];
+uint8_t *keyMatrixColumnPins;
+uint8_t *keyMatrixRowPins;
 #endif  
 
 // ==================================================
@@ -177,6 +177,10 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
+
+uint8_t ColumnPins = 8;
+uint8_t RowPins = 8;
+keyMatrixColumnPins = new (allocateMemory(ColumnPins)) uint8_t;
     keyMatrixColumnPins[0] = 0;
     keyMatrixColumnPins[1] = 1;
     keyMatrixColumnPins[2] = 2;
@@ -185,7 +189,7 @@ void setup()
     keyMatrixColumnPins[5] = 5;
     keyMatrixColumnPins[6] = 6;
     keyMatrixColumnPins[7] = 7;
-
+keyMatrixRowPins = new (allocateMemory(RowPins)) uint8_t;
     keyMatrixRowPins[0] = 8;
     keyMatrixRowPins[1] = 9;
     keyMatrixRowPins[2] = 10;
