@@ -177,7 +177,7 @@ void setup()
     cmdMessenger.printLfCr();
     ResetBoard();
     initPollIntervals();
-
+/*
 uint8_t ColumnPins = 8;
 uint8_t RowPins = 8;
 keyMatrixColumnPins = new (allocateMemory(ColumnPins)) uint8_t;
@@ -199,6 +199,7 @@ keyMatrixRowPins = new (allocateMemory(RowPins)) uint8_t;
     keyMatrixRowPins[6] = 14;
     keyMatrixRowPins[7] = 15;
     Keymatrix::Add(8, keyMatrixColumnPins, 8, keyMatrixRowPins, "Keymatrix");
+*/
 #ifdef USE_INTERRUPT
     setup_interrupt();
 #endif
