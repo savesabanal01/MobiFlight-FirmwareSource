@@ -55,13 +55,12 @@ const uint8_t MEM_OFFSET_SERIAL = MEM_OFFSET_NAME + MEM_LEN_NAME;
 const uint8_t MEM_LEN_SERIAL    = 11;
 const uint8_t MEM_OFFSET_CONFIG = MEM_OFFSET_NAME + MEM_LEN_NAME + MEM_LEN_SERIAL;
 
-const char type[sizeof(MOBIFLIGHT_TYPE)] = MOBIFLIGHT_TYPE;
-char       serial[MEM_LEN_SERIAL]        = MOBIFLIGHT_SERIAL;
-char       name[MEM_LEN_NAME]            = MOBIFLIGHT_NAME;
-const int  MEM_LEN_CONFIG                = MEMLEN_CONFIG;
-char       nameBuffer[MEM_LEN_CONFIG]    = "";
-uint16_t   configLength                  = 0;
-boolean    configActivated               = false;
+char      serial[MEM_LEN_SERIAL]     = MOBIFLIGHT_SERIAL;
+char      name[MEM_LEN_NAME]         = MOBIFLIGHT_NAME;
+const int MEM_LEN_CONFIG             = MEMLEN_CONFIG;
+char      nameBuffer[MEM_LEN_CONFIG] = "";
+uint16_t  configLength               = 0;
+boolean   configActivated            = false;
 
 void resetConfig();
 void readConfig();
@@ -193,7 +192,7 @@ uint8_t readUintFromEEPROM(volatile uint16_t *addreeprom)
     char    params[4] = {0}; // max 3 (255) digits NULL terminated
     uint8_t counter   = 0;
     do {
-        params[counter++] = MFeeprom.read_byte((*addreeprom)++);           // read character from eeprom and locate next buffer and eeprom location
+        params[counter++] = MFeeprom.read_byte((*addreeprom)++);      // read character from eeprom and locate next buffer and eeprom location
     } while (params[counter - 1] != '.' && counter < sizeof(params)); // reads until limiter '.' and for safety reason not more then size of params[]
     params[counter - 1] = 0x00;                                       // replace '.' by NULL to terminate the string
     return atoi(params);
@@ -206,9 +205,9 @@ bool readNameFromEEPROM(uint16_t *addreeprom, char *buffer, uint16_t *addrbuffer
     char temp = 0;
     do {
         temp                    = MFeeprom.read_byte((*addreeprom)++); // read the first character
-        buffer[(*addrbuffer)++] = temp;                           // save character and locate next buffer position
-        if (*addrbuffer >= MEMLEN_NAMES_BUFFER) {                 // nameBuffer will be exceeded
-            return false;                                         // abort copying from EEPROM to nameBuffer
+        buffer[(*addrbuffer)++] = temp;                                // save character and locate next buffer position
+        if (*addrbuffer >= MEMLEN_NAMES_BUFFER) {                      // nameBuffer will be exceeded
+            return false;                                              // abort copying from EEPROM to nameBuffer
         }
     } while (temp != ':');            // reads until limiter ':' and locates the next free buffer position
     buffer[(*addrbuffer) - 1] = 0x00; // replace ':' by NULL, terminates the string
@@ -235,7 +234,7 @@ void readConfig()
     uint16_t addreeprom   = MEM_OFFSET_CONFIG; // define first memory location where config is saved in EEPROM
     uint16_t addrbuffer   = 0;                 // and start with first memory location from nameBuffer
     char     params[6]    = "";
-    char     command      = readUintFromEEPROM(&addreeprom); // read the first value from EEPROM, it's a device definition
+    uint8_t  command      = readUintFromEEPROM(&addreeprom); // read the first value from EEPROM, it's a device definition
     bool     copy_success = true;                            // will be set to false if copying input names to nameBuffer exceeds array dimensions
                                                              // not required anymore when pins instead of names are transferred to the UI
 
@@ -420,7 +419,7 @@ void OnGetInfo()
 {
     setLastCommandMillis();
     cmdMessenger.sendCmdStart(kInfo);
-    cmdMessenger.sendCmdArg(type);
+    cmdMessenger.sendCmdArg(F(MOBIFLIGHT_TYPE));
     cmdMessenger.sendCmdArg(name);
     cmdMessenger.sendCmdArg(serial);
     cmdMessenger.sendCmdArg(VERSION);
@@ -460,8 +459,7 @@ void OnGenNewSerial()
 // ************************************************************
 void storeName()
 {
-    uint8_t prefix = '#';
-    MFeeprom.write_block(MEM_OFFSET_NAME, prefix);
+    MFeeprom.write_byte(MEM_OFFSET_NAME, '#');
     MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
 }
 

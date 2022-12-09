@@ -9,8 +9,11 @@
 #include <Arduino.h>
 #include "MFBoards.h"
 
-#define ADC_MAX_AVERAGE          8                                        // must be 2^n
-#define ADC_MAX_AVERAGE_LOG2     3                                        // please calculate LOG2(ADC_MAX_AVERAGE)
+// Following value defines the buffer size for samples; the larger the buffer,
+// the smoother the response (and the larger the delay).
+// Buffer size is 2^ADC_MAX_AVERAGE_LOG2: 3 -> 8 samples, 4 -> 16 samples etc.
+#define ADC_MAX_AVERAGE_LOG2 3
+#define ADC_MAX_AVERAGE      (1 << ADC_MAX_AVERAGE_LOG2)
 #define CALIBRATION_START_ADRESS (EEPROM_SIZE - (MAX_ANALOG_PIN * 4) - 1) // base adress for storing calibration data, each calibration data needs 4 Byte (2 * uint16_t)
 #define CALIBRATION_TIME         5000                                     // time for calibration, within this time pot must be moved from min to max several time
 
