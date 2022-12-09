@@ -4,8 +4,8 @@
 // (C) MobiFlight Project 2022
 //
 
-#ifndef MFBoardNano_h
-#define MFBoardNano_h
+#ifndef MFBoardUno_h
+#define MFBoardUno_h
 
 #ifndef MF_SEGMENT_SUPPORT
 #define MF_SEGMENT_SUPPORT 1
@@ -69,3 +69,5 @@
 #define RANDOM_SEED_INPUT A0
 
 #endif
+
+// MFBoards.h
