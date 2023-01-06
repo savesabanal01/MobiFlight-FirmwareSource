@@ -62,7 +62,6 @@
 #define FIRST_ANALOG_PIN    18   // first pin of anlog in, needed to calculate the position of calibration data in EEPROM
 #define MAX_ANALOG_PIN      4    // max. numbers of analog pins, could be different from MAX_ANALOG_INPUTS, needed for calibration data in EEPROM
 
-#define RANDOM_SEED_INPUT A0
 
 #endif
 
