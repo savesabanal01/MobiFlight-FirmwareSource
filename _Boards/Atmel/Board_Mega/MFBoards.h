@@ -28,9 +28,6 @@
 #ifndef MF_INPUT_SHIFTER_SUPPORT
 #define MF_INPUT_SHIFTER_SUPPORT 1
 #endif
-#ifndef MF_KEYMATRIX_SUPPORT
-#define MF_KEYMATRIX_SUPPORT 1
-#endif
 #ifndef MF_MUX_SUPPORT
 #define MF_MUX_SUPPORT 1
 #endif
