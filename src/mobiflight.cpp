@@ -10,6 +10,7 @@
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
 #include "MFEEPROM.h"
 #include "MFInterrupt.h"
+#include "ArduinoUniqueID.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
