@@ -53,7 +53,7 @@ const uint8_t MEM_LEN_NAME      = 48;
 const uint8_t MEM_OFFSET_SERIAL = MEM_OFFSET_NAME + MEM_LEN_NAME;
 const uint8_t MEM_LEN_SERIAL    = 11;
 const uint8_t MEM_OFFSET_CONFIG = MEM_OFFSET_NAME + MEM_LEN_NAME + MEM_LEN_SERIAL;
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_TEENSY35) || defined(ARDUINO_TEENSY41) || defined(ARDUINO_ARCH_ESP32)
 char      serial[MEM_LEN_SERIAL]     = MOBIFLIGHT_SERIAL;
 #elif defined(ARDUINO_ARCH_RP2040)
 // Pico has a unique 64-bit device identifier which is retrieved from the external NOR flash device at boot.
