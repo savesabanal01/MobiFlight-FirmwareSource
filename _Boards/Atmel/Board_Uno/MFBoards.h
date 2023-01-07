@@ -58,10 +58,6 @@
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8
 
-#define STEPS         64
-#define STEPPER_SPEED 400 // 300 already worked, 467, too?
-#define STEPPER_ACCEL 800
-
 #define MOBIFLIGHT_TYPE     "MobiFlight Uno"
 #define MOBIFLIGHT_SERIAL   "0987654321"
 #define MOBIFLIGHT_NAME     "MobiFlight Uno"
