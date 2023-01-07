@@ -43,13 +43,12 @@ enum {
     kAnalogChange,         // 28
     kInputShifterChange,   // 29
     kDigInMuxChange,       // 30
-    kSetStepperSpeedAccel, // 31
-    kKeyMatrixChange,      // 32
+    kKeyMatrixChange,      // 31
     kDebug = 0xFF          // 255
 };
 
-void     attachCommandCallbacks();
-uint32_t getLastCommandMillis();
-void     setLastCommandMillis();
+void                attachCommandCallbacks();
+uint32_t            getLastCommandMillis();
+void                setLastCommandMillis();
 
 extern CmdMessenger cmdMessenger;
