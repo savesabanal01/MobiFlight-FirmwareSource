@@ -43,8 +43,9 @@ enum {
     kAnalogChange,          // 28
     kInputShifterChange,    // 29
     kDigInMuxChange,        // 30
-    kSetAnalogCalibration,  // 31
-    kReadAnalogCalibration, // 32
+    kSetStepperSpeedAccel,  // 31
+    kSetAnalogCalibration,  // 32
+    kReadAnalogCalibration, // 33
     kDebug = 0xFF           // 255
 };
 
