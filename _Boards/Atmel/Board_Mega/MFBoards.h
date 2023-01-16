@@ -39,18 +39,17 @@
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
 
-#define MODULE_MAX_PINS      69
-#define MAX_OUTPUTS          40
-#define MAX_BUTTONS          68
-#define MAX_LEDSEGMENTS      4
-#define MAX_ENCODERS         20
-#define MAX_STEPPERS         10
-#define MAX_MFSERVOS         10
-#define MAX_MFLCD_I2C        2
-#define MAX_ANALOG_INPUTS    16
-#define MAX_OUTPUT_SHIFTERS  4
-#define MAX_INPUT_SHIFTERS   4
-#define MAX_DIGIN_MUX        4
+#define MAX_OUTPUTS         40
+#define MAX_BUTTONS         68
+#define MAX_LEDSEGMENTS     4
+#define MAX_ENCODERS        20
+#define MAX_STEPPERS        10
+#define MAX_MFSERVOS        10
+#define MAX_MFLCD_I2C       2
+#define MAX_ANALOG_INPUTS   16
+#define MAX_OUTPUT_SHIFTERS 4
+#define MAX_INPUT_SHIFTERS  4
+#define MAX_DIGIN_MUX       4
 #define MAX_KEYMATRIX        1
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8

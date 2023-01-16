@@ -42,7 +42,6 @@
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
 
-#define MODULE_MAX_PINS      21
 #define MAX_OUTPUTS          18
 #define MAX_BUTTONS          18
 #define MAX_LEDSEGMENTS      1
@@ -65,7 +64,6 @@
 #define MEMLEN_CONFIG       440  // max. size for config which wil be stored in EEPROM
 #define MEMLEN_NAMES_BUFFER 350  // max. size for configBuffer, contains only names from inputs
 #define MF_MAX_DEVICEMEM    400  // max. memory size for devices
-
 
 #endif
 
