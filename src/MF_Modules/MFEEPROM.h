@@ -7,6 +7,13 @@
 #pragma once
 
 #include <EEPROM.h>
+#if defined(ARDUINO_ARCH_RP2040)
+#include "Core1.h"
+#endif
+#if defined(ARDUINO_ARCH_ESP32)
+#include "Core0.h"
+extern TaskHandle_t Core0handle;
+#endif
 
 class MFEEPROM
 {

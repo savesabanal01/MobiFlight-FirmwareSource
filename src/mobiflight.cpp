@@ -10,6 +10,7 @@
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
 #include "MFEEPROM.h"
 #include "MFInterrupt.h"
+#include "ArduinoUniqueID.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
@@ -131,6 +132,9 @@ void SetPowerSavingMode(bool state)
     Output::PowerSave(state);
 #if MF_SEGMENT_SUPPORT == 1
     LedSegment::PowerSave(state);
+#endif
+#if MF_STEPPER_SUPPORT == 1
+    Stepper::PowerSave(state);
 #endif
 
 #ifdef DEBUG2CMDMESSENGER
