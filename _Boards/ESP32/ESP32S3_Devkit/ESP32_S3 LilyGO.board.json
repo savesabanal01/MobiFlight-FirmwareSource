@@ -1,0 +1,60 @@
+{
+    "$schema": "./mfboard.schema.json",
+    "AvrDudeSettings": {
+      "Device": "ESP32-S3 LilyGO",
+      "BaudRate": "115200",
+      "Programmer": "arduino",
+      "FirmwareBaseName": "mobiflight_raspberrypico",
+      "Timeout": 15000
+    },
+    "Connection": {
+      "ConnectionDelay": 1250,
+      "DelayAfterFirmwareUpdate": 1250,
+      "DtrEnable": true,
+      "EEPROMSize": 1496,
+      "ExtraConnectionRetry": false,
+      "ForceResetOnFirmwareUpdate": true,
+      "MessageSize": 64
+    },
+    "HardwareIds": ["^VID_303A&PID_1001"],
+    "Info": {
+      "CanInstallFirmware": true,
+      "FriendlyName": "ESP32-S3 LilyGO",
+      "LatestFirmwareVersion": "2.3.0",
+      "MobiFlightType": "MobiFlight ESP32-S3 LilyGO"
+    },
+    "ModuleLimits": {
+      "MaxAnalogInputs": 0,
+      "MaxInputShifters": 0,
+      "MaxButtons": 1,
+      "MaxEncoders": 0,
+      "MaxLcdI2C": 1,
+      "MaxLedSegments": 0,
+      "MaxOutputs": 0,
+      "MaxServos": 0,
+      "MaxShifters": 0,
+      "MaxSteppers": 0,
+      "MaxInputMultiplexer": 0
+    },
+    "Pins": [
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": false,
+        "Pin": 0
+      },
+      {
+        "isAnalog": false,
+        "isI2C": true,
+        "isPWM": false,
+        "Pin": 8
+      },
+      {
+        "isAnalog": false,
+        "isI2C": false,
+        "isPWM": true,
+        "Pin": 48
+      }
+    ]
+  }
+  

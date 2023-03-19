@@ -7,6 +7,13 @@
 #pragma once
 
 #include <EEPROM.h>
+#if defined(ARDUINO_ARCH_RP2040)
+#include "Core1.h"
+#endif
+#if defined(ARDUINO_ARCH_ESP32)
+#include "Core0.h"
+extern TaskHandle_t Core0handle;
+#endif
 
 class MFEEPROM
 {
@@ -45,6 +52,21 @@ public:
         if (adr + sizeof(T) > _eepromLength) return false;
         EEPROM.put(adr, t);
 #if defined(ARDUINO_ARCH_RP2040)
+        // #########################################################################
+        // Communication with Core1
+        // see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
+        // #########################################################################
+        multicore_fifo_push_blocking(CORE1_CMD_STOP);
+        multicore_lockout_start_blocking();
+        EEPROM.commit();
+        multicore_lockout_end_blocking();
+#endif
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
+        // vTaskDelete(core0handle);
+        EEPROM.commit();
+        // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);
+#endif
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
         EEPROM.commit();
 #endif
         return true;
@@ -58,6 +80,21 @@ public:
             EEPROM.put(adr + i, t[i]);
         }
 #if defined(ARDUINO_ARCH_RP2040)
+        // #########################################################################
+        // Communication with Core1
+        // see https://raspberrypi.github.io/pico-sdk-doxygen/group__multicore__fifo.html
+        // #########################################################################
+        multicore_fifo_push_blocking(CORE1_CMD_STOP);
+        multicore_lockout_start_blocking();
+        EEPROM.commit();
+        multicore_lockout_end_blocking();
+#endif
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_CORE0)
+        // vTaskDelete(core0handle);
+        EEPROM.commit();
+        // xTaskCreatePinnedToCore(core0,"Graphics",10000,NULL,0,&Core0handle,0);
+#endif
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
         EEPROM.commit();
 #endif
         return true;

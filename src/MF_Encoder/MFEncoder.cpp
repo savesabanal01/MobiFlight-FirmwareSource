@@ -84,9 +84,7 @@ void MFEncoder::update()
 {
     if (!_initialized)
         return;
-
-    tick();
-
+// poll() is done in loop() or ISR, not here anymore
     int16_t pos = getPosition();
     if (pos == _pos) {
         // nothing happened
@@ -125,7 +123,7 @@ void MFEncoder::update()
     _pos = pos;
 }
 
-void MFEncoder::tick(void)
+void MFEncoder::poll(void)
 {
     bool     sig1      = !digitalRead(_pin1); // to keep backwards compatibility for encoder type digitalRead must be negated
     bool     sig2      = !digitalRead(_pin2); // to keep backwards compatibility for encoder type digitalRead must be negated

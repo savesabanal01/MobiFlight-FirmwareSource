@@ -78,6 +78,9 @@ void MFStepper::attach(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, u
 void MFStepper::detach()
 {
     _initialized = false;
+#if defined(STANDARD_NEW)
+    delete _stepper;
+#endif
 }
 
 void MFStepper::moveTo(long newPosition)

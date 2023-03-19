@@ -17,7 +17,6 @@ namespace LCDDisplay
     {
         if (lcd_12cRegistered == MAX_MFLCD_I2C)
             return;
-
         if (!FitInMemory(sizeof(MFLCDDisplay))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("LCD does not fit in Memory!"));

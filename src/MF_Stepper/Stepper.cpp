@@ -17,7 +17,6 @@ namespace Stepper
     {
         if (steppersRegistered == MAX_STEPPERS)
             return;
-
         if (!FitInMemory(sizeof(MFStepper))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Stepper does not fit in Memory!"));

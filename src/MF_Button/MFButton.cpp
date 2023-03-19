@@ -13,16 +13,20 @@ MFButton::MFButton(uint8_t pin, const char *name)
     _pin   = pin;
     _name  = name;
     pinMode(_pin, INPUT_PULLUP);    // set pin to input
-    _state = digitalRead(_pin);     // initialize on actual status
+    _oldState = digitalRead(_pin);     // initialize on actual status
 }
 
 void MFButton::update()
 {
-    uint8_t newState = (uint8_t)digitalRead(_pin);
-    if (newState != _state) {
-        _state = newState;
-        trigger(_state);
+    if (_newState != _oldState) {
+        _oldState = _newState;
+        trigger(_oldState);
     }
+}
+
+void MFButton::poll()
+{
+    _newState = (uint8_t)digitalRead(_pin);
 }
 
 void MFButton::trigger(uint8_t state)
@@ -32,14 +36,14 @@ void MFButton::trigger(uint8_t state)
 
 void MFButton::triggerOnPress()
 {
-    if (_handler && _state == LOW) {
+    if (_handler && _oldState == LOW) {
         (*_handler)(btnOnPress, _pin, _name);
     }
 }
 
 void MFButton::triggerOnRelease()
 {
-    if (_handler && _state == HIGH) {
+    if (_handler && _oldState == HIGH) {
         (*_handler)(btnOnRelease, _pin, _name);
     }
 }

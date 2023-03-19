@@ -26,7 +26,6 @@ namespace Analog
     {
         if (analogRegistered == MAX_ANALOG_INPUTS)
             return;
-
         if (!FitInMemory(sizeof(MFAnalog))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("AnalogIn does not fit in Memory"));

@@ -56,7 +56,7 @@ public:
     void        attach(uint8_t pin1, uint8_t pin2, uint8_t TypeEncoder, const char *name = "Encoder");
     void        update();
     // call this function every some milliseconds or by using an interrupt for handling state changes of the rotary encoder.
-    void        tick(void);
+    void        poll(void);
     // retrieve the current position
     int16_t     getPosition();
     // adjust the current position

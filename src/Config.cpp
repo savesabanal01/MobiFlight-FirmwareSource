@@ -7,7 +7,7 @@
 #include "mobiflight.h"
 #include "MFEEPROM.h"
 #include "Button.h"
-#include "Encoder.h"
+#include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
 #include "ArduinoUniqueID.h"
 
@@ -150,7 +150,9 @@ void resetConfig()
 #endif
     configLength    = 0;
     configActivated = false;
+#if !defined(STANDARD_NEW)
     ClearMemory();
+#endif
 }
 
 void OnResetConfig()

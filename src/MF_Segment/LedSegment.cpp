@@ -17,7 +17,6 @@ namespace LedSegment
     {
         if (ledSegmentsRegistered == MAX_LEDSEGMENTS)
             return;
-
         if (!FitInMemory(sizeof(MFSegments))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("7Segment does not fit in Memory!"));

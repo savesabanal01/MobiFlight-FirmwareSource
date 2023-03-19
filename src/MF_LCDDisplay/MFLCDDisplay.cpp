@@ -23,14 +23,16 @@ void MFLCDDisplay::display(const char *string)
 
 void MFLCDDisplay::attach(byte address, byte cols, byte lines)
 {
-    _address     = address;
-    _cols        = cols;
-    _lines       = lines;
-    _initialized = true;
-    _lcdDisplay.init((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
-    _lcdDisplay.backlight();
-    Wire.setClock(400000);
-    test();
+  _address = address;
+  _cols = cols;
+  _lines = lines;
+  _initialized = true;
+  Wire.setClock(400000);              // for Raspberry Pico setClock() must be called before begin()! After init() it is not considered
+  _lcdDisplay.init((uint8_t)address, (uint8_t)cols, (uint8_t)lines);
+  Wire.setClock(400000);              // for Mega/Micro/Uno setClock() must be called after begin()! Before it will be overwritten bei begin()
+  _lcdDisplay.backlight();
+  Wire.setClock(400000);
+  test();
 }
 
 void MFLCDDisplay::detach()

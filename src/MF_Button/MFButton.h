@@ -26,6 +26,7 @@ public:
     MFButton(uint8_t pin = 1, const char *name = "Button");
     static void attachHandler(buttonEvent newHandler);
     void        update();
+    void        poll();
     void        trigger(uint8_t state);
     void        triggerOnPress();
     void        triggerOnRelease();
@@ -34,7 +35,8 @@ public:
 
 private:
     static buttonEvent _handler;
-    bool               _state;
+    bool               _oldState;
+    bool               _newState;
 };
 
 // MFButton.h
