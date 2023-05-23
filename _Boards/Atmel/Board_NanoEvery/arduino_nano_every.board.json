@@ -1,9 +1,9 @@
 {
   "$schema": "./mfboard.schema.json",
   "AvrDudeSettings": {
-    "Device": "atmega328p",
+    "Device": "atmega4809",
     "BaudRate": "115200",
-    "Programmer": "arduino",
+    "Programmer": "jtag2updi",
     "FirmwareBaseName": "mobiflight_nano_every",
     "Timeout": 15000
   },
