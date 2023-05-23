@@ -519,7 +519,7 @@ void generateSerial(bool force)
     // used as starting point. It is very unlikely that the time between flashing the firmware
     // and getting the command to send the info's to the connector is always the same.
     generateRandomSerial();
-#elif defined(ARDUINO_ARCH_RP2040)
+#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_MEGAAVR)
     // Read the uniqueID for Pico's and use it as serial number
     generateUniqueSerial();
     // mark this in the eeprom that a UniqueID is used on first start up for Pico's

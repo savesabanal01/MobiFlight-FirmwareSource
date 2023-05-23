@@ -38,6 +38,8 @@ void setup_interrupt(void)
 {
     myTimer.begin(timerIsr, 1000);
 }
+#else
+#error TimerOne is not supported for this architecture
 #endif
 
 #if defined(ARDUINO_ARCH_RP2040)
