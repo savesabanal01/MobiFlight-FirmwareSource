@@ -489,8 +489,8 @@ void generateSerial(bool force)
     }
 
     // Coming here no UniqueID and no serial number is available, so it's the first start up of a board
-#if defined(ARDUINO_ARCH_AVR)
-    // Generate a serial number for AVR's
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_RENESAS)
+    // Generate a serial number for AVR's and for Uno R4 as long as the UniqueID is not extended for the Uno R4
     // To have not always the same starting point for the random generator, millis() are
     // used as starting point. It is very unlikely that the time between flashing the firmware
     // and getting the command to send the info's to the connector is always the same.
