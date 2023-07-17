@@ -6,8 +6,6 @@
 
 #include "MFServo.h"
 
-#if MF_SERVO_SUPPORT==1
-
 void MFServo::moveTo(int absolute)
 {
     int newValue = map(absolute, _mapRange[0], _mapRange[1], _mapRange[2], _mapRange[3]);
@@ -79,7 +77,5 @@ void MFServo::setInternalRange(int min, int max)
     _mapRange[2] = min;
     _mapRange[3] = max;
 }
-
-#endif
 
 // MFServo.h

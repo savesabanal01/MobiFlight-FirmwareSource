@@ -7,10 +7,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include "MFBoards.h"
-
-#if MF_SERVO_SUPPORT==1
-
 #include <Servo.h>
 
 class MFServo
@@ -34,7 +30,5 @@ private:
     long    _currentPos;
     int     speed;
 };
-
-#endif
 
 // MFServo.h

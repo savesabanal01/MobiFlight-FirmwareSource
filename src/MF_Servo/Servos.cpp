@@ -4,13 +4,10 @@
 // (C) MobiFlight Project 2022
 //
 
-
-
 #include "mobiflight.h"
 #include "MFServo.h"
 #include "Servos.h"
 
-#if MF_SERVO_SUPPORT==1
 namespace Servos
 {
     MFServo *servos[MAX_MFSERVOS];
@@ -62,7 +59,5 @@ namespace Servos
         }
     }
 } // namespace
-
-#endif
 
 // Servos.cpp
