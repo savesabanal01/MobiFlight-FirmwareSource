@@ -35,15 +35,14 @@
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
 
-// check all following defines!!!
-#define MAX_OUTPUTS         40
-#define MAX_BUTTONS         68
+#define MAX_OUTPUTS         20
+#define MAX_BUTTONS         20
 #define MAX_LEDSEGMENTS     4
-#define MAX_ENCODERS        20
-#define MAX_STEPPERS        10
-#define MAX_MFSERVOS        10
+#define MAX_ENCODERS        10
+#define MAX_STEPPERS        5
+#define MAX_MFSERVOS        12
 #define MAX_MFLCD_I2C       2
-#define MAX_ANALOG_INPUTS   16
+#define MAX_ANALOG_INPUTS   6
 #define MAX_OUTPUT_SHIFTERS 4
 #define MAX_INPUT_SHIFTERS  4
 #define MAX_DIGIN_MUX       4
@@ -51,7 +50,7 @@
 #define MOBIFLIGHT_TYPE     "MobiFlight UnoR4"
 #define MOBIFLIGHT_SERIAL   "1234567890"
 #define MOBIFLIGHT_NAME     "MobiFlight Uno R4"
-#define EEPROM_SIZE         4096 // EEPROMSizeMega
+#define EEPROM_SIZE         8192 // EEPROMSizeUnoR4
 #define MEMLEN_CONFIG       1496 // max. size for config which wil be stored in EEPROM
 #define MEMLEN_NAMES_BUFFER 1000 // max. size for configBuffer, contains only names from inputs
 #define MF_MAX_DEVICEMEM    1500 // max. memory size for devices
