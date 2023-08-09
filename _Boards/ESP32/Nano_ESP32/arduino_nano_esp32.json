@@ -152,14 +152,14 @@
     },
     {
       "isAnalog": true,
-      "isI2C": false,
+      "isI2C": true,
       "isPWM": false,
       "Name": "A4",
       "Pin": 21
     },
     {
       "isAnalog": true,
-      "isI2C": false,
+      "isI2C": true,
       "isPWM": false,
       "Name": "A5",
       "Pin": 22
