@@ -5,7 +5,7 @@
     "VerificationFileName": "INFO_UF2.TXT"
   },
   "Connection": {
-    "ConnectionDelay": 1250,
+    "ConnectionDelay": 2000,
     "DelayAfterFirmwareUpdate": 1250,
     "DtrEnable": true,
     "EEPROMSize": 1496,
@@ -18,7 +18,7 @@
     "CanInstallFirmware": true,
     "CanResetBoard": true,
     "FirmwareBaseName": "mobiflight_nano_esp32",
-    "FirmwareExtension": "uf2",
+    "FirmwareExtension": "bin",
     "FriendlyName": "MobiFlight Nano ESP32",
     "LatestFirmwareVersion": "2.4.1",
     "MobiFlightType": "MobiFlight Nano ESP32",
