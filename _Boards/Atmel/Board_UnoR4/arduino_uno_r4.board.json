@@ -27,7 +27,7 @@
       "LatestFirmwareVersion": "2.4.1",
       "FriendlyName": "Arduino Uno R4",
       "MobiFlightType": "MobiFlight UnoR4",
-      "ResetFirmwareFile": "reset.arduino_mega_1_0_2.hex"
+      "ResetFirmwareFile": "reset.uno_r4_1_0_2.bin"
     },
     "ModuleLimits": {
       "MaxAnalogInputs": 6,
