@@ -18,7 +18,11 @@ namespace Analog
     {
         cmdMessenger.sendCmdStart(kAnalogChange);
         cmdMessenger.sendCmdArg(name);
+#ifdef ARDUINO_ARCH_ESP32
+        cmdMessenger.sendCmdArg(value>>2);
+#else
         cmdMessenger.sendCmdArg(value);
+#endif
         cmdMessenger.sendCmdEnd();
     };
 
