@@ -14,7 +14,7 @@
 #define MF_SERVO_SUPPORT 1
 #endif
 #ifndef MF_ANALOG_SUPPORT
-#define MF_ANALOG_SUPPORT 8
+#define MF_ANALOG_SUPPORT 1
 #endif
 #ifndef MF_OUTPUT_SHIFTER_SUPPORT
 #define MF_OUTPUT_SHIFTER_SUPPORT 1
@@ -37,7 +37,7 @@
 #define MAX_STEPPERS        6
 #define MAX_MFSERVOS        8
 #define MAX_MFLCD_I2C       2
-#define MAX_ANALOG_INPUTS   3
+#define MAX_ANALOG_INPUTS   8
 #define MAX_OUTPUT_SHIFTERS 4
 #define MAX_INPUT_SHIFTERS  4
 #define MAX_DIGIN_MUX       4
