@@ -6,6 +6,27 @@
 
 #include "MFOutputShifter.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+void shiftOutESP32(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val)
+{
+	uint8_t i;
+
+	for (i = 0; i < 8; i++)  {
+		if (bitOrder == LSBFIRST) {
+			digitalWrite(dataPin, val & 1);
+			val >>= 1;
+		} else {	
+			digitalWrite(dataPin, (val & 128) != 0);
+			val <<= 1;
+		}
+			
+		digitalWrite(clockPin, HIGH);
+		digitalWrite(clockPin, LOW);
+        delayMicroseconds(1);		
+	}
+}
+#endif
+
 MFOutputShifter::MFOutputShifter()
 {
     _initialized = false;
@@ -88,7 +109,11 @@ void MFOutputShifter::updateShiftRegister()
 {
     digitalWrite(_latchPin, LOW);
     for (uint8_t i = _moduleCount; i > 0; i--) {
+#ifdef ARDUINO_ARCH_ESP32
+        shiftOutESP32(_dataPin, _clockPin, MSBFIRST, _outputBuffer[i - 1]); // LSBFIRST, MSBFIRST,
+#else
         shiftOut(_dataPin, _clockPin, MSBFIRST, _outputBuffer[i - 1]); // LSBFIRST, MSBFIRST,
+#endif
     }
     digitalWrite(_latchPin, HIGH);
 }
