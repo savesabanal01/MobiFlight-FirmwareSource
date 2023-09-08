@@ -39,7 +39,7 @@ namespace DigInMux
         dip->attach(dataPin, (nRegs == 1), name);
         MFDigInMux::attachHandler(handlerOnDigInMux);
         digInMuxRegistered++;
-#ifdef DEBUG2MSG
+#ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added digital input MUX"));
 #endif
         return digInMuxRegistered -1;
@@ -48,7 +48,7 @@ namespace DigInMux
     void Clear()
     {
         for (uint8_t i = 0; i < digInMuxRegistered; i++) {
-            digInMux[digInMuxRegistered]->detach();
+            digInMux[i]->detach();
         }
         digInMuxRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
