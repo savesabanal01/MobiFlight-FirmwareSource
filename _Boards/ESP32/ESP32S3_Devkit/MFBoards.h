@@ -33,32 +33,66 @@
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
 
-#define MAX_OUTPUTS         15
+#ifndef MAX_OUTPUTS
+#define MAX_OUTPUTS         26
+#endif
+#ifndef MAX_BUTTONS
 #define MAX_BUTTONS         26
-#define MAX_LEDSEGMENTS     2
-#define MAX_ENCODERS        12
-#define MAX_STEPPERS        4
-#define MAX_MFSERVOS        4
+#endif
+#ifndef MAX_LEDSEGMENTS
+#define MAX_LEDSEGMENTS     4
+#endif
+#ifndef MAX_ENCODERS
+#define MAX_ENCODERS        8
+#endif
+#ifndef MAX_STEPPERS
+#define MAX_STEPPERS        6
+#endif
+#ifndef MAX_MFSERVOS
+#define MAX_MFSERVOS        8
+#endif
+#ifndef MAX_MFLCD_I2C
 #define MAX_MFLCD_I2C       2
+#endif
+#ifndef MAX_ANALOG_INPUTS
 #define MAX_ANALOG_INPUTS   3
+#endif
+#ifndef MAX_OUTPUT_SHIFTERS
 #define MAX_OUTPUT_SHIFTERS 4
+#endif
+#ifndef MAX_INPUT_SHIFTERS
 #define MAX_INPUT_SHIFTERS  4
-#define MAX_DIGIN_MUX       2
+#endif
+#ifndef MAX_DIGIN_MUX
+#define MAX_DIGIN_MUX       4
+#endif
+#ifndef MAX_KEYMATRIX
 #define MAX_KEYMATRIX        1
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8
+#endif
 
-#define STEPS               64
-#define STEPPER_SPEED       400     // 300 already worked, 467, too?
-#define STEPPER_ACCEL       800
-
-#define MOBIFLIGHT_TYPE         "MobiFlight ESP32-S3 LilyGO"
+#ifndef MOBIFLIGHT_TYPE
+#define MOBIFLIGHT_TYPE         "MobiFlight RaspiPico"
+#endif
+#ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL       "0987654321"
-#define MOBIFLIGHT_NAME         "MobiFlight ESP32-S3 LilyGO"
-#define EEPROM_SIZE             512     // EEPROMSizeESP32
+#endif
+#ifndef MOBIFLIGHT_NAME
+#define MOBIFLIGHT_NAME         "MobiFlight RaspiPico"
+#endif
+#ifndef EEPROM_SIZE
+#define EEPROM_SIZE             4096    // EEPROMSizeRaspberryPico
+#endif
+#ifndef MEMLEN_CONFIG
 #define MEMLEN_CONFIG           1496    // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
+#endif
+#ifndef MEMLEN_NAMES_BUFFER
 #define MEMLEN_NAMES_BUFFER     1000    // max. size for configBuffer, contains only names from inputs
+#endif
+#ifndef MF_MAX_DEVICEMEM
 #define MF_MAX_DEVICEMEM        2000    // max. memory size for devices
+#endif
 
 #define RANDOM_SEED_INPUT   A0      // better to have randomSeed(analogRead(RANDOM_SEED_INPUT)); in generateSerial(), "0" is not valid for all HW platforms
 
