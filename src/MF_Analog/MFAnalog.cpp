@@ -39,7 +39,7 @@ void MFAnalog::readChannel(uint8_t alwaysTrigger)
 //        newValue = map(newValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
         _lastValue = newValue;
         if (_handler != NULL) {
-            (*_handler)(_lastValue, _pin, _name);
+            (*_handler)(_lastValue, _name);
         }
     }
 }
