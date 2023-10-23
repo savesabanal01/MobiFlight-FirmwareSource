@@ -35,6 +35,9 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
+#ifndef MF_CUSTOMDEVICE_SUPPORT
+#define MF_CUSTOMDEVICE_SUPPORT 2
+#endif
 #ifndef MF_KEYMATRIX_SUPPORT
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
@@ -72,15 +75,14 @@
 #ifndef MAX_DIGIN_MUX
 #define MAX_DIGIN_MUX       3
 #endif
+#ifndef MAX_CUSTOM_DEVICES
+#define MAX_CUSTOM_DEVICES  2
+#endif
 #ifndef MAX_KEYMATRIX
 #define MAX_KEYMATRIX        1
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8
 #endif
-
-#define STEPS 64
-#define STEPPER_SPEED 400 // 300 already worked, 467, too?
-#define STEPPER_ACCEL 800
 
 #ifndef MOBIFLIGHT_TYPE
 #define MOBIFLIGHT_TYPE     "MobiFlight Nano"

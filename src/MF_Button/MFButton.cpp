@@ -37,14 +37,14 @@ void MFButton::trigger(uint8_t state)
 void MFButton::triggerOnPress()
 {
     if (_handler && _oldState == LOW) {
-        (*_handler)(btnOnPress, _pin, _name);
+        (*_handler)(btnOnPress, _name);
     }
 }
 
 void MFButton::triggerOnRelease()
 {
     if (_handler && _oldState == HIGH) {
-        (*_handler)(btnOnRelease, _pin, _name);
+        (*_handler)(btnOnRelease, _name);
     }
 }
 

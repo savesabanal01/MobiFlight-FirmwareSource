@@ -24,7 +24,8 @@ enum {
     kTypeDigInMux,             // 14 Digital input multiplexer support (example: 74HCT4067, 74HCT4051)
     kTypeStepper,              // 15 new stepper type with settings for backlash and deactivate output
     kTypeLedSegmentMulti,      // 16 new led segment with MAX7219 and TM1637 support
-    kTypeKeyMatrix             // 17 KeyMatrix support
+    kTypeCustomDevice,         // 17 Custom Device
+    kTypeKeyMatrix             // 18 KeyMatrix support
 };
 
 void loadConfig(void);

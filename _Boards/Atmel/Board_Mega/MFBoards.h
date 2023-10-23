@@ -35,6 +35,9 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
+#ifndef MF_CUSTOMDEVICE_SUPPORT
+#define MF_CUSTOMDEVICE_SUPPORT 1
+#endif
 #ifndef MF_KEYMATRIX_SUPPORT
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
@@ -71,6 +74,9 @@
 #endif
 #ifndef MAX_DIGIN_MUX
 #define MAX_DIGIN_MUX       4
+#endif
+#ifndef MAX_CUSTOM_DEVICES
+#define MAX_CUSTOM_DEVICES  5
 #endif
 #ifndef MAX_KEYMATRIX
 #define MAX_KEYMATRIX        1
