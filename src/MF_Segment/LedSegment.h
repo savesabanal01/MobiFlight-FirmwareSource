@@ -8,12 +8,19 @@
 
 namespace LedSegment
 {
-    uint8_t Add(int dataPin, int csPin, int clkPin, int numDevices, int brightness);
-    void    Clear();
-    void    PowerSave(bool state);
-    void    OnInitModule();
-    void    OnSetModule();
-    void    OnSetModuleBrightness();
+    enum {
+        TYPE_MAX72XX        = 0,
+        TYPE_TM1637_4DIGITS = 0xFD,
+        TYPE_TM1637_6DIGITS = 0xFE,
+        TYPE_UNDEFINED      = 0xFF
+    };
+
+    uint8_t Add(uint8_t type, uint8_t dataPin, uint8_t csPin, uint8_t clkPin, uint8_t numDevices, uint8_t brightness);
+    void Clear();
+    void PowerSave(bool state);
+    void OnInitModule();
+    void OnSetModule();
+    void OnSetModuleBrightness();
 }
 
 // LedSegment.h

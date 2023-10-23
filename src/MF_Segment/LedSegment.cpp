@@ -13,7 +13,7 @@ namespace LedSegment
     MFSegments *ledSegments[MAX_LEDSEGMENTS];
     uint8_t     ledSegmentsRegistered = 0;
 
-    uint8_t Add(int dataPin, int csPin, int clkPin, int numDevices, int brightness)
+    uint8_t Add(uint8_t type, uint8_t dataPin, uint8_t csPin, uint8_t clkPin, uint8_t numDevices, uint8_t brightness)
     {
         if (ledSegmentsRegistered == MAX_LEDSEGMENTS)
             return 0xFF;
@@ -24,7 +24,7 @@ namespace LedSegment
             return 0xFF;
         }
         ledSegments[ledSegmentsRegistered] = new (allocateMemory(sizeof(MFSegments))) MFSegments;
-        ledSegments[ledSegmentsRegistered]->attach(dataPin, csPin, clkPin, numDevices, brightness); // lc is our object
+        ledSegments[ledSegmentsRegistered]->attach(type, dataPin, csPin, clkPin, numDevices, brightness); // lc is our object
         ledSegmentsRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added Led Segment"));
