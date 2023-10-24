@@ -13,7 +13,7 @@ namespace Servos
     MFServo *servos[MAX_MFSERVOS];
     uint8_t  servosRegistered = 0;
 
-    uint8_t Add(int pin)
+    uint8_t Add(uint8_t pin)
     {
         if (servosRegistered == MAX_MFSERVOS)
             return 0xFF;
