@@ -9,8 +9,6 @@
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
 #include "MFEEPROM.h"
-#include "MFInterrupt.h"
-#include "ArduinoUniqueID.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
@@ -40,6 +38,9 @@
 #include "TFT.h"
 #include "core0.h"
 #endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1
+#include "CustomDevice.h"
+#endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
 #define MF_ENCODER_DEBOUNCE_MS    1  // time between encoder updates
@@ -49,7 +50,7 @@
 #define MF_ANALOGAVERAGE_DELAY_MS 10 // time between updating the analog average calculation
 #define MF_ANALOGREAD_DELAY_MS    50 // time between sending analog values
 
-bool                powerSavingMode   = false;
+        bool        powerSavingMode   = false;
 const unsigned long POWER_SAVING_TIME = 60 * 15; // in seconds
 
 #if defined(ARDUINO_ARCH_RP2040)
@@ -85,6 +86,9 @@ typedef struct {
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     uint32_t DigInMux = 0;
+#endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1
+    uint32_t CustomDevice = 0;
 #endif
 } lastUpdate_t;
 
@@ -248,6 +252,13 @@ void loop()
 #if MF_SERVO_SUPPORT == 1
         // Servo smoothing depends on the time between calling update(), so it must be done every 5ms
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
+#endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1 && defined(MF_CUSTOMDEVICE_HAS_UPDATE)
+#ifdef MF_CUSTOMDEVICE_POLL_MS
+        timedUpdate(CustomDevice::update, &lastUpdate.CustomDevice, MF_CUSTOMDEVICE_POLL_MS);
+#else
+        CustomDevice::update();
+#endif
 #endif
 
         // lcds, outputs, outputshifters, segments do not need update
