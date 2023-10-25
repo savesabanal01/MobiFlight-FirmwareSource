@@ -10,7 +10,6 @@
 #include "./MF_Encoder/Encoder.h" // otherwise Teensy specific Encoder lib is used
 #include "MFEEPROM.h"
 #include "MFInterrupt.h"
-#include "ArduinoUniqueID.h"
 #if MF_ANALOG_SUPPORT == 1
 #include "Analog.h"
 #endif
@@ -39,6 +38,9 @@
 #if defined(ARDUINO_ARCH_ESP32)
 #include "TFT.h"
 #include "core0.h"
+#endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1
+#include "CustomDevice.h"
 #endif
 
 #define MF_BUTTON_DEBOUNCE_MS     10 // time between updating the buttons
@@ -85,6 +87,9 @@ typedef struct {
 #endif
 #if MF_DIGIN_MUX_SUPPORT == 1 // && !defined(USE_INTERRUPT)
     uint32_t DigInMux = 0;
+#endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1
+    uint32_t CustomDevice = 0;
 #endif
 } lastUpdate_t;
 
@@ -244,10 +249,16 @@ void loop()
 #if MF_STEPPER_SUPPORT == 1
         Stepper::update();
 #endif
-
 #if MF_SERVO_SUPPORT == 1
         // Servo smoothing depends on the time between calling update(), so it must be done every 5ms
         timedUpdate(Servos::update, &lastUpdate.Servos, MF_SERVO_DELAY_MS);
+#endif
+#if MF_CUSTOMDEVICE_SUPPORT == 1 && defined(MF_CUSTOMDEVICE_HAS_UPDATE)
+#ifdef MF_CUSTOMDEVICE_POLL_MS
+        timedUpdate(CustomDevice::update, &lastUpdate.CustomDevice, MF_CUSTOMDEVICE_POLL_MS);
+#else
+        CustomDevice::update();
+#endif
 #endif
 
         // lcds, outputs, outputshifters, segments do not need update
