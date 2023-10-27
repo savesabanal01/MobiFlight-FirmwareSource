@@ -184,7 +184,7 @@ void OnResetConfig()
 {
     resetConfig();
     cmdMessenger.sendCmd(kStatus, F("OK"));
-    checksumConfig = 0;
+    clearChecksumConfig();
 }
 
 void OnSaveConfig()
@@ -544,6 +544,11 @@ void generateRandomSerial()
         randomSerial >>= 4;
     }
     MFeeprom.write_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
+    clearChecksumSerial();
+    for (uint8_t i = 0; i < 10; i++) {
+        calculateChecksumSerial(serial[i]);
+    }
+    MFeeprom.write_byte(MEMLEN_CONFIG, getChecksumSerial());
 }
 
 #if defined(ARDUINO_ARCH_RP2040)
@@ -573,6 +578,13 @@ void generateSerial(bool force)
     // A serial number according old style is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'S' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'N') {
         MFeeprom.read_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
+        clearChecksumSerial();
+        for (uint8_t i = 0; i < 10; i++) {
+            calculateChecksumSerial(serial[i]);
+        }
+        if (getChecksumSerial() != MFeeprom.read_byte(MEMLEN_CONFIG)) {
+            cmdMessenger.sendCmd(kStatus, F("Failure reading Serialnumber from EEPROM"));
+        }
         return;
     }
 #if defined(ARDUINO_ARCH_RP2040)
