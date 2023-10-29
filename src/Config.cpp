@@ -79,6 +79,8 @@ void    _activateConfig();
 void    calculateChecksum(uint8_t value);
 uint8_t getChecksum();
 void    clearChecksum();
+void    saveChecksum(uint16_t addrEEPROM);
+uint8_t readChecksum(uint16_t addrEEPROM);
 
 // ************************************************************
 // configBuffer handling
@@ -182,7 +184,7 @@ void OnResetConfig()
 void OnSaveConfig()
 {
     cmdMessenger.sendCmd(kConfigSaved, F("OK"));
-    MFeeprom.write_byte(MEM_OFFSET_CONFIG + configLength + 2, getChecksum()); // +1 is terminating NULL, +2 checksum value
+    saveChecksum(MEM_LEN_CONFIG + 2); // +1 is terminating NULL, +2 checksum value
     //  Uncomment the if{} part to reset and load the config via serial terminal for testing w/o the GUI
     //    1: Type "13" to reset the config
     //    2: Type "14" to get the config length
@@ -464,7 +466,7 @@ void readConfig()
         nameBuffer[MEMLEN_NAMES_BUFFER - 1] = 0x00; // terminate the last copied (part of) string with 0x00
         cmdMessenger.sendCmd(kStatus, F("Failure on reading config"));
     }
-    if (MFeeprom.read_byte(addreeprom + 1) != getChecksum()) {
+    if (readChecksum(MEM_LEN_CONFIG + 2) != getChecksum()) {
         cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
     }
 }
@@ -484,7 +486,7 @@ void OnGetConfig()
             cmdMessenger.sendArg(temp);
             calculateChecksum(temp);
         }
-        if (MFeeprom.read_byte(MEM_OFFSET_CONFIG + configLength + 2) != getChecksum()) {
+        if (readChecksum(MEM_LEN_CONFIG + 2) != getChecksum()) {
             cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
         }
     }
@@ -540,7 +542,7 @@ void generateRandomSerial()
     for (uint8_t i = 0; i < 10; i++) {
         calculateChecksum(serial[i]);
     }
-    MFeeprom.write_byte(MEMLEN_CONFIG, getChecksum());
+    saveChecksum(MEM_LEN_CONFIG);
 }
 
 #if defined(ARDUINO_ARCH_RP2040)
@@ -574,7 +576,7 @@ void generateSerial(bool force)
         for (uint8_t i = 0; i < 10; i++) {
             calculateChecksum(serial[i]);
         }
-        if (getChecksum() != MFeeprom.read_byte(MEMLEN_CONFIG)) {
+        if (getChecksum() != readChecksum(MEMLEN_CONFIG)) {
             cmdMessenger.sendCmd(kStatus, F("Failure reading Serialnumber from EEPROM"));
         }
         return;
@@ -618,11 +620,11 @@ void storeName()
 {
     clearChecksum();
     MFeeprom.write_byte(MEM_OFFSET_NAME, '#');
-    MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, strlen(name)); // max length of name is limited to 24 by the connector
+    MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
     for (uint8_t i = 0; i < strlen(name); i++) {
         calculateChecksum(name[i]);
     }
-    MFeeprom.write_byte(MEM_LEN_NAME - 1, getChecksum());
+    saveChecksum(MEM_LEN_CONFIG + 1);
 }
 
 void restoreName()
@@ -635,7 +637,7 @@ void restoreName()
     for (uint8_t i = 0; i < strlen(name); i++) {
         calculateChecksum(name[i]);
     }
-    if (getChecksum() != MFeeprom.read_byte(MEM_LEN_NAME - 1)) {
+    if (getChecksum() != readChecksum(MEM_LEN_CONFIG + 1)) {
         cmdMessenger.sendCmd(kStatus, F("Failure reading Name from EEPROM"));
     }
 }
@@ -665,6 +667,20 @@ uint8_t getChecksum()
 void clearChecksum()
 {
     checksum = 0;
+}
+
+void saveChecksum(uint16_t addrEEPROM)
+{
+// MEM_LEN_CONFIG for serial checksum
+// MEM_LEN_CONFIG + 1 for name checksum
+// MEM_LEN_CONFIG + 2 for config checksum
+
+    MFeeprom.write_byte(addrEEPROM, checksum);
+}
+
+uint8_t readChecksum(uint16_t addrEEPROM)
+{
+    return MFeeprom.read_byte(addrEEPROM);
 }
 
 // config.cpp
