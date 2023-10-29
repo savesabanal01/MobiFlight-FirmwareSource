@@ -71,22 +71,14 @@ const int MEM_LEN_CONFIG                  = MEMLEN_CONFIG;
 char      nameBuffer[MEMLEN_NAMES_BUFFER] = "";
 uint16_t  configLength                    = 0;
 boolean   configActivated                 = false;
-uint8_t   checksumConfig                  = 0;
-uint8_t   checksumName                    = 0;
-uint8_t   checksumSerial                  = 0;
+uint8_t   checksum                        = 0;
 
 void    resetConfig();
 void    readConfig();
 void    _activateConfig();
-void    calculateChecksumConfig(uint8_t value);
-uint8_t getChecksumConfig();
-void    clearChecksumConfig();
-void    calculateChecksumSerial(uint8_t value);
-uint8_t getChecksumSerial();
-void    clearChecksumSerial();
-void    calculateChecksumName(uint8_t value);
-uint8_t getChecksumName();
-void    clearChecksumName();
+void    calculateChecksum(uint8_t value);
+uint8_t getChecksum();
+void    clearChecksum();
 
 // ************************************************************
 // configBuffer handling
@@ -133,7 +125,7 @@ void OnSetConfig()
         configLength += cfgLen;
         cmdMessenger.sendCmd(kStatus, configLength);
         for (uint8_t i = 0; i < cfgLen; i++) {
-            calculateChecksumConfig(cfg[i]);
+            calculateChecksum(cfg[i]);
         }
     } else
         cmdMessenger.sendCmd(kStatus, -1); // last successfull saving block is already NULL terminated, nothing more todo
@@ -184,13 +176,13 @@ void OnResetConfig()
 {
     resetConfig();
     cmdMessenger.sendCmd(kStatus, F("OK"));
-    clearChecksumConfig();
+    clearChecksum();
 }
 
 void OnSaveConfig()
 {
     cmdMessenger.sendCmd(kConfigSaved, F("OK"));
-    MFeeprom.write_byte(MEM_OFFSET_CONFIG + configLength + 2, checksumConfig); // +1 is terminating NULL, +2 checksum value
+    MFeeprom.write_byte(MEM_OFFSET_CONFIG + configLength + 2, getChecksum()); // +1 is terminating NULL, +2 checksum value
     //  Uncomment the if{} part to reset and load the config via serial terminal for testing w/o the GUI
     //    1: Type "13" to reset the config
     //    2: Type "14" to get the config length
@@ -225,7 +217,7 @@ uint8_t readUintFromEEPROM(volatile uint16_t *addreeprom)
         params[counter] = MFeeprom.read_byte((*addreeprom)++); // read character from eeprom and locate next buffer and eeprom location
         if (params[counter] == 0)
             return 0;
-        calculateChecksumConfig(params[counter]);
+        calculateChecksum(params[counter]);
         counter++;
     } while (params[counter - 1] != '.' && counter < sizeof(params)); // reads until limiter '.' and for safety reason not more then size of params[]
     params[counter - 1] = 0x00;                                       // replace '.' by NULL to terminate the string
@@ -240,7 +232,7 @@ bool readNameFromEEPROM(uint16_t *addreeprom, char *buffer, uint16_t *addrbuffer
     do {
         temp                    = MFeeprom.read_byte((*addreeprom)++); // read the first character
         buffer[(*addrbuffer)++] = temp;                                // save character and locate next buffer position
-        calculateChecksumConfig(temp);
+        calculateChecksum(temp);
         if (*addrbuffer >= MEMLEN_NAMES_BUFFER) { // nameBuffer will be exceeded
             return false;                         // abort copying from EEPROM to nameBuffer
         }
@@ -258,7 +250,7 @@ bool readEndCommandFromEEPROM(uint16_t *addreeprom, uint8_t delimiter)
     uint16_t length = MFeeprom.get_length();
     do {
         temp = MFeeprom.read_byte((*addreeprom)++);
-        calculateChecksumConfig(temp);
+        calculateChecksum(temp);
         if (*addreeprom > length) // abort if EEPROM size will be exceeded
             return false;
     } while (temp != delimiter); // reads until limiter ':'
@@ -269,7 +261,7 @@ void readConfig()
 {
     if (configLength == 0) // do nothing if no config is available
         return;
-    clearChecksumConfig();
+    clearChecksum();
     uint16_t addreeprom   = MEM_OFFSET_CONFIG;               // define first memory location where config is saved in EEPROM
     uint16_t addrbuffer   = 0;                               // and start with first memory location from nameBuffer
     char     params[8]    = "";                              // buffer for reading parameters from EEPROM and sending to ::Add() function of device
@@ -472,7 +464,7 @@ void readConfig()
         nameBuffer[MEMLEN_NAMES_BUFFER - 1] = 0x00; // terminate the last copied (part of) string with 0x00
         cmdMessenger.sendCmd(kStatus, F("Failure on reading config"));
     }
-    if (MFeeprom.read_byte(addreeprom + 1) != getChecksumConfig()) {
+    if (MFeeprom.read_byte(addreeprom + 1) != getChecksum()) {
         cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
     }
 }
@@ -482,17 +474,17 @@ void OnGetConfig()
     char temp = 0;
     setLastCommandMillis();
     cmdMessenger.sendCmdStart(kInfo);
-    clearChecksumConfig();
+    clearChecksum();
     if (configLength > 0) {
         temp = MFeeprom.read_byte(MEM_OFFSET_CONFIG);
         cmdMessenger.sendCmdArg(temp);
-        calculateChecksumConfig(temp);
+        calculateChecksum(temp);
         for (uint16_t i = 1; i < configLength; i++) {
             temp = MFeeprom.read_byte(MEM_OFFSET_CONFIG + i);
             cmdMessenger.sendArg(temp);
-            calculateChecksumConfig(temp);
+            calculateChecksum(temp);
         }
-        if (MFeeprom.read_byte(MEM_OFFSET_CONFIG + configLength + 2) != getChecksumConfig()) {
+        if (MFeeprom.read_byte(MEM_OFFSET_CONFIG + configLength + 2) != getChecksum()) {
             cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
         }
     }
@@ -544,11 +536,11 @@ void generateRandomSerial()
         randomSerial >>= 4;
     }
     MFeeprom.write_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
-    clearChecksumSerial();
+    clearChecksum();
     for (uint8_t i = 0; i < 10; i++) {
-        calculateChecksumSerial(serial[i]);
+        calculateChecksum(serial[i]);
     }
-    MFeeprom.write_byte(MEMLEN_CONFIG, getChecksumSerial());
+    MFeeprom.write_byte(MEMLEN_CONFIG, getChecksum());
 }
 
 #if defined(ARDUINO_ARCH_RP2040)
@@ -578,11 +570,11 @@ void generateSerial(bool force)
     // A serial number according old style is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'S' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'N') {
         MFeeprom.read_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
-        clearChecksumSerial();
+        clearChecksum();
         for (uint8_t i = 0; i < 10; i++) {
-            calculateChecksumSerial(serial[i]);
+            calculateChecksum(serial[i]);
         }
-        if (getChecksumSerial() != MFeeprom.read_byte(MEMLEN_CONFIG)) {
+        if (getChecksum() != MFeeprom.read_byte(MEMLEN_CONFIG)) {
             cmdMessenger.sendCmd(kStatus, F("Failure reading Serialnumber from EEPROM"));
         }
         return;
@@ -624,13 +616,13 @@ void OnGenNewSerial()
 // ************************************************************
 void storeName()
 {
-    clearChecksumName();
+    clearChecksum();
     MFeeprom.write_byte(MEM_OFFSET_NAME, '#');
     MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, strlen(name)); // max length of name is limited to 24 by the connector
     for (uint8_t i = 0; i < strlen(name); i++) {
-        checksumName += name[i];
+        calculateChecksum(name[i]);
     }
-    MFeeprom.write_byte(MEM_LEN_NAME - 1, checksumName);
+    MFeeprom.write_byte(MEM_LEN_NAME - 1, getChecksum());
 }
 
 void restoreName()
@@ -639,11 +631,11 @@ void restoreName()
         return;
 
     MFeeprom.read_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
-    clearChecksumName();
+    clearChecksum();
     for (uint8_t i = 0; i < strlen(name); i++) {
-        checksumName += name[i];
+        calculateChecksum(name[i]);
     }
-    if (checksumName != MFeeprom.read_byte(MEM_LEN_NAME - 1)) {
+    if (getChecksum() != MFeeprom.read_byte(MEM_LEN_NAME - 1)) {
         cmdMessenger.sendCmd(kStatus, F("Failure reading Name from EEPROM"));
     }
 }
@@ -660,49 +652,19 @@ void OnSetName()
 // checksum handling
 // ************************************************************
 
-void calculateChecksumConfig(uint8_t value)
+void calculateChecksum(uint8_t value)
 {
-    checksumConfig += value;
+    checksum += value;
 }
 
-uint8_t getChecksumConfig()
+uint8_t getChecksum()
 {
-    return checksumConfig;
+    return checksum;
 }
 
-void clearChecksumConfig()
+void clearChecksum()
 {
-    checksumConfig = 0;
-}
-
-void calculateChecksumSerial(uint8_t value)
-{
-    checksumSerial += value;
-}
-
-uint8_t getChecksumSerial()
-{
-    return checksumSerial;
-}
-
-void clearChecksumSerial()
-{
-    checksumSerial = 0;
-}
-
-void calculateChecksumName(uint8_t value)
-{
-    checksumName += value;
-}
-
-uint8_t getChecksumName()
-{
-    return checksumName;
-}
-
-void clearChecksumName()
-{
-    checksumName = 0;
+    checksum = 0;
 }
 
 // config.cpp
