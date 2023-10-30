@@ -77,6 +77,7 @@ typedef struct {
 lastUpdate_t lastUpdate;
 
 extern MFEEPROM MFeeprom;
+void    initChecksum();
 
 void initPollIntervals(void)
 {
@@ -159,6 +160,7 @@ void setup()
     MFeeprom.init();
     attachCommandCallbacks();
     cmdMessenger.printLfCr();
+    initChecksum();
     ResetBoard();
     initPollIntervals();
 }
