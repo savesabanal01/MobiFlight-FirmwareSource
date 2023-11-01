@@ -680,7 +680,7 @@ void saveChecksum(uint16_t addrEEPROM)
 
 uint8_t readChecksum(uint16_t addrEEPROM)
 {
-    return MFeeprom.read_byte(addrEEPROM) + 1;
+    return MFeeprom.read_byte(addrEEPROM);
 }
 
 void initChecksum()
