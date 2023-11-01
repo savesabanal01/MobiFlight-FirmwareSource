@@ -471,7 +471,7 @@ void readConfig()
         cmdMessenger.sendCmd(kStatus, F("Failure on reading config"));
     }
     if (readChecksum(checksumConfigAdrEeprom) != getChecksum()) {
-        cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
+        cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM"));
     }
 }
 
@@ -491,7 +491,7 @@ void OnGetConfig()
             calculateChecksum(temp);
         }
         if (readChecksum(checksumConfigAdrEeprom) != getChecksum()) {
-            cmdMessenger.sendCmd(kStatus, F("Failure reading Config from EEPROM"));
+            cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM"));
         }
     }
     cmdMessenger.sendCmdEnd();
@@ -581,7 +581,7 @@ void generateSerial(bool force)
             calculateChecksum(serial[i]);
         }
         if (getChecksum() != readChecksum(checksumSerialAdrEeprom)) {
-            cmdMessenger.sendCmd(kStatus, F("Failure reading Serialnumber from EEPROM"));
+            cmdMessenger.sendCmd(kDebug, F("Failure reading Serialnumber from EEPROM"));
         }
         return;
     }
@@ -592,7 +592,7 @@ void generateSerial(bool force)
         return;
     }
 #endif
-
+return;
     // Coming here no UniqueID and no serial number is available, so it's the first start up of a board
 #if defined(ARDUINO_ARCH_AVR)
     // Generate a serial number for AVR's
@@ -642,7 +642,7 @@ void restoreName()
         calculateChecksum(name[i]);
     }
     if (getChecksum() != readChecksum(checksumNameAdrEeprom)) {
-        cmdMessenger.sendCmd(kStatus, F("Failure reading Name from EEPROM"));
+        cmdMessenger.sendCmd(kDebug, F("Failure reading Name from EEPROM"));
     }
 }
 
@@ -680,7 +680,7 @@ void saveChecksum(uint16_t addrEEPROM)
 
 uint8_t readChecksum(uint16_t addrEEPROM)
 {
-    return MFeeprom.read_byte(addrEEPROM);
+    return MFeeprom.read_byte(addrEEPROM) + 1;
 }
 
 void initChecksum()
