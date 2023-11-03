@@ -21,7 +21,7 @@
       "FirmwareExtension": "bin",
       "FriendlyName": "MobiFlight ESP32 Mini",
       "LatestFirmwareVersion": "2.4.1",
-      "MobiFlightType": "MobiFlight ESP32mini",
+      "MobiFlightType": "MobiFlight ESP32S2mini",
       "ResetFirmwareFile": "reset.esp32_s2_mini.bin"
     },
     "ModuleLimits": {
