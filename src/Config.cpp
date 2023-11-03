@@ -9,7 +9,7 @@
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
 #include "ArduinoUniqueID.h"
 #endif
 
@@ -66,7 +66,7 @@ const uint8_t MEM_OFFSET_CONFIG = MEM_OFFSET_NAME + MEM_LEN_NAME + MEM_LEN_SERIA
 
 #if defined(ARDUINO_ARCH_AVR)
 char serial[11] = MOBIFLIGHT_SERIAL; // 3 characters for "SN-",7 characters for "xyz-zyx" plus terminating NULL
-#elif defined(ARDUINO_ARCH_RP2040)
+#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
 char serial[3 + UniqueIDsize * 2 + 1] = MOBIFLIGHT_SERIAL; // 3 characters for "SN-", UniqueID as HEX String, terminating NULL
 #endif
 char      name[MEM_LEN_NAME]              = MOBIFLIGHT_NAME;
@@ -534,7 +534,7 @@ void generateRandomSerial()
     MFeeprom.write_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
 }
 
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
 void readUniqueSerial()
 {
     serial[0] = 'S';
@@ -563,7 +563,7 @@ void generateSerial(bool force)
         MFeeprom.read_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
         return;
     }
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
     // A uniqueID is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'I' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'D') {
         readUniqueSerial();
@@ -578,7 +578,7 @@ void generateSerial(bool force)
     // used as starting point. It is very unlikely that the time between flashing the firmware
     // and getting the command to send the info's to the connector is always the same.
     generateRandomSerial();
-#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_MEGAAVR)
+#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_MEGAAVR)
     // Read the uniqueID for Pico's and use it as serial number
     readUniqueSerial();
     // mark this in the eeprom that a UniqueID is used on first start up for Pico's
