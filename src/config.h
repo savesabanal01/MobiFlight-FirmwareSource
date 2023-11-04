@@ -25,7 +25,8 @@ enum {
     kTypeStepper,              // 15 new stepper type with settings for backlash and deactivate output
     kTypeLedSegmentMulti,      // 16 new led segment with MAX7219 and TM1637 support
     kTypeCustomDevice,         // 17 Custom Device
-    kTypeKeyMatrix             // 18 KeyMatrix support
+    kTypeKeyMatrix,            // 18 KeyMatrix support
+    kTypeMax                   // if new device types are added, this MUST be before this one!
 };
 
 void loadConfig(void);
