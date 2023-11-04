@@ -62,7 +62,7 @@ namespace Button
     void poll(void)
     {
         for (uint8_t i = 0; i < buttonsRegistered; i++) {
-            buttons[i]->poll();
+            buttons[i].poll();
         }
     }
 

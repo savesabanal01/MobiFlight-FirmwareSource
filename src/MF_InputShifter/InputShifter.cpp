@@ -66,7 +66,7 @@ namespace InputShifter
     void poll()
     {
         for (uint8_t i = 0; i < inputShiftersRegistered; i++) {
-            inputShifters[i]->poll();
+            inputShifters[i].poll();
         }
     }
 
