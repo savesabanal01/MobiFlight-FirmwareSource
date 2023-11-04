@@ -38,52 +38,12 @@
 #ifndef MF_KEYMATRIX_SUPPORT
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
-
-#ifndef MODULE_MAX_PINS
-#define MODULE_MAX_PINS      28
-#endif
-#ifndef MAX_OUTPUTS
-#define MAX_OUTPUTS          26
-#endif
-#ifndef MAX_BUTTONS
-#define MAX_BUTTONS          26
-#endif
-#ifndef MAX_LEDSEGMENTS
-#define MAX_LEDSEGMENTS      4
-#endif
-#ifndef MAX_ENCODERS
-#define MAX_ENCODERS         8
-#endif
-#ifndef MAX_STEPPERS
-#define MAX_STEPPERS         6
-#endif
-#ifndef MAX_MFSERVOS
-#define MAX_MFSERVOS         8
-#endif
-#ifndef MAX_MFLCD_I2C
-#define MAX_MFLCD_I2C        2
-#endif
-#ifndef MAX_ANALOG_INPUTS
-#define MAX_ANALOG_INPUTS    3
-#endif
-#ifndef MAX_OUTPUT_SHIFTERS
-#define MAX_OUTPUT_SHIFTERS  4
-#endif
-#ifndef MAX_INPUT_SHIFTERS
-#define MAX_INPUT_SHIFTERS   4
-#endif
-#ifndef MAX_DIGIN_MUX
-#define MAX_DIGIN_MUX        4
-#endif
 #ifndef MAX_KEYMATRIX
 #define MAX_KEYMATRIX        1
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8
 #endif
 
-#ifndef MOBIFLIGHT_TYPE
-#define MOBIFLIGHT_TYPE     "MobiFlight RaspiPico"
-#endif
 #ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL   "0987654321"
 #endif

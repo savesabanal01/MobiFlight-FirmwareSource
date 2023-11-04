@@ -29,9 +29,6 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
-#ifndef MF_CUSTOMDEVICE_SUPPORT
-#define MF_CUSTOMDEVICE_SUPPORT 1
-#endif
 #ifndef MF_KEYMATRIX_SUPPORT
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
@@ -44,14 +41,11 @@
 #define MAX_ROW_KEYMATRIX    8
 #endif
 
-#ifndef MOBIFLIGHT_TYPE
-#define MOBIFLIGHT_TYPE         "MobiFlight RaspiPico"
-#endif
 #ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL       "0987654321"
 #endif
 #ifndef MOBIFLIGHT_NAME
-#define MOBIFLIGHT_NAME         "MobiFlight RaspiPico"
+#define MOBIFLIGHT_NAME         "MobiFlight ESP32-S3 LilyGO"
 #endif
 #ifndef MEMLEN_CONFIG
 #define MEMLEN_CONFIG           1496    // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);

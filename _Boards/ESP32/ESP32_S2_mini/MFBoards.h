@@ -28,30 +28,15 @@
 #define MF_MUX_SUPPORT       1
 #define MF_DIGIN_MUX_SUPPORT 1
 #endif
-#ifndef MF_CUSTOMDEVICE_SUPPORT
-#define MF_CUSTOMDEVICE_SUPPORT 1
-#endif
 #ifndef MF_KEYMATRIX_SUPPORT
 #define MF_KEYMATRIX_SUPPORT 1
 #endif
-
-#define MAX_OUTPUTS         26
-#define MAX_BUTTONS         26
-#define MAX_LEDSEGMENTS     4
-#define MAX_ENCODERS        8
-#define MAX_STEPPERS        6
-#define MAX_MFSERVOS        8
-#define MAX_MFLCD_I2C       2
-#define MAX_ANALOG_INPUTS   8
-#define MAX_OUTPUT_SHIFTERS 4
-#define MAX_INPUT_SHIFTERS  4
-#define MAX_DIGIN_MUX       4
-#define MAX_CUSTOM_DEVICES  5
+#ifndef MAX_KEYMATRIX
 #define MAX_KEYMATRIX        1
 #define MAX_COLUMN_KEYMATRIX 8
 #define MAX_ROW_KEYMATRIX    8
+#endif
 
-#define MOBIFLIGHT_TYPE         "MobiFlight ESP32S2mini"
 #define MOBIFLIGHT_SERIAL       "0987654321"
 #define MOBIFLIGHT_NAME         "MobiFlight Mini ESP32"
 #define EEPROM_SIZE             4096
