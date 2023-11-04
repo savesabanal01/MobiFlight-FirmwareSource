@@ -10,10 +10,11 @@
 
 namespace DigInMux
 {
+    bool setupArray(uint16_t count);
     uint8_t Add(uint8_t dataPin, uint8_t nRegs, char const *name = "DigInMux");
-    void    Clear();
-    void    read();
-    void    OnTrigger();
+    void Clear();
+    void read();
+    void OnTrigger();
 }
 
 // DigInMux.h

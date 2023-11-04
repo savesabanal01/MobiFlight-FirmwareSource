@@ -8,11 +8,11 @@
 
 namespace Servos
 {
+    bool setupArray(uint16_t count);
     uint8_t Add(uint8_t pin);
-    void    Clear();
-    void    OnSet();
-    int16_t getActualValue(uint8_t channel);
-    void    update();
+    void Clear();
+    void OnSet();
+    void update();
 }
 
 // Servos.h
