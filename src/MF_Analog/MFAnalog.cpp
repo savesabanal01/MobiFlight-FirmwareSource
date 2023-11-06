@@ -51,7 +51,11 @@ void MFAnalog::retrigger()
 void MFAnalog::readBuffer()
 {                                                           // read ADC and calculate floating average, call it every ~10ms
     ADC_Average_Total -= ADC_Buffer[(ADC_Average_Pointer)]; // subtract oldest value to save the newest value
-    ADC_Buffer[ADC_Average_Pointer] = analogRead(_pin);     // store read in, must be subtracted in next loop
+#ifdef ARDUINO_ARCH_ESP32                                    //
+    ADC_Buffer[ADC_Average_Pointer] = analogRead(_pin) >> 2; // store read in, must be subtracted in next loop, for ESP32 divide by 4
+#else                                                        //
+    ADC_Buffer[ADC_Average_Pointer] = analogRead(_pin);      // store read in, must be subtracted in next loop
+#endif 
     ADC_Average_Total += ADC_Buffer[ADC_Average_Pointer];   // add read in for floating average
     ADC_Average_Pointer++;                                  // prepare for next loop
     ADC_Average_Pointer &= (ADC_MAX_AVERAGE - 1);           // limit max. values for floating average
