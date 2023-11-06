@@ -5,25 +5,7 @@
 //
 
 #include "MFInputShifter.h"
-
-#ifdef ARDUINO_ARCH_ESP32
-uint8_t shiftInESP32(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder)
-{
-    uint8_t value = 0;
-    uint8_t i;
-
-    for (i = 0; i < 8; ++i) {
-        if (bitOrder == LSBFIRST)
-            value |= digitalRead(dataPin) << i;
-        else
-            value |= digitalRead(dataPin) << (7 - i);
-        digitalWrite(clockPin, HIGH);
-        digitalWrite(clockPin, LOW);
-        delayMicroseconds(1);
-    }
-    return value;
-}
-#endif
+#include "MFShiftData.h"
 
 inputShifterEvent MFInputShifter::_inputHandler = NULL;
 
@@ -69,11 +51,7 @@ void MFInputShifter::poll(uint8_t doTrigger)
     // called it will pull in the data from each chained module.
     for (uint8_t module = 0; module < _moduleCount; module++) {
         uint8_t currentState;
-#ifdef ARDUINO_ARCH_ESP32
-        currentState = shiftInESP32(_dataPin, _clockPin, MSBFIRST);
-#else
-        currentState = shiftIn(_dataPin, _clockPin, MSBFIRST);
-#endif
+        currentState = shiftInData(_dataPin, _clockPin, MSBFIRST);
 
         // If an input changed on the current module from the last time it was read
         // then hand it off to figure out which bits specifically changed.
