@@ -5,6 +5,7 @@
 //
 
 #include "MFInputShifter.h"
+#include "MFShiftData.h"
 
 inputShifterEvent MFInputShifter::_inputHandler = NULL;
 
@@ -41,7 +42,7 @@ void MFInputShifter::attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin,
 // changed from the previously read state.
 void MFInputShifter::update()
 {
-// poll() is done in loop() or ISR, not here anymore
+    // poll() is done in loop() or ISR, not here anymore
     for (uint8_t module = 0; module < _moduleCount; module++) {
         // If an input changed on the current module from the last time it was read
         // then hand it off to figure out which bits specifically changed.
@@ -57,7 +58,7 @@ void MFInputShifter::poll()
     digitalWrite(_clockPin, HIGH); // Preset clock to retrieve first bit
     digitalWrite(_latchPin, HIGH); // Disable input latching and enable shifting
     for (uint8_t module = 0; module < _moduleCount; module++) {
-        _currentState[module] = shiftIn(_dataPin, _clockPin, MSBFIRST);
+        _currentState[module] = shiftInData(_dataPin, _clockPin, MSBFIRST);
     }
     digitalWrite(_latchPin, LOW); // disable shifting and enable input latching
 }
