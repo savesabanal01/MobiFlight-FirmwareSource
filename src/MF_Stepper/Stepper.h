@@ -17,6 +17,7 @@ namespace Stepper
     void update();
     void OnSetSpeedAccel();
     void PowerSave(bool state);
+    void SetRelative(uint8_t _stepper, int16_t _pos);
 }
 
 // Stepper.h

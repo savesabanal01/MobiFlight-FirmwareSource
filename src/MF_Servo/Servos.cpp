@@ -26,7 +26,7 @@ namespace Servos
     uint8_t Add(uint8_t pin)
     {
         if (servosRegistered == maxServos)
-            return;
+            return 0xFF;
         servos[servosRegistered] = MFServo();
         servos[servosRegistered].attach(pin, true);
         servosRegistered++;
@@ -59,7 +59,7 @@ namespace Servos
 
     int16_t getActualValue(uint8_t channel)
     {
-        return servos[channel]->getActualValue(); // range is 0 ... 1024
+        return servos[channel].getActualValue(); // range is 0 ... 1024
     }
 
     void update()

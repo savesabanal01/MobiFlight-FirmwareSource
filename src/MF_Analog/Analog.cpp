@@ -63,7 +63,7 @@ namespace Analog
 
     int16_t getActualValue(uint8_t channel)
     {
-        return analog[channel]->getActualValue(); // range is 0 ... 1024
+        return analog[channel].getActualValue(); // range is 0 ... 1024
     }
 
     void readAverage(void)
