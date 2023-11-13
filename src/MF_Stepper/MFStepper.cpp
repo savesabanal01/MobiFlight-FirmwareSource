@@ -82,6 +82,9 @@ void MFStepper::detach()
 
 void MFStepper::moveTo(long newPosition)
 {
+    if (!_initialized)
+        return;
+
     _resetting           = false;
     long currentPosition = _stepper->currentPosition();
 
@@ -102,17 +105,18 @@ void MFStepper::moveTo(long newPosition)
 
 void MFStepper::move(long relative)
 {
+    if (!_initialized)
+        return;
+
     _resetting = false;
     _stepper->move(relative);
 }
 
-uint8_t MFStepper::getZeroPin()
-{
-    return _zeroPin;
-}
-
 void MFStepper::setZero()
 {
+    if (!_initialized)
+        return;
+
     _stepper->setCurrentPosition(0);
     if (_inMove == MOVE_CW) {
         _stepper->moveTo(-_backlash);
@@ -121,6 +125,9 @@ void MFStepper::setZero()
 
 void MFStepper::setZeroInReset()
 {
+    if (!_initialized)
+        return;
+
     if (_resetting) {
         _stepper->setCurrentPosition(0);
         _resetting = false;
@@ -129,6 +136,9 @@ void MFStepper::setZeroInReset()
 
 void MFStepper::checkZeroPin()
 {
+    if (!_initialized)
+        return;
+
     uint8_t newState = (uint8_t)digitalRead(_zeroPin);
     if (newState != _zeroPinState) {
         _zeroPinState = newState;
@@ -138,6 +148,9 @@ void MFStepper::checkZeroPin()
 
 void MFStepper::update()
 {
+    if (!_initialized)
+        return;
+
     _stepper->run();
     checkZeroPin();
     if (_stepper->currentPosition() == (_targetPos + _backlash * _inMove) && _deactivateOutput) {
@@ -148,6 +161,9 @@ void MFStepper::update()
 
 void MFStepper::reset()
 {
+    if (!_initialized)
+        return;
+
     // we are not a auto reset stepper if this pin is 0
     if (_zeroPin == 0)
         return;
@@ -165,16 +181,24 @@ void MFStepper::reset()
 
 void MFStepper::setMaxSpeed(uint16_t speed)
 {
+    if (!_initialized)
+        return;
+
     _stepper->setMaxSpeed(speed);
 }
 
 void MFStepper::setAcceleration(uint16_t acceleration)
 {
+    if (!_initialized)
+        return;
+
     _stepper->setAcceleration(acceleration);
 }
 
 void MFStepper::powerSavingMode(bool state)
 {
+    if (!_initialized)
+        return;
     if (state)
         _stepper->disableOutputs();
     else
