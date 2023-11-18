@@ -44,6 +44,9 @@
 #define MAX_ROW_KEYMATRIX    8
 #endif
 
+#ifndef MOBIFLIGHT_TYPE
+#define MOBIFLIGHT_TYPE     "MobiFlight RaspiPico"
+#endif
 #ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL   "0987654321"
 #endif

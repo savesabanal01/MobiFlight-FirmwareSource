@@ -35,7 +35,7 @@ public:
 
 private:
     static buttonEvent _handler;
-    bool               _oldState;
+    bool               _state;
     bool               _newState;
 };
 
