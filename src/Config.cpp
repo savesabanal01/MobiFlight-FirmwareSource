@@ -558,7 +558,6 @@ void readConfig()
 void OnGetConfig()
 {
     char temp = 0;
-    setLastCommandMillis();
     cmdMessenger.sendCmdStart(kInfo);
     clearChecksum();
     if (configLength > 0) {
