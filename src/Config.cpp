@@ -122,7 +122,6 @@ void OnSetConfig()
 #ifdef DEBUG2CMDMESSENGER
     cmdMessenger.sendCmd(kDebug, F("Setting config start"));
 #endif
-    setLastCommandMillis();
     char   *cfg    = cmdMessenger.readStringArg();
     uint8_t cfgLen = strlen(cfg);
 
@@ -585,7 +584,6 @@ void OnGetInfo()
     // OnGetInfo() is called from the connector and the time is very likely always different
     // Therefore millis() can be used for randomSeed
     generateSerial(false);
-    setLastCommandMillis();
     cmdMessenger.sendCmdStart(kInfo);
     cmdMessenger.sendCmdArg(F(MOBIFLIGHT_TYPE));
     cmdMessenger.sendCmdArg(name);
