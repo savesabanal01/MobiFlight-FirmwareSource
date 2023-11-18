@@ -54,7 +54,6 @@ namespace Servos
         if (servo >= servosRegistered)
             return;
         servos[servo].moveTo(newValue);
-        setLastCommandMillis();
     }
 
     int16_t getActualValue(uint8_t channel)
