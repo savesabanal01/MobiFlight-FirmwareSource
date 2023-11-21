@@ -78,15 +78,13 @@ namespace Analog
     void OnSetCalibration()
     {
         int deviceID = cmdMessenger.readInt16Arg();
-        analog[deviceID]->doCalibration();
-        setLastCommandMillis();
+        analog[deviceID].doCalibration();
     }
 
     void OnReadCalibration()
     {
         int deviceID = cmdMessenger.readInt16Arg();
-        analog[deviceID]->readCalibration();
-        setLastCommandMillis();
+        analog[deviceID].readCalibration();
     }
 } // namespace Analog
 #endif
