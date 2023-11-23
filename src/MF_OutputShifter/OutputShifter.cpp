@@ -26,7 +26,7 @@ namespace OutputShifter
     uint8_t Add(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules)
     {
         if (outputShifterRegistered == maxOutputShifter)
-            return;
+            return 0xFF;
         outputShifters[outputShifterRegistered] = MFOutputShifter();
         outputShifters[outputShifterRegistered].attach(latchPin, clockPin, dataPin, modules);
         outputShifters[outputShifterRegistered].clear();

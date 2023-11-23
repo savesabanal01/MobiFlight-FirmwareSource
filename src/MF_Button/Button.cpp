@@ -34,8 +34,9 @@ namespace Button
     uint8_t Add(uint8_t pin, char const *name)
     {
         if (buttonsRegistered == maxButtons)
-            return;
-        buttons[buttonsRegistered] = MFButton(pin, name);
+            return 0xFF;
+        buttons[buttonsRegistered] = MFButton();
+        buttons[buttonsRegistered].attach(pin, name);
         MFButton::attachHandler(handlerOnButton);
         buttonsRegistered++;
 #ifdef DEBUG2CMDMESSENGER

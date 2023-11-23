@@ -37,7 +37,7 @@ namespace DigInMux
     uint8_t Add(uint8_t dataPin, uint8_t nRegs, char const *name)
     {
         if (digInMuxRegistered == maxDigInMux)
-            return;
+            return 0xFF;
         digInMux[digInMuxRegistered] = MFDigInMux(&MUX, name);
         digInMux[digInMuxRegistered].attach(dataPin, (nRegs == 1), name);
         MFDigInMux::attachHandler(handlerOnDigInMux);

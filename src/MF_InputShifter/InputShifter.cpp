@@ -35,7 +35,7 @@ namespace InputShifter
     uint8_t Add(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name)
     {
         if (inputShiftersRegistered == maxInputShiffter)
-            return;
+            return 0xFF;
         inputShifters[inputShiftersRegistered] = MFInputShifter();
         inputShifters[inputShiftersRegistered].attach(latchPin, clockPin, dataPin, modules, name);
         MFInputShifter::attachHandler(handlerInputShifterOnChange);

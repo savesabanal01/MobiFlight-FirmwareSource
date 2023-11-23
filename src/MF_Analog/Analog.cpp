@@ -35,9 +35,10 @@ namespace Analog
     uint8_t Add(uint8_t pin, char const *name, uint8_t sensitivity)
     {
         if (analogRegistered == maxAnalogIn)
-            return;
+            return 0xFF;
 
-        analog[analogRegistered] = MFAnalog(pin, name, sensitivity);
+        analog[analogRegistered] = MFAnalog();
+        analog[analogRegistered].attach(pin, name, sensitivity);
         MFAnalog::attachHandler(handlerOnAnalogChange);
         analogRegistered++;
 #ifdef DEBUG2CMDMESSENGER

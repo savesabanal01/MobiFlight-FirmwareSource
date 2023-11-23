@@ -26,8 +26,13 @@ namespace Output
     uint8_t Add(uint8_t pin)
     {
         if (outputsRegistered == maxOutputs)
-            return;
-        outputs[outputsRegistered] = MFOutput(pin);
+            return 0xFF;
+        outputs[outputsRegistered] = MFOutput();
+        outputs[outputsRegistered].attach(pin);
+#if defined(ARDUINO_ARCH_RP2040)
+        pinMode(pin, OUTPUT_12MA);
+        analogWrite(pin, false);
+#endif
         outputsRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added output"));
