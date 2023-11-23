@@ -9,10 +9,9 @@
 
 inputShifterEvent MFInputShifter::_inputHandler = NULL;
 
-MFInputShifter::MFInputShifter(const char *name)
+MFInputShifter::MFInputShifter()
 {
     _initialized = false;
-    _name        = name;
 }
 
 // Registers a new input shifter and configures the clock, data and latch pins as well

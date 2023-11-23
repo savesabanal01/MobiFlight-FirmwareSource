@@ -23,8 +23,9 @@ enum {
 class MFButton
 {
 public:
-    MFButton(uint8_t pin = 1, const char *name = "Button");
+    MFButton();
     static void attachHandler(buttonEvent newHandler);
+    void        attach(uint8_t pin, const char *name);
     void        update();
     void        poll();
     void        trigger(uint8_t state);
@@ -36,7 +37,7 @@ public:
 private:
     static buttonEvent _handler;
     bool               _state;
-    bool               _newState;
+    bool               _initialized;
 };
 
 // MFButton.h
