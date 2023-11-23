@@ -12,7 +12,12 @@ extern MFEEPROM MFeeprom;
 
 analogEvent MFAnalog::_handler = NULL;
 
-MFAnalog::MFAnalog(uint8_t pin, const char *name, uint8_t sensitivity)
+MFAnalog::MFAnalog()
+{
+    _initialized = false;
+}
+
+void MFAnalog::attach(uint8_t pin, const char *name, uint8_t sensitivity)
 {
     _sensitivity = sensitivity;
     _pin         = pin;
@@ -25,15 +30,20 @@ MFAnalog::MFAnalog(uint8_t pin, const char *name, uint8_t sensitivity)
     // and set initial value from buffers
     _lastValue = ADC_Average_Total >> ADC_MAX_AVERAGE_LOG2;
     // readCalibration();
+    _initialized = true;
 }
 
 bool MFAnalog::valueHasChanged(int16_t newValue)
 {
+    if (!_initialized)
+        return false;
     return (abs(newValue - _lastValue) >= _sensitivity);
 }
 
 void MFAnalog::readChannel(uint8_t alwaysTrigger)
 {
+    if (!_initialized)
+        return;
     int16_t newValue = ADC_Average_Total >> ADC_MAX_AVERAGE_LOG2;
     if (alwaysTrigger || valueHasChanged(newValue)) {
 //        newValue = map(newValue, CalibrationData.minValue, CalibrationData.maxValue, 0, 1023); // just for testing for now
@@ -92,7 +102,9 @@ void MFAnalog::readCalibration()
 }
 
 void MFAnalog::readBuffer()
-{                                                           // read ADC and calculate floating average, call it every ~10ms
+{                          
+    if (!_initialized)
+        return;                                 // read ADC and calculate floating average, call it every ~10ms
     ADC_Average_Total -= ADC_Buffer[(ADC_Average_Pointer)]; // subtract oldest value to save the newest value
     ADC_Buffer[ADC_Average_Pointer] = analogRead(_pin);     // store read in, must be subtracted in next loop
     ADC_Average_Total += ADC_Buffer[ADC_Average_Pointer];   // add read in for floating average
