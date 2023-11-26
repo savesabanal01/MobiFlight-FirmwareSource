@@ -652,7 +652,7 @@ void generateSerial(bool force)
     }
 
     // A serial number according old style is already generated and saved to the eeprom
-    if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'S' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'N') {
+//    if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'S' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'N') {
         MFeeprom.read_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
         clearChecksum();
         for (uint8_t i = 0; i < 10; i++) {
@@ -662,7 +662,7 @@ void generateSerial(bool force)
             cmdMessenger.sendCmd(kDebug, F("Failure reading Serialnumber from EEPROM"));
         }
         return;
-    }
+//    }
 #if defined(ARDUINO_ARCH_RP2040)
     // A uniqueID is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'I' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'D') {
