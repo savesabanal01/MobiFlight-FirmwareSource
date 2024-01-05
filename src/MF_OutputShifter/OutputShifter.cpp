@@ -31,7 +31,7 @@ namespace OutputShifter
         if (!outputShifters[outputShifterRegistered].attach(latchPin, clockPin, dataPin, modules))
         {
             cmdMessenger.sendCmd(kStatus, F("OutputShifter array does not fit into Memory"));
-            return;
+            return 0xFF;
         }
         outputShifterRegistered++;
 #ifdef DEBUG2CMDMESSENGER
