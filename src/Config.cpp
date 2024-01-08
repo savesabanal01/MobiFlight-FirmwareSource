@@ -9,7 +9,7 @@
 #include "Button.h"
 #include "./MF_Encoder/Encoder.h"     // otherwise Teensy specific Encoder lib is used
 #include "Output.h"
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_ESP32)
 #include "ArduinoUniqueID.h"
 #endif
 
