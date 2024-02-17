@@ -61,9 +61,18 @@ namespace DigInMux
 
     void read()
     {
+        return; // must be checked if MUX is for port extension
+
         for (uint8_t i = 0; i < digInMuxRegistered; i++) {
             digInMux[i].update();
         }
+    }
+
+    uint8_t readPin(uint8_t mux, uint8_t pin)
+    {
+//Serial.print("Reading from MUX: "); Serial.println(mux);
+//Serial.print("And from pin: "); Serial.println(pin);
+        return digInMux[mux].readPin(pin);
     }
 
     void OnTrigger()

@@ -60,11 +60,27 @@ void MFDigInMux::detach()
     }
 }
 
+uint8_t MFDigInMux::readPin(uint8_t pin)
+{
+     _MUX->setChannel(pin);
+#ifdef USE_FAST_IO
+        delayMicroseconds(5);
+        return DIGITALREAD(_dataPinFast);
+#else
+        DIGITALREAD(_dataPin);
+        return DIGITALREAD(_dataPin);
+#endif
+
+}
+
 // Reads the values from the attached modules, compares them to the previously
 // read values, and calls the registered event handler for any inputs that
 // changed from the previously read state.
 void MFDigInMux::update()
 {
+    // How to handle that a MUX gets not read if encoders/buttons are connected
+    return;
+
     poll(DO_TRIGGER);
 }
 
@@ -92,8 +108,8 @@ void MFDigInMux::poll(bool doTrigger)
         // for added safety, we perform one more (useless) digitalRead().
         // NB An external pullup (10k or 4k7) is recommended anyway for better interference immunity.
 #ifdef USE_FAST_IO
-        pinVal = DIGITALREAD(_dataPinFast);
         delayMicroseconds(5);
+        pinVal = DIGITALREAD(_dataPinFast);
 #else
         pinVal = DIGITALREAD(_dataPin);
         pinVal = DIGITALREAD(_dataPin);

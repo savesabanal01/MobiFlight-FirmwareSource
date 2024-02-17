@@ -17,6 +17,7 @@
 // -----
 
 #include "MFEncoder.h"
+#include "DigInMux.h"
 
 // The array holds the values -1 for the entries where a position was decremented,
 // a 1 for the entries where the position was incremented
@@ -62,21 +63,26 @@ MFEncoder::MFEncoder()
 
 void MFEncoder::attach(uint8_t pin1, uint8_t pin2, uint8_t TypeEncoder, const char *name)
 {
+    if (pin1 < 100) {
+#ifdef USE_FAST_IO
+        _pin1.Port = portInputRegister(digitalPinToPort(pin1));
+        _pin1.Mask = digitalPinToBitMask(pin1);
+        _pin2.Port = portInputRegister(digitalPinToPort(pin2));
+        _pin2.Mask = digitalPinToBitMask(pin2);
+#else
+        _pin1     = pin1;
+        _pin2     = pin2;
+#endif
+        pinMode(pin1, INPUT_PULLUP);
+        pinMode(pin2, INPUT_PULLUP);
+    } else {
+        _pin1Mux   = pin1 - 100;
+        _pin2Mux   = pin2 - 100;
+        _useMUX = (_pin1Mux >> 4) + 1;
+    }
     _pos  = 0;
     _name = name;
-#ifdef USE_FAST_IO
-    _pin1.Port = portInputRegister(digitalPinToPort(pin1));
-    _pin1.Mask = digitalPinToBitMask(pin1);
-    _pin2.Port = portInputRegister(digitalPinToPort(pin2));
-    _pin2.Mask = digitalPinToBitMask(pin2);
-#else
-    _pin1     = pin1;
-    _pin2     = pin2;
-#endif
     _encoderType = encoderTypes[TypeEncoder];
-
-    pinMode(pin1, INPUT_PULLUP);
-    pinMode(pin2, INPUT_PULLUP);
     // start with position 0;
     _oldState         = 0;
     _position         = 0;
@@ -134,8 +140,18 @@ void MFEncoder::update()
 
 void MFEncoder::tick(void)
 {
-    bool sig1 = !DIGITALREAD(_pin1); // to keep backwards compatibility for encoder type digitalRead must be negated
-    bool sig2 = !DIGITALREAD(_pin2); // to keep backwards compatibility for encoder type digitalRead must be negated
+    bool sig1, sig2;
+
+    if (_useMUX)
+    {
+        sig1 = !DigInMux::readPin(_useMUX - 1, _pin1Mux); // to keep backwards compatibility for encoder type digitalRead must be negated
+        sig2 = !DigInMux::readPin(_useMUX - 1, _pin2Mux); // to keep backwards compatibility for encoder type digitalRead must be negated
+    } else
+    {
+        sig1 = !DIGITALREAD(_pin1); // to keep backwards compatibility for encoder type digitalRead must be negated
+        sig2 = !DIGITALREAD(_pin2); // to keep backwards compatibility for encoder type digitalRead must be negated
+    }
+    
     int      _speed    = 0;
     uint32_t currentMs = millis();
 

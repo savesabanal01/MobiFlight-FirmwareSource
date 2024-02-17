@@ -38,6 +38,8 @@ private:
     static buttonEvent _handler;
     bool               _state;
     bool               _initialized;
+    uint8_t            _useMUX;
+    uint8_t            _pinMux;
 };
 
 // MFButton.h

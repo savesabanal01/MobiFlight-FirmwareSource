@@ -33,6 +33,7 @@ public:
     void     retrigger();
     void     update();
     uint16_t getValues(void) { return _lastState; }
+    uint8_t  readPin(uint8_t pin);
 
 private:
     enum { MUX_INITED   = 0,

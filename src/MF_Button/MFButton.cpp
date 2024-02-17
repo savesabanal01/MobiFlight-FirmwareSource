@@ -4,6 +4,7 @@
 // (C) MobiFlight Project 2022
 //
 #include "MFButton.h"
+#include "DigInMux.h"
 
 buttonEvent MFButton::_handler = NULL;
 
@@ -14,15 +15,26 @@ MFButton::MFButton()
 
 void MFButton::attach(uint8_t pin, const char *name)
 {
+
+    _name   = name;
+    if (pin < 100)
+    {
 #ifdef USE_FAST_IO
-    _pin.Port = portInputRegister(digitalPinToPort(pin));
-    _pin.Mask = digitalPinToBitMask(pin);
+        _pin.Port = portInputRegister(digitalPinToPort(pin));
+        _pin.Mask = digitalPinToBitMask(pin);
 #else
-    _pin   = pin;
+        _pin   = pin;
 #endif
-    _name  = name;
-    pinMode(pin, INPUT_PULLUP);    // set pin to input
-    _state = digitalRead(pin);     // initialize on actual status
+        pinMode(pin, INPUT_PULLUP);    // set pin to input
+        _state = digitalRead(pin);     // initialize on actual status
+        _useMUX = 0;
+    } else
+    {
+        _pinMux = pin - 100;
+        _useMUX = (_pinMux >> 4) + 1;
+        _state = DigInMux::readPin(_useMUX - 1, _pinMux);
+    }
+    
     _initialized = true;
 }
 
@@ -30,7 +42,14 @@ void MFButton::update()
 {
     if (!_initialized)
         return;
-    uint8_t newState = DIGITALREAD(_pin);
+    
+    uint8_t newState = 0;
+
+    if (_useMUX)
+        newState = DigInMux::readPin(_useMUX - 1, _pinMux);
+    else
+        newState = DIGITALREAD(_pin);
+
     if (newState != _state) {
         _state = newState;
         trigger(_state);

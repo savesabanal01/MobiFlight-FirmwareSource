@@ -65,8 +65,8 @@ public:
 
 private:
     static encoderEvent _handler;
-    FASTIO_s _pin1;
-    FASTIO_s _pin2;
+    FASTIO_s    _pin1;
+    FASTIO_s    _pin2;
     bool        _initialized;
     const char *_name;
     int16_t     _pos;
@@ -79,6 +79,9 @@ private:
     uint32_t    _positionTime;     // time last position change was detected
     uint32_t    _positionTimePrev; // time previous position change was detected
     uint32_t    _lastFastDec;
+    uint8_t     _useMUX;
+    uint8_t     _pin1Mux;
+    uint8_t     _pin2Mux;
 };
 
 // MFEncoder.h
