@@ -42,8 +42,8 @@ void MFDigInMux::attach(uint8_t dataPin, bool halfSize, char const *name)
     _dataPinFast.Mask = digitalPinToBitMask(dataPin);
 #endif
     _dataPin = dataPin;
-    _name        = name;
-    _flags       = 0x00;
+    _name    = name;
+    _flags   = 0x00;
     if (halfSize) bitSet(_flags, MUX_HALFSIZE);
     pinMode(_dataPin, INPUT_PULLUP);
     bitSet(_flags, MUX_INITED);
@@ -62,15 +62,15 @@ void MFDigInMux::detach()
 
 uint8_t MFDigInMux::readPin(uint8_t pin)
 {
-     _MUX->setChannel(pin);
+    _MUX->setChannel(pin);
 #ifdef USE_FAST_IO
-        delayMicroseconds(5);
-        return DIGITALREAD(_dataPinFast);
+    delayMicroseconds(5);
+    return DIGITALREAD(_dataPinFast);
 #else
-        DIGITALREAD(_dataPin);
-        return DIGITALREAD(_dataPin);
+    // One additional DIGITALREAD is enough for settling the output
+    DIGITALREAD(_dataPin);
+    return DIGITALREAD(_dataPin);
 #endif
-
 }
 
 // Reads the values from the attached modules, compares them to the previously

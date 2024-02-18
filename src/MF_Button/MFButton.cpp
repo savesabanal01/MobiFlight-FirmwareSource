@@ -15,26 +15,22 @@ MFButton::MFButton()
 
 void MFButton::attach(uint8_t pin, const char *name)
 {
-
-    _name   = name;
-    if (pin < 100)
-    {
+    _name = name;
+    if (pin < 100) {
 #ifdef USE_FAST_IO
         _pin.Port = portInputRegister(digitalPinToPort(pin));
         _pin.Mask = digitalPinToBitMask(pin);
 #else
-        _pin   = pin;
+        _pin = pin;
 #endif
-        pinMode(pin, INPUT_PULLUP);    // set pin to input
-        _state = digitalRead(pin);     // initialize on actual status
+        pinMode(pin, INPUT_PULLUP); // set pin to input
+        _state  = digitalRead(pin); // initialize on actual status
         _useMUX = 0;
-    } else
-    {
+    } else {
         _pinMux = pin - 100;
         _useMUX = (_pinMux >> 4) + 1;
-        _state = DigInMux::readPin(_useMUX - 1, _pinMux);
+        _state  = DigInMux::readPin(_useMUX - 1, _pinMux);
     }
-    
     _initialized = true;
 }
 
@@ -42,7 +38,7 @@ void MFButton::update()
 {
     if (!_initialized)
         return;
-    
+
     uint8_t newState = 0;
 
     if (_useMUX)

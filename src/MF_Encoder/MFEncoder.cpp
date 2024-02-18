@@ -70,18 +70,18 @@ void MFEncoder::attach(uint8_t pin1, uint8_t pin2, uint8_t TypeEncoder, const ch
         _pin2.Port = portInputRegister(digitalPinToPort(pin2));
         _pin2.Mask = digitalPinToBitMask(pin2);
 #else
-        _pin1     = pin1;
-        _pin2     = pin2;
+        _pin1 = pin1;
+        _pin2 = pin2;
 #endif
         pinMode(pin1, INPUT_PULLUP);
         pinMode(pin2, INPUT_PULLUP);
     } else {
-        _pin1Mux   = pin1 - 100;
-        _pin2Mux   = pin2 - 100;
-        _useMUX = (_pin1Mux >> 4) + 1;
+        _pin1Mux = pin1 - 100;
+        _pin2Mux = pin2 - 100;
+        _useMUX  = (_pin1Mux >> 4) + 1;
     }
-    _pos  = 0;
-    _name = name;
+    _pos         = 0;
+    _name        = name;
     _encoderType = encoderTypes[TypeEncoder];
     // start with position 0;
     _oldState         = 0;
@@ -142,16 +142,15 @@ void MFEncoder::tick(void)
 {
     bool sig1, sig2;
 
-    if (_useMUX)
-    {
-        sig1 = !DigInMux::readPin(_useMUX - 1, _pin1Mux); // to keep backwards compatibility for encoder type digitalRead must be negated
-        sig2 = !DigInMux::readPin(_useMUX - 1, _pin2Mux); // to keep backwards compatibility for encoder type digitalRead must be negated
-    } else
-    {
-        sig1 = !DIGITALREAD(_pin1); // to keep backwards compatibility for encoder type digitalRead must be negated
-        sig2 = !DIGITALREAD(_pin2); // to keep backwards compatibility for encoder type digitalRead must be negated
+    // to keep backwards compatibility for encoder type digitalRead must be negated
+    if (_useMUX) {
+        sig1 = !DigInMux::readPin(_useMUX - 1, _pin1Mux);
+        sig2 = !DigInMux::readPin(_useMUX - 1, _pin2Mux);
+    } else {
+        sig1 = !DIGITALREAD(_pin1);
+        sig2 = !DIGITALREAD(_pin2);
     }
-    
+
     int      _speed    = 0;
     uint32_t currentMs = millis();
 
