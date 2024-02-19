@@ -71,6 +71,11 @@ namespace DigInMux
         return digInMux[mux].readPin(pin);
     }
 
+    void    setUpdate(uint8_t mux, bool doUpdate)
+    {
+        digInMux[mux].setUpdate(doUpdate);
+    }
+
     void OnTrigger()
     {
         for (uint8_t i = 0; i < digInMuxRegistered; i++) {

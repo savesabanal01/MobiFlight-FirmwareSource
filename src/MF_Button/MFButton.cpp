@@ -29,7 +29,10 @@ void MFButton::attach(uint8_t pin, const char *name)
     } else {
         _pinMux = pin - 100;
         _useMUX = (_pinMux >> 4) + 1;
-        _state  = DigInMux::readPin(_useMUX - 1, _pinMux);
+        // deactivate reading MUX every 10ms
+        // MUX MUST be defined before Button on MUX
+        DigInMux::setUpdate(_useMUX - 1, false);
+        _state = DigInMux::readPin(_useMUX - 1, _pinMux);
     }
     _initialized = true;
 }

@@ -47,7 +47,7 @@ void MFDigInMux::attach(uint8_t dataPin, bool halfSize, char const *name)
     if (halfSize) bitSet(_flags, MUX_HALFSIZE);
     pinMode(_dataPin, INPUT_PULLUP);
     bitSet(_flags, MUX_INITED);
-
+    _doUpdate = true;
     // Initialize all inputs with current status
     poll(DONT_TRIGGER);
 }
@@ -58,6 +58,11 @@ void MFDigInMux::detach()
         pinMode(_dataPin, INPUT_PULLUP);
         bitClear(_flags, MUX_INITED);
     }
+}
+
+void MFDigInMux::setUpdate(bool doUpdate)
+{
+    _doUpdate = doUpdate;
 }
 
 uint8_t MFDigInMux::readPin(uint8_t pin)
@@ -78,9 +83,8 @@ uint8_t MFDigInMux::readPin(uint8_t pin)
 // changed from the previously read state.
 void MFDigInMux::update()
 {
-    // How to handle that a MUX gets not read if encoders/buttons are connected
-    return;
-
+    if (!_doUpdate)
+        return;
     poll(DO_TRIGGER);
 }
 

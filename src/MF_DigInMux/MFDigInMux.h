@@ -34,6 +34,7 @@ public:
     void     update();
     uint16_t getValues(void) { return _lastState; }
     uint8_t  readPin(uint8_t pin);
+    void     setUpdate(bool doUpdate);
 
 private:
     enum { MUX_INITED   = 0,
@@ -53,6 +54,7 @@ private:
     uint8_t  _dataPin; // Data pin - MUX common, input to AVR
     uint8_t  _flags;
     uint16_t _lastState;
+    bool     _doUpdate;
 
     void poll(bool detect);
     void detectChanges(uint16_t lastState, uint16_t currentState);

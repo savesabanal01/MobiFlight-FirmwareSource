@@ -15,6 +15,7 @@ namespace DigInMux
     void    Clear();
     void    read();
     uint8_t readPin(uint8_t mux, uint8_t pin);
+    void    setUpdate(uint8_t mux, bool doUpdate);
     void    OnTrigger();
 }
 

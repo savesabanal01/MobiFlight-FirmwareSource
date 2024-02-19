@@ -79,6 +79,9 @@ void MFEncoder::attach(uint8_t pin1, uint8_t pin2, uint8_t TypeEncoder, const ch
         _pin1Mux = pin1 - 100;
         _pin2Mux = pin2 - 100;
         _useMUX  = (_pin1Mux >> 4) + 1;
+        // deactivate reading MUX every 10ms
+        // MUX MUST be defined before Encoder on MUX
+        DigInMux::setUpdate(_useMUX - 1, false);
     }
     _pos         = 0;
     _name        = name;
