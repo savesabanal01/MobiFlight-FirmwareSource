@@ -75,7 +75,6 @@ namespace Stepper
         if (_stepper >= steppersRegistered)
             return;
         steppers[_stepper].move(_pos);
-        setLastCommandMillis();
     }
 
     void setMaxSpeed(uint8_t _stepper, uint16_t _maxspeed)
@@ -83,7 +82,6 @@ namespace Stepper
         if (_stepper >= steppersRegistered)
             return;
         steppers[_stepper].setMaxSpeed(_maxspeed);
-        setLastCommandMillis();
     }
 
     void setAcceleration(uint8_t _stepper, uint16_t _acceleration)
@@ -91,7 +89,6 @@ namespace Stepper
         if (_stepper >= steppersRegistered)
             return;
         steppers[_stepper].setAcceleration(_acceleration);
-        setLastCommandMillis();
     }
 
     void OnReset()
