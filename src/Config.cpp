@@ -540,7 +540,7 @@ void OnGetConfig()
 #endif
     if (configLength > 0) {
         if (!hasConfig)
-            cmdMessenger.sendArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG));
+            cmdMessenger.sendCmdArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG));
         for (uint16_t i = 1; i < configLength; i++) {
             cmdMessenger.sendArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG + i));
         }
