@@ -11,7 +11,7 @@
 namespace Button
 {
     bool setupArray(uint16_t count);
-    void Add(uint8_t pin, char const *name = "Button");
+    uint8_t Add(uint8_t pin, char const *name = "Button");
     void Clear();
     void read();
     void OnTrigger();

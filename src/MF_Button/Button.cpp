@@ -31,10 +31,10 @@ namespace Button
         return true;
     }
 
-    void Add(uint8_t pin, char const *name)
+    uint8_t Add(uint8_t pin, char const *name)
     {
         if (buttonsRegistered == maxButtons)
-            return;
+            return 0xFF;
         buttons[buttonsRegistered] = MFButton();
         buttons[buttonsRegistered].attach(pin, name);
         MFButton::attachHandler(handlerOnButton);
@@ -42,6 +42,7 @@ namespace Button
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added button ") /* + name */);
 #endif
+        return buttonsRegistered - 1;
     }
 
     void Clear(void)

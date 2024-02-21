@@ -23,16 +23,17 @@ namespace LCDDisplay
         return true;
     }
 
-    void Add(uint8_t address, uint8_t cols, uint8_t lines)
+    uint8_t Add(uint8_t address, uint8_t cols, uint8_t lines)
     {
         if (lcd_12cRegistered == maxLCD_I2C)
-            return;
+            return 0xFF;
         lcd_I2C[lcd_12cRegistered] = MFLCDDisplay();
         lcd_I2C[lcd_12cRegistered].attach(address, cols, lines);
         lcd_12cRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added lcdDisplay"));
 #endif
+        return lcd_12cRegistered - 1;
     }
 
     void Clear()

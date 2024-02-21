@@ -16,7 +16,7 @@ namespace LedSegment
     };
 
     bool setupArray(uint16_t count);
-    void Add(uint8_t type, uint8_t dataPin, uint8_t csPin, uint8_t clkPin, uint8_t numDevices, uint8_t brightness);
+    uint8_t Add(uint8_t type, uint8_t dataPin, uint8_t csPin, uint8_t clkPin, uint8_t numDevices, uint8_t brightness);
     void Clear();
     void PowerSave(bool state);
     void OnInitModule();

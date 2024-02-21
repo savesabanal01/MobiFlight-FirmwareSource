@@ -32,10 +32,10 @@ namespace Analog
         return true;
     }
 
-    void Add(uint8_t pin, char const *name, uint8_t sensitivity)
+    uint8_t Add(uint8_t pin, char const *name, uint8_t sensitivity)
     {
         if (analogRegistered == maxAnalogIn)
-            return;
+            return 0xFF;
 
         analog[analogRegistered] = MFAnalog();
         analog[analogRegistered].attach(pin, name, sensitivity);
@@ -44,6 +44,7 @@ namespace Analog
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added analog device "));
 #endif
+        return analogRegistered - 1;
     }
 
     void Clear(void)
@@ -59,6 +60,11 @@ namespace Analog
         for (uint8_t i = 0; i < analogRegistered; i++) {
             analog[i].update();
         }
+    }
+
+    int16_t getActualValue(uint8_t channel)
+    {
+        return analog[channel].getActualValue(); // range is 0 ... 1024
     }
 
     void readAverage(void)

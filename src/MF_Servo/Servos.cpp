@@ -23,16 +23,17 @@ namespace Servos
         return true;
     }
 
-    void Add(uint8_t pin)
+    uint8_t Add(uint8_t pin)
     {
         if (servosRegistered == maxServos)
-            return;
+            return 0xFF;
         servos[servosRegistered] = MFServo();
         servos[servosRegistered].attach(pin, true);
         servosRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added servos"));
 #endif
+        return servosRegistered - 1;
     }
 
     void Clear()
@@ -53,6 +54,11 @@ namespace Servos
         if (servo >= servosRegistered)
             return;
         servos[servo].moveTo(newValue);
+    }
+
+    int16_t getActualValue(uint8_t channel)
+    {
+        return servos[channel].getActualValue(); // range is 0 ... 1024
     }
 
     void update()

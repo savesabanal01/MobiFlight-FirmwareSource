@@ -31,10 +31,10 @@ namespace Encoder
         return true;
     }
 
-    void Add(uint8_t pin1, uint8_t pin2, uint8_t encoder_type, char const *name)
+    uint8_t Add(uint8_t pin1, uint8_t pin2, uint8_t encoder_type, char const *name)
     {
         if (encodersRegistered == maxEncoders)
-            return;
+            return 0xFF;
         encoders[encodersRegistered] = MFEncoder();
         encoders[encodersRegistered].attach(pin1, pin2, encoder_type, name);
         MFEncoder::attachHandler(handlerOnEncoder);
@@ -42,6 +42,7 @@ namespace Encoder
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added encoder"));
 #endif
+        return encodersRegistered - 1;
     }
 
     void Clear()

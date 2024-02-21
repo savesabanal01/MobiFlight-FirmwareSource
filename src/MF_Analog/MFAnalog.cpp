@@ -53,6 +53,11 @@ void MFAnalog::update()
     readChannel(false);
 }
 
+int16_t MFAnalog::getActualValue()
+{
+    return (int16_t)(ADC_Average_Total >> ADC_MAX_AVERAGE_LOG2);
+}
+
 void MFAnalog::retrigger()
 {
     readChannel(true);

@@ -18,6 +18,7 @@ public:
     void setExternalRange(int min, int max);
     void setInternalRange(int min, int max);
     void moveTo(int absolute);
+    int16_t getActualValue();
     void update();
 
 private:

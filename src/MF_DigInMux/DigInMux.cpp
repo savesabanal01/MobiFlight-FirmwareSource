@@ -34,18 +34,18 @@ namespace DigInMux
         return true;
     }
 
-    void Add(uint8_t dataPin, uint8_t nRegs, char const *name)
+    uint8_t Add(uint8_t dataPin, uint8_t nRegs, char const *name)
     {
         if (digInMuxRegistered == maxDigInMux)
-            return;
+            return 0xFF;
         digInMux[digInMuxRegistered] = MFDigInMux(&MUX, name);
         digInMux[digInMuxRegistered].attach(dataPin, (nRegs == 1), name);
         MFDigInMux::attachHandler(handlerOnDigInMux);
         digInMuxRegistered++;
-
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added digital input MUX"));
 #endif
+        return digInMuxRegistered -1;
     }
 
     void Clear()

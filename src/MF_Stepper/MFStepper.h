@@ -21,6 +21,7 @@ public:
     void    update();
     void    reset();
     void    moveTo(long absolute);
+    void    move(long relative);
     void    setMaxSpeed(uint16_t speed);
     void    setAcceleration(uint16_t acceleration);
     void    setZero();

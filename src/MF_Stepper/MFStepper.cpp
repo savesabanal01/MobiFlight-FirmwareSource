@@ -103,6 +103,15 @@ void MFStepper::moveTo(long newPosition)
     }
 }
 
+void MFStepper::move(long relative)
+{
+    if (!_initialized)
+        return;
+
+    _resetting = false;
+    _stepper->move(relative);
+}
+
 void MFStepper::setZero()
 {
     if (!_initialized)

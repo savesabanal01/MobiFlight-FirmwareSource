@@ -23,16 +23,17 @@ namespace Output
         return true;
     }
 
-    void Add(uint8_t pin)
+    uint8_t Add(uint8_t pin)
     {
         if (outputsRegistered == maxOutputs)
-            return;
+            return 0xFF;
         outputs[outputsRegistered] = MFOutput();
         outputs[outputsRegistered].attach(pin);
         outputsRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added output"));
 #endif
+        return outputsRegistered - 1;
     }
 
     void Clear()

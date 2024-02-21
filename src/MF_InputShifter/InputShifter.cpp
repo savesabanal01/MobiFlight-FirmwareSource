@@ -32,21 +32,22 @@ namespace InputShifter
         return true;
     }
 
-    void Add(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name)
+    uint8_t Add(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t modules, char const *name)
     {
         if (inputShiftersRegistered == maxInputShifter)
-            return;
+            return 0xFF;
         inputShifters[inputShiftersRegistered] = MFInputShifter();
         if (!inputShifters[inputShiftersRegistered].attach(latchPin, clockPin, dataPin, modules, name))
         {
             cmdMessenger.sendCmd(kStatus, F("InputShifter array does not fit into Memory"));
-            return;
+            return 0xFF;
         }
         MFInputShifter::attachHandler(handlerInputShifterOnChange);
         inputShiftersRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added input shifter"));
 #endif
+        return inputShiftersRegistered - 1;
     }
 
     void Clear()
