@@ -9,4 +9,5 @@ namespace CustomDevice
     void OnSet();
     void PowerSave(bool state);
     bool GetConfig();
+    void GetArraySizes(uint8_t numberDevices[]);
 }
