@@ -552,7 +552,7 @@ void readConfig()
         cmdMessenger.sendCmd(kStatus, F("Failure on reading config"));
     }
     if (readChecksum(checksumConfigAdrEeprom) != getChecksum()) {
-        cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM"));
+        cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM during loading Config"));
     }
 }
 
@@ -571,7 +571,7 @@ void OnGetConfig()
             calculateChecksum(temp);
         }
         if (readChecksum(checksumConfigAdrEeprom) != getChecksum()) {
-            cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM"));
+            cmdMessenger.sendCmd(kDebug, F("Failure reading Config from EEPROM during sending Config"));
         }
     }
     cmdMessenger.sendCmdEnd();
