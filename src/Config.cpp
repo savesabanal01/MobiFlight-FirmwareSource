@@ -97,6 +97,8 @@ bool readConfigLength()
     uint16_t length     = MFeeprom.get_length();
     configLength        = 0;
 
+    if (MFeeprom.read_byte(MEM_OFFSET_CONFIG) == 0xFF)
+        return false;
     while (MFeeprom.read_byte(addreeprom++) != 0x00) {
         configLength++;
         if (addreeprom > length) {
@@ -627,6 +629,7 @@ void generateRandomSerial()
         calculateChecksum(serial[i]);
     }
     saveChecksum(checksumSerialAdrEeprom);
+    cmdMessenger.sendCmd(kDebug, F("Serial number generated"));
 }
 
 #if defined(ARDUINO_ARCH_RP2040)
@@ -668,7 +671,11 @@ void generateSerial(bool force)
 #if defined(ARDUINO_ARCH_RP2040)
     // A uniqueID is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'I' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'D') {
+#if defined(ARDUINO_ARCH_AVR)
+        generateRandomSerial();
+#elif defined(ARDUINO_ARCH_RP2040)
         readUniqueSerial();
+#endif
         return;
     }
 #endif
@@ -679,6 +686,7 @@ return;
     // To have not always the same starting point for the random generator, millis() are
     // used as starting point. It is very unlikely that the time between flashing the firmware
     // and getting the command to send the info's to the connector is always the same.
+    // additional double check if it's really a new board, should reduce Jaimes problem
     generateRandomSerial();
 #elif defined(ARDUINO_ARCH_RP2040)
     // Read the uniqueID for Pico's and use it as serial number
@@ -686,9 +694,9 @@ return;
     // mark this in the eeprom that a UniqueID is used on first start up for Pico's
     MFeeprom.write_block(MEM_OFFSET_SERIAL, "ID", 2);
 #endif
-    // Set first byte of config to 0x00 to ensure empty config on 1st start up
-    // Otherwise the complete length of the config will be send with 0xFF (empty EEPROM)
-    MFeeprom.write_byte(MEM_OFFSET_CONFIG, 0x00);
+    if (MFeeprom.read_byte(MEM_OFFSET_CONFIG) == 0xFF) {
+        MFeeprom.write_block(MEM_OFFSET_CONFIG, 0x00);
+    }
 }
 
 void OnGenNewSerial()
