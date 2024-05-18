@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <stdint.h>
 namespace Analog
 {
     bool setupArray(uint16_t count);

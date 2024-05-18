@@ -62,7 +62,7 @@ const uint8_t MEM_OFFSET_SERIAL = MEM_OFFSET_NAME + MEM_LEN_NAME;
 const uint8_t MEM_LEN_SERIAL    = 11;
 const uint8_t MEM_OFFSET_CONFIG = MEM_OFFSET_NAME + MEM_LEN_NAME + MEM_LEN_SERIAL;
 
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
 char serial[11] = MOBIFLIGHT_SERIAL; // 3 characters for "SN-",7 characters for "xyz-zyx" plus terminating NULL
 #elif defined(ARDUINO_ARCH_RP2040)
 char serial[3 + UniqueIDsize * 2 + 1] = MOBIFLIGHT_SERIAL; // 3 characters for "SN-", UniqueID as HEX String, terminating NULL
@@ -625,7 +625,7 @@ void generateSerial(bool force)
 
     // A uniqueID is already generated and saved to the eeprom
     if (MFeeprom.read_byte(MEM_OFFSET_SERIAL) == 'I' && MFeeprom.read_byte(MEM_OFFSET_SERIAL + 1) == 'D') {
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
         generateRandomSerial();
 #elif defined(ARDUINO_ARCH_RP2040)
         readUniqueSerial();
@@ -635,7 +635,7 @@ void generateSerial(bool force)
 
 
     // Coming here no UniqueID and no serial number is available, so it's the first start up of a board
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_STM32)
     // Generate a serial number for AVR's
     // To have not always the same starting point for the random generator, millis() are
     // used as starting point. It is very unlikely that the time between flashing the firmware
