@@ -175,6 +175,7 @@ void OnResetConfig()
 
 void OnSaveConfig()
 {
+    MFeeprom.commit();
     cmdMessenger.sendCmd(kConfigSaved, F("OK"));
     //  Uncomment the if{} part to reset and load the config via serial terminal for testing w/o the GUI
     //    1: Type "13" to reset the config
@@ -590,6 +591,7 @@ void generateRandomSerial()
         randomSerial >>= 4;
     }
     MFeeprom.write_block(MEM_OFFSET_SERIAL, serial, MEM_LEN_SERIAL);
+    MFeeprom.commit();
     cmdMessenger.sendCmd(kDebug, F("Serial number generated"));
 }
 
@@ -647,9 +649,11 @@ void generateSerial(bool force)
     readUniqueSerial();
     // mark this in the eeprom that a UniqueID is used on first start up for Pico's
     MFeeprom.write_block(MEM_OFFSET_SERIAL, "ID", 2);
+    MFeeprom.commit();
 #endif
     if (MFeeprom.read_byte(MEM_OFFSET_CONFIG) == 0xFF) {
         MFeeprom.write_block(MEM_OFFSET_CONFIG, 0x00);
+        MFeeprom.commit();
     }
 }
 
@@ -666,6 +670,7 @@ void storeName()
 {
     MFeeprom.write_byte(MEM_OFFSET_NAME, '#');
     MFeeprom.write_block(MEM_OFFSET_NAME + 1, name, MEM_LEN_NAME - 1);
+    MFeeprom.commit();
 }
 
 void restoreName()

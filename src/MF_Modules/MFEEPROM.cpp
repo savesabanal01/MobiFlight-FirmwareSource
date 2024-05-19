@@ -20,7 +20,7 @@ void MFEEPROM::init(void)
     EEPROM.begin(4096);
 #endif
 #if defined(ARDUINO_ARCH_STM32)
-    EEPROM.eeprom_buffer_fill();
+    eeprom_buffer_fill();
 #endif
     _eepromLength = EEPROM.length();
 }
@@ -34,7 +34,7 @@ uint8_t MFEEPROM::read_byte(uint16_t adr)
 {
     if (adr >= _eepromLength) return 0;
 #if defined(ARDUINO_ARCH_STM32)
-    EEPROM.eeprom_buffered_read_byte(adr);
+    return eeprom_buffered_read_byte(adr);
 #else
     return EEPROM.read(adr);
 #endif
@@ -44,19 +44,19 @@ bool MFEEPROM::write_byte(uint16_t adr, const uint8_t data)
 {
     if (adr >= _eepromLength) return false;
 #if defined(ARDUINO_ARCH_STM32)
-    EEPROM.eeprom_buffered_write_byte(adr, data);
+    eeprom_buffered_write_byte(adr, data);
 #else
     EEPROM.write(adr, data);
 #endif
     return true;
 }
 
-void MFEEPROM::flash() {
+void MFEEPROM::commit() {
 #if defined(ARDUINO_ARCH_RP2040)
     EEPROM.commit();
 #endif
 #if defined(ARDUINO_ARCH_STM32)
-    EEPROM.eeprom_buffer_flush();
+    eeprom_buffer_flush();
 #endif
 }
 // MFEEPROM.cpp
