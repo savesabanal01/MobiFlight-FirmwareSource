@@ -10,7 +10,7 @@
 #include "Encoder.h"
 #include "MFEEPROM.h"
 #if MF_ANALOG_SUPPORT == 1
-#include "Analog.h"
+#include "AnalogIn.h"
 #endif
 #if MF_INPUT_SHIFTER_SUPPORT == 1
 #include "InputShifter.h"

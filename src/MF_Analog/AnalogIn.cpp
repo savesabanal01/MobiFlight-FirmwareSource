@@ -6,7 +6,6 @@
 
 #include "mobiflight.h"
 #include "MFAnalog.h"
-#include "Analog.h"
 
 #if MF_ANALOG_SUPPORT == 1
 namespace Analog

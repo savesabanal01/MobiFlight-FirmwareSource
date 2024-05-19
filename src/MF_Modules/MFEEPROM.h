@@ -19,6 +19,7 @@ public:
     uint16_t get_length(void);
     uint8_t read_byte(uint16_t adr);
     bool write_byte(uint16_t adr, const uint8_t data);
+    void flash();
 
     template <typename T>
     bool read_block(uint16_t adr, T &t)
