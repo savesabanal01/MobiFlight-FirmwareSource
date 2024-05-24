@@ -18,14 +18,14 @@
         "MessageSize": 64
     },
     "HardwareIds": [
-        "^VID_2E8A&PID_000A"
+        "^VID_0483&PID_374B"
     ],
     "Info": {
         "CanInstallFirmware": true,
         "CanResetBoard": true,
         "FirmwareBaseName": "mobiflight_nucleof303",
         "FirmwareExtension": "uf2",
-        "FriendlyName": "Raspberry NucleoF303",
+        "FriendlyName": "STM32 NucleoF303",
         "LatestFirmwareVersion": "2.5.1",
         "MobiFlightType": "MobiFlight NucleoF303",
         "ResetFirmwareFile": ""

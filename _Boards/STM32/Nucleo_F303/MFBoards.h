@@ -31,7 +31,7 @@
 #endif
 
 #ifndef MOBIFLIGHT_TYPE
-#define MOBIFLIGHT_TYPE         "MobiFlight Nucleo"
+#define MOBIFLIGHT_TYPE         "MobiFlight NucleoF303"
 #endif
 #ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL       "0987654321"
