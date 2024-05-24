@@ -46,20 +46,6 @@
     },
     "Pins": [
         {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PA_3/A14",
-            "Pin": 0
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PA_2/A15",
-            "Pin": 1
-        },
-        {
             "isAnalog": false,
             "isI2C": true,
             "isPWM": true,
