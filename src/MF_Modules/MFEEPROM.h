@@ -57,9 +57,12 @@ public:
         if (adr + sizeof(T) > _eepromLength) return false;
 #if defined(ARDUINO_ARCH_STM32)
         const uint8_t *ptr = (const uint8_t *) &t;
+//Serial.print("Writing to buffer: ");
         for (int count = sizeof(T) ; count ; --count) {
+//Serial.print((char)*ptr);
             eeprom_buffered_write_byte(adr + count, *ptr++);
         }
+//Serial.println();
 #else
         EEPROM.put(adr, t);
 #endif

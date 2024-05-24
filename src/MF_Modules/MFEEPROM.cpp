@@ -57,6 +57,7 @@ void MFEEPROM::commit() {
 #endif
 #if defined(ARDUINO_ARCH_STM32)
     eeprom_buffer_flush();
+//Serial.println("Commiting buffer to EEPROM");
 #endif
 }
 // MFEEPROM.cpp
