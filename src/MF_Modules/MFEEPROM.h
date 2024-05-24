@@ -43,7 +43,7 @@ public:
         uint8_t *ptr = (uint8_t*) &t;
         for (uint16_t i = 0; i < len; i++) {
 #if defined(ARDUINO_ARCH_STM32)
-            read_block(adr + i * sizeof(T), t[i]);
+            *ptr++ = eeprom_buffered_read_byte(adr + i);
 #else
             *ptr++ = EEPROM.read(adr + i);
 #endif
@@ -57,12 +57,9 @@ public:
         if (adr + sizeof(T) > _eepromLength) return false;
 #if defined(ARDUINO_ARCH_STM32)
         const uint8_t *ptr = (const uint8_t *) &t;
-//Serial.print("Writing to buffer: ");
         for (int count = sizeof(T) ; count ; --count) {
-//Serial.print((char)*ptr);
             eeprom_buffered_write_byte(adr + count, *ptr++);
         }
-//Serial.println();
 #else
         EEPROM.put(adr, t);
 #endif
@@ -75,7 +72,7 @@ public:
         if (adr + len > _eepromLength) return false;
         for (uint16_t i = 0; i < len; i++) {
 #if defined(ARDUINO_ARCH_STM32)
-            write_block(adr + i * sizeof(T), t[i]);
+            eeprom_buffered_write_byte(adr + i, t[i]);
 #else
             EEPROM.put(adr + i, t[i]);
 #endif
