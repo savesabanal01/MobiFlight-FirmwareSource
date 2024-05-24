@@ -8,6 +8,7 @@ if firmware_version == "":
     firmware_version = "0.0.1"
 firmware_version = firmware_version.lstrip("v")
 firmware_version = firmware_version.strip(".")
+platform = os.environ.get('PLATFORM', "")
 
 zip_file_name = 'Mobiflight-Connector'
 build_path = './_build'
@@ -24,9 +25,9 @@ def copy_fw_files (source, target, env):
     if os.path.exists(build_path_json) == False:
         os.makedirs(build_path_json)
 
-    if fw_file_name[-3:] == "bin":
-        fw_file_name=fw_file_name[0:-3] + "uf2"
-
+#    if fw_file_name[-3:] == "bin":
+#        fw_file_name=fw_file_name[0:-3] + "uf2"
+    print(f'Using platform {platform} for the build')
     # Copy build FW file
     shutil.copy(fw_file_name, build_path_fw)
 
