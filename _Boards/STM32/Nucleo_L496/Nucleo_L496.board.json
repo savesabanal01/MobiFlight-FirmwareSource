@@ -23,11 +23,11 @@
     "Info": {
         "CanInstallFirmware": true,
         "CanResetBoard": true,
-        "FirmwareBaseName": "mobiflight_nucleo_f303",
+        "FirmwareBaseName": "mobiflight_nucleo_l496",
         "FirmwareExtension": "uf2",
-        "FriendlyName": "STM32 Nucleo F303",
+        "FriendlyName": "STM32 Nucleo L496",
         "LatestFirmwareVersion": "2.5.1",
-        "MobiFlightType": "MobiFlight NucleoF303",
+        "MobiFlightType": "MobiFlight NucleoL496",
         "ResetFirmwareFile": ""
     },
     "ModuleLimits": {

@@ -31,13 +31,13 @@
 #endif
 
 #ifndef MOBIFLIGHT_TYPE
-#define MOBIFLIGHT_TYPE         "MobiFlight NucleoF303"
+#define MOBIFLIGHT_TYPE         "MobiFlight NucleoL496"
 #endif
 #ifndef MOBIFLIGHT_SERIAL
 #define MOBIFLIGHT_SERIAL       "0987654321"
 #endif
 #ifndef MOBIFLIGHT_NAME
-#define MOBIFLIGHT_NAME         "MobiFlight Nucleo F303"
+#define MOBIFLIGHT_NAME         "MobiFlight Nucleo L496"
 #endif
 #ifndef MEMLEN_CONFIG
 #define MEMLEN_CONFIG           1496    // MUST be less than EEPROM_SIZE!! MEM_OFFSET_CONFIG + MEM_LEN_CONFIG <= EEPROM_SIZE, see: eeprom_write_block (MEM_OFFSET_CONFIG, configBuffer, MEM_LEN_CONFIG);
