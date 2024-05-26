@@ -17,7 +17,7 @@ build_path = './_build'
 build_path_fw = build_path + '/firmware'
 build_path_json = build_path + '/Boards'
 distrubution_path = './_dist'
-board_folder = ['./_Boards/Atmel', './_Boards/RaspberryPi']
+board_folder = ['./_Boards/Atmel', './_Boards/RaspberryPi', './_Boards/STM32']
 
 def copy_fw_files (source, target, env):
     fw_file_name=str(target[0])
@@ -27,8 +27,8 @@ def copy_fw_files (source, target, env):
     if os.path.exists(build_path_json) == False:
         os.makedirs(build_path_json)
 
-#    if fw_file_name[-3:] == "bin":
-#        fw_file_name=fw_file_name[0:-3] + "uf2"
+    if fw_file_name[-3:] == "bin" and platform == "raspberrypi":
+        fw_file_name=fw_file_name[0:-3] + "uf2"
 
     # Copy build FW file
     shutil.copy(fw_file_name, build_path_fw)
@@ -37,6 +37,8 @@ def copy_fw_files (source, target, env):
     file_extension = '.hex'
     copy_files_by_extension(board_folder, build_path_fw, file_extension)
     file_extension = '.uf2'
+    copy_files_by_extension(board_folder, build_path_fw, file_extension)
+    file_extension = '.bin'
     copy_files_by_extension(board_folder, build_path_fw, file_extension)
     file_extension = '.json'
     copy_files_by_extension(board_folder, build_path_json, file_extension)
