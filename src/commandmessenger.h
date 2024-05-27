@@ -45,6 +45,7 @@ enum {
     kDigInMuxChange,       // 30
     kSetStepperSpeedAccel, // 31
     kSetCustomDevice,      // 32
+    kJumpToBootloader,     // 33, only for STM32 to jump to Bootloader
     kDebug = 0xFF          // 255
 };
 

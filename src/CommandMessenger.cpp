@@ -49,6 +49,7 @@ void attachCommandCallbacks()
 {
     // Attach callback methods
     cmdMessenger.attach(OnUnknownCommand);
+    cmdMessenger.attach(kJumpToBootloader, JumpToBootloader);
 
 #if MF_SEGMENT_SUPPORT == 1
     cmdMessenger.attach(kInitModule, LedSegment::OnInitModule);
@@ -145,6 +146,36 @@ void OnTrigger()
 #endif
 #if MF_ANALOG_SUPPORT == 1
     Analog::OnTrigger();
+#endif
+}
+
+void JumpToBootloader(void)
+{
+#if defined(ARDUINO_ARCH_STM32)
+     HAL_SuspendTick();
+
+     /* Clear Interrupt Enable Register & Interrupt Pending Register */
+     for (int i=0;i<5;i++)
+     {
+         NVIC->ICER[i]=0xFFFFFFFF;
+         NVIC->ICPR[i]=0xFFFFFFFF;
+     }
+
+     HAL_FLASH_Unlock();
+
+     HAL_FLASH_OB_Unlock();
+
+     // RM0351 Rev 7 Page 93/1903
+     // AN2606 Rev 44 Page 23/372
+     CLEAR_BIT(FLASH->OPTR, FLASH_OPTR_nBOOT0);
+     SET_BIT(FLASH->OPTR, FLASH_OPTR_nBOOT1);
+     CLEAR_BIT(FLASH->OPTR, FLASH_OPTR_nSWBOOT0);
+
+     SET_BIT(FLASH->CR, FLASH_CR_OPTSTRT);
+
+     while(READ_BIT(FLASH->SR, FLASH_SR_BSY));
+
+     HAL_FLASH_OB_Launch();
 #endif
 }
 
