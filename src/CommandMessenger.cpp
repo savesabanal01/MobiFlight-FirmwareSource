@@ -43,6 +43,7 @@ unsigned long lastCommand;
 void OnSetPowerSavingMode();
 void OnTrigger();
 void OnUnknownCommand();
+void JumpToBootloader();
 
 // Callbacks define on which received commands we take action
 void attachCommandCallbacks()
