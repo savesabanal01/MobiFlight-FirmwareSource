@@ -47,347 +47,745 @@
     "Pins": [
         {
             "isAnalog": false,
-            "isI2C": true,
+            "isI2C": false,
             "isPWM": true,
-            "Name": "PA_10/SDA",
+            "Name": "PD9",
+            "Pin": 0
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD8",
+            "Pin": 1
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF15",
             "Pin": 2
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_3",
+            "Name": "PE13",
             "Pin": 3
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_5",
+            "Name": "PF14",
             "Pin": 4
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_4",
+            "Name": "PE11",
             "Pin": 5
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_10",
+            "Name": "PE9",
             "Pin": 6
         },
         {
             "isAnalog": false,
-            "isI2C": true,
+            "isI2C": false,
             "isPWM": true,
-            "Name": "PA_8/SCL",
+            "Name": "PF13",
             "Pin": 7
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_9",
+            "Name": "PF12",
             "Pin": 8
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_7",
+            "Name": "PD15",
             "Pin": 9
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_6",
+            "Name": "PD14",
             "Pin": 10
         },
         {
             "isAnalog": true,
-            "isI2C": false,
+            "isI2C": true,
             "isPWM": true,
-            "Name": "PA_7/A6",
+            "Name": "PA7/A11",
             "Pin": 11
         },
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_6/A7",
+            "Name": "PA6/A12",
             "Pin": 12
         },
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_5/A16",
+            "Name": "PA5/A13",
             "Pin": 13
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_9",
+            "Name": "PB9",
             "Pin": 14
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_8",
+            "Name": "PB8",
             "Pin": 15
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_10",
+            "Name": "PC6",
             "Pin": 16
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_12",
+            "Name": "PB15",
             "Pin": 17
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_13",
-            "Pin": 19
+            "Name": "PB13",
+            "Pin": 18
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_14",
+            "Name": "PB12",
+            "Pin": 19
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA4/A14",
             "Pin": 20
         },
         {
             "isAnalog": false,
-            "isI2C": false,
+            "isI2C": true,
             "isPWM": true,
-            "Name": "PA_15",
+            "Name": "PB4",
             "Pin": 21
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_7",
+            "Name": "PB5",
             "Pin": 22
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_13",
+            "Name": "PB3",
             "Pin": 23
         },
         {
-            "isAnalog": false,
+            "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_14",
-            "Pin": 24
-        },
-        {
-            "isAnalog": false,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PC_15",
-            "Pin": 25
-        },
-        {
-            "isAnalog": false,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PF_0",
+            "Name": "PA2/A15",
             "Pin": 26
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PF_1",
+            "Name": "PB10",
             "Pin": 27
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_2/A8",
+            "Name": "PE15",
             "Pin": 28
         },
-        
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_3/A9",
+            "Name": "PB0/A16",
             "Pin": 29
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_11",
+            "Name": "PE12",
             "Pin": 30
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PD_2",
+            "Name": "PE14",
             "Pin": 31
         },
         {
-            "isAnalog": false,
+            "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_9",
+            "Name": "PA0/A17",
             "Pin": 32
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_8",
-            "Pin": 33
+            "Name": "PE0",
+            "Pin": 34
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_6",
-            "Pin": 34
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PC_5/A10",
+            "Name": "PB11",
             "Pin": 35
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_12/USB_DP",
-            "Pin": 36
+            "Name": "PE10",
+            "Pin": 40
         },
         {
             "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_11/USB_DM",
-            "Pin": 37
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PB_12/A21",
-            "Pin": 38
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PB_11/A11",
-            "Pin": 39
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PB_2/A12",
-            "Pin": 40
-        },
-        {
-            "isAnalog": true,
-            "isI2C": false,
-            "isPWM": true,
-            "Name": "PB_1/A19",
+            "Name": "PE7",
             "Pin": 41
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_15/A17",
+            "Name": "PE8",
             "Pin": 42
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_14/A18",
+            "Name": "PC8",
             "Pin": 43
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_13/A20",
+            "Name": "PC9",
             "Pin": 44
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_4/A13",
+            "Name": "PC10",
             "Pin": 45
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_0/A0",
+            "Name": "PC11",
             "Pin": 46
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_1/A1",
+            "Name": "PC12",
             "Pin": 47
         },
         {
-            "isAnalog": true,
+            "isAnalog": false,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PA_4/A2",
+            "Name": "PD2",
             "Pin": 48
         },
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PB_0/A3",
+            "Name": "PF3/A18",
             "Pin": 49
         },
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_1/A4",
+            "Name": "PF5/A19",
             "Pin": 50
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD7",
+            "Pin": 51
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD6",
+            "Pin": 52
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD5",
+            "Pin": 53
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD4",
+            "Pin": 54
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD3",
+            "Pin": 55
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE2",
+            "Pin": 56
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE4",
+            "Pin": 57
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE5",
+            "Pin": 58
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE6",
+            "Pin": 59
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE3",
+            "Pin": 60
         },
         {
             "isAnalog": true,
             "isI2C": false,
             "isPWM": true,
-            "Name": "PC_0/A5",
-            "Pin": 51
+            "Name": "PF8/A20",
+            "Pin": 61
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF7/A21",
+            "Pin": 62
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF9/A22",
+            "Pin": 63
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG1",
+            "Pin": 64
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG0",
+            "Pin": 65
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD1",
+            "Pin": 66
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD0",
+            "Pin": 67
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF0",
+            "Pin": 68
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF1",
+            "Pin": 69
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF2",
+            "Pin": 70
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PB6",
+            "Pin": 71
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PB2",
+            "Pin": 72
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA8",
+            "Pin": 73
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA9",
+            "Pin": 74
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA10",
+            "Pin": 75
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA11",
+            "Pin": 76
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA12",
+            "Pin": 77
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PA15",
+            "Pin": 78
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PB7",
+            "Pin": 79
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PB14",
+            "Pin": 80
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PC7",
+            "Pin": 81
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PC13",
+            "Pin": 82
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PC14",
+            "Pin": 83
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PC15",
+            "Pin": 84
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD10",
+            "Pin": 85
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD11",
+            "Pin": 86
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD12",
+            "Pin": 87
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PD13",
+            "Pin": 88
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PE1",
+            "Pin": 89
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF10/A23",
+            "Pin": 90
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PF11",
+            "Pin": 91
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG2",
+            "Pin": 92
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG3",
+            "Pin": 93
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG4",
+            "Pin": 94
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG5",
+            "Pin": 95
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG6",
+            "Pin": 96
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG7",
+            "Pin": 97
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG8",
+            "Pin": 98
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG9",
+            "Pin": 99
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG10",
+            "Pin": 100
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG11",
+            "Pin": 101
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG12",
+            "Pin": 102
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG13",
+            "Pin": 103
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PG14",
+            "Pin": 104
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PH0",
+            "Pin": 105
+        },
+        {
+            "isAnalog": false,
+            "isI2C": false,
+            "isPWM": true,
+            "Name": "PH1",
+            "Pin": 106
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PA3/A0",
+            "Pin": 107
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PC0/A1",
+            "Pin": 108
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PC3/A2",
+            "Pin": 109
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PC1/A3",
+            "Pin": 110
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PC4/A4",
+            "Pin": 111
+        },
+        {
+            "isAnalog": true,
+            "isI2C": false,
+            "isPWM": false,
+            "Name": "PC5/A5",
+            "Pin": 112
         }
     ]
 }
