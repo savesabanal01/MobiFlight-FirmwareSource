@@ -31,7 +31,7 @@ bool MFInputShifter::attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin,
 
     if (!FitInMemory(sizeof(uint8_t) * _moduleCount))
         return false;
-    
+
     _lastState = new (allocateMemory(sizeof(uint8_t) * _moduleCount)) uint8_t;
     for (uint8_t i = 0; i < _moduleCount; i++) {
         _lastState[i] = 0;
@@ -42,6 +42,11 @@ bool MFInputShifter::attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin,
     poll(DONT_TRIGGER);
 
     return true;
+}
+
+void MFInputShifter::detach()
+{
+    _initialized = false;
 }
 
 // Reads the values from the attached modules, compares them to the previously
@@ -94,26 +99,21 @@ void MFInputShifter::detectChanges(uint8_t lastState, uint8_t currentState, uint
     }
 }
 
-// Reads the current state for all connected modules then fires
-// release events for every released button followed by
-// press events for every pressed button.
-void MFInputShifter::retrigger()
+// Triggers the event handler for the associated input shift register pin,
+// if a handler is registered.
+void MFInputShifter::trigger(uint8_t pin, bool state)
 {
+    (*_inputHandler)((state == LOW ? inputShifterOnPress : inputShifterOnRelease), pin, _name);
+}
+
+void MFInputShifter::triggerOnPress()
+{
+    if (!_initialized || !_inputHandler)
+        return;
+
     uint8_t state;
 
     poll(DONT_TRIGGER);
-
-    // Trigger all the released buttons
-    for (int module = 0; module < _moduleCount; module++) {
-        state = _lastState[module];
-        for (uint8_t i = 0; i < 8; i++) {
-            // Only trigger if the button is in the off position
-            if (state & 1) {
-                trigger(i + (module * 8), HIGH);
-            }
-            state = state >> 1;
-        }
-    }
 
     // Trigger all the pressed buttons
     for (int module = 0; module < _moduleCount; module++) {
@@ -129,23 +129,32 @@ void MFInputShifter::retrigger()
     }
 }
 
-// Triggers the event handler for the associated input shift register pin,
-// if a handler is registered.
-void MFInputShifter::trigger(uint8_t pin, bool state)
+void MFInputShifter::triggerOnRelease()
 {
-    if (!_inputHandler) return;
-    (*_inputHandler)((state == LOW ? inputShifterOnPress : inputShifterOnRelease), pin, _name);
+    if (!_initialized || !_inputHandler)
+        return;
+
+    uint8_t state;
+
+    poll(DONT_TRIGGER);
+
+    // Trigger all the released buttons
+    for (int module = 0; module < _moduleCount; module++) {
+        state = _lastState[module];
+        for (uint8_t i = 0; i < 8; i++) {
+            // Only trigger if the button is in the off position
+            if (state & 1) {
+                trigger(i + (module * 8), HIGH);
+            }
+            state = state >> 1;
+        }
+    }
 }
 
 // Attaches a new event handler for the specified event.
 void MFInputShifter::attachHandler(inputShifterEvent newHandler)
 {
     _inputHandler = newHandler;
-}
-
-void MFInputShifter::detach()
-{
-    _initialized = false;
 }
 
 // MFInputShifter.cpp
