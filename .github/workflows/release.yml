@@ -38,12 +38,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
 
-      - name: Checkout custom devices
-        uses: actions/checkout@v3
-        with:
-          repository: MobiFlight/MobiFlight-CustomDevices
-          path: CustomDevices
-
       - name: Extract build version
         id: get_version
         uses: battila7/get-version-action@v2
@@ -56,16 +50,12 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: firmware
-          path: |
-            .pio/build/**/*.hex
-            .pio/build/**/*.uf2
+          name: ZIP files
+          path: ./_dist/*.zip
 
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: |
-            .pio/build/**/*.hex
-            .pio/build/**/*.uf2
+          files: ./_dist/*.zip

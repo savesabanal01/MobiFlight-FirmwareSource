@@ -39,12 +39,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
 
-      - name: Checkout custom devices
-        uses: actions/checkout@v3
-        with:
-          repository: MobiFlight/MobiFlight-CustomDevices
-          path: CustomDevices
-
       - name: Run PlatformIO
         env:
           VERSION: "0.0.${{ github.event.number }}"
@@ -53,7 +47,5 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: firmware
-          path: |
-            .pio/build/**/*.hex
-            .pio/build/**/*.uf2
+          name: ZIP files
+          path: ./_dist/*.zip
