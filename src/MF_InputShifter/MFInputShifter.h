@@ -37,9 +37,6 @@ private:
     FASTIO_s    _latchPin;
     FASTIO_s    _clockPin;
     FASTIO_s    _dataPin;
-    uint8_t     _latchPin;    // SH/~LD (latch) pin
-    uint8_t     _clockPin;    // CLK (clock) pin
-    uint8_t     _dataPin;     // SDO (data) pin
     uint8_t     _moduleCount; // Number of 8 bit modules in series.
     bool        _initialized = false;
     uint8_t    *_lastState;

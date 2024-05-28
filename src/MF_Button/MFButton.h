@@ -35,10 +35,9 @@ public:
 
 private:
     const char *_name;
-    uint8_t     _pin;
+    FASTIO_s    _pin;
     bool        _initialized;
     bool        _state;
-    FASTIO_s    _pin;
 
     static buttonEvent _inputHandler;
 };
