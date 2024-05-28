@@ -20,11 +20,11 @@ void MFOutputShifter::setPin(uint8_t pin, uint8_t value, uint8_t refresh)
     uint8_t msk = (0x01 << (pin & 0x07));
 
     if (value != MF_LOW) {
-        _outputBuffer[idx] |= msk;
+        _lastState[idx] |= msk;
     } else {
-        _outputBuffer[idx] &= ~msk;
+        _lastState[idx] &= ~msk;
     }
-    if (refresh) updateShiftRegister();
+    if (refresh) update();
 }
 
 void MFOutputShifter::setPins(char *pins, uint8_t value)
@@ -37,7 +37,7 @@ void MFOutputShifter::setPins(char *pins, uint8_t value)
         setPin(num, value, 0);
         pinTokens = strtok(0, "|");
     }
-    updateShiftRegister();
+    update();
 }
 
 bool MFOutputShifter::attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t moduleCount)
@@ -55,7 +55,7 @@ bool MFOutputShifter::attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin
     if (!FitInMemory(sizeof(uint8_t) * _moduleCount))
         return false;
 
-    _outputBuffer = new (allocateMemory(sizeof(uint8_t) * _moduleCount)) uint8_t;
+    _lastState = new (allocateMemory(sizeof(uint8_t) * _moduleCount)) uint8_t;
 
     clear();
 
@@ -70,16 +70,16 @@ void MFOutputShifter::detach()
 void MFOutputShifter::clear()
 {
     for (uint8_t i = 0; i < _moduleCount; i++) {
-        _outputBuffer[i] = 0xFF * MF_LOW;
+        _lastState[i] = 0xFF * MF_LOW;
     }
-    updateShiftRegister();
+    update();
 }
 
-void MFOutputShifter::updateShiftRegister()
+void MFOutputShifter::update()
 {
     digitalWrite(_latchPin, LOW);
     for (uint8_t i = _moduleCount; i > 0; i--) {
-        shiftOut(_dataPin, _clockPin, MSBFIRST, _outputBuffer[i - 1]); // LSBFIRST, MSBFIRST,
+        shiftOut(_dataPin, _clockPin, MSBFIRST, _lastState[i - 1]); // LSBFIRST, MSBFIRST,
     }
     digitalWrite(_latchPin, HIGH);
 }

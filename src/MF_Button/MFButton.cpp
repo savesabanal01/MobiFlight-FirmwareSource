@@ -5,7 +5,7 @@
 //
 #include "MFButton.h"
 
-buttonEvent MFButton::_handler = NULL;
+buttonEvent MFButton::_inputHandler = NULL;
 
 MFButton::MFButton()
 {
@@ -14,11 +14,16 @@ MFButton::MFButton()
 
 void MFButton::attach(uint8_t pin, uint8_t deviceID)
 {
-    _pin      = pin;
+    _pin  = pin;
     _deviceID = deviceID;
-    pinMode(_pin, INPUT_PULLUP); // set pin to input
-    _state = digitalRead(_pin);  // initialize on actual status
+    pinMode(_pin, INPUT_PULLUP);      // set pin to input
+    _state       = digitalRead(_pin); // initialize on actual status
     _initialized = true;
+}
+
+void MFButton::detach()
+{
+    _initialized = false;
 }
 
 void MFButton::update()
@@ -41,8 +46,8 @@ void MFButton::triggerOnPress()
 {
     if (!_initialized)
         return;
-    if (_handler && _state == LOW) {
-        (*_handler)(btnOnPress, _deviceID);
+    if (_inputHandler && _state == LOW) {
+        (*_inputHandler)(btnOnPress, _deviceID);
     }
 }
 
@@ -50,14 +55,14 @@ void MFButton::triggerOnRelease()
 {
     if (!_initialized)
         return;
-    if (_handler && _state == HIGH) {
-        (*_handler)(btnOnRelease, _deviceID);
+    if (_inputHandler && _state == HIGH) {
+        (*_inputHandler)(btnOnRelease, _deviceID);
     }
 }
 
 void MFButton::attachHandler(buttonEvent newHandler)
 {
-    _handler = newHandler;
+    _inputHandler = newHandler;
 }
 
 // MFButton.cpp

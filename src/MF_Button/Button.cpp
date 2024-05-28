@@ -14,7 +14,7 @@ namespace Button
     uint8_t   buttonsRegistered = 0;
     uint8_t   maxButtons        = 0;
 
-    void handlerOnButton(uint8_t eventId, uint8_t deviceID)
+    void handlerButtonOnChange(uint8_t eventId, uint8_t deviceID)
     {
         cmdMessenger.sendCmdStart(kButtonChange);
         cmdMessenger.sendCmdArg(deviceID);
@@ -37,7 +37,7 @@ namespace Button
             return;
         buttons[buttonsRegistered] = MFButton();
         buttons[buttonsRegistered].attach(pin, buttonsRegistered);
-        MFButton::attachHandler(handlerOnButton);
+        MFButton::attachHandler(handlerButtonOnChange);
         buttonsRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Added button ") /* + name */);
@@ -46,6 +46,9 @@ namespace Button
 
     void Clear(void)
     {
+        for (uint8_t i = 0; i < buttonsRegistered; i++) {
+            buttons[i].detach();
+        }
         buttonsRegistered = 0;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kDebug, F("Cleared buttons"));
