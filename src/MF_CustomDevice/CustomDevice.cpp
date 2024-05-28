@@ -1,6 +1,9 @@
 #include "mobiflight.h"
 #include "CustomDevice.h"
 #include "MFCustomDevice.h"
+#if defined(USE_2ND_CORE)
+#include <FreeRTOS.h>
+#endif
 
 /* **********************************************************************************
     Normally nothing has to be changed in this file
@@ -14,6 +17,9 @@ namespace CustomDevice
     MFCustomDevice *customDevice;
     uint8_t         customDeviceRegistered = 0;
     uint8_t         maxCustomDevices       = 0;
+#if defined(USE_2ND_CORE)
+    char payload[SERIAL_RX_BUFFER_SIZE];
+#endif
 
     bool setupArray(uint16_t count)
     {
@@ -24,12 +30,12 @@ namespace CustomDevice
         return true;
     }
 
-    void Add(uint16_t adrPin, uint16_t adrType, uint16_t adrConfig)
+    void Add(uint16_t adrPin, uint16_t adrType, uint16_t adrConfig, bool configFromFlash)
     {
         if (customDeviceRegistered == maxCustomDevices)
             return;
         customDevice[customDeviceRegistered] = MFCustomDevice();
-        customDevice[customDeviceRegistered].attach(adrPin, adrType, adrConfig);
+        customDevice[customDeviceRegistered].attach(adrPin, adrType, adrConfig, configFromFlash);
         customDeviceRegistered++;
 #ifdef DEBUG2CMDMESSENGER
         cmdMessenger.sendCmd(kStatus, F("Added CustomDevice"));
@@ -62,9 +68,11 @@ namespace CustomDevice
     ********************************************************************************** */
     void update()
     {
+#if !defined(USE_2ND_CORE)
         for (int i = 0; i != customDeviceRegistered; i++) {
             customDevice[i].update();
         }
+#endif
     }
 
     /* **********************************************************************************
@@ -84,7 +92,19 @@ namespace CustomDevice
         int16_t messageID = cmdMessenger.readInt16Arg();  // get the messageID number
         char   *output    = cmdMessenger.readStringArg(); // get the pointer to the new raw string
         cmdMessenger.unescape(output);                    // and unescape the string if escape characters are used
-        customDevice[device].set(messageID, output);      // send the string to your custom device
+#if defined(USE_2ND_CORE)
+        // copy the message, could get be overwritten from the next message while processing on 2nd core
+        strncpy(payload, output, SERIAL_RX_BUFFER_SIZE);
+        // wait for 2nd core
+        rp2040.fifo.pop();
+        // Hmhm, how to get the function pointer to a function from class??
+        // rp2040.fifo.push((uintptr_t) &customDevice[device].set);
+        rp2040.fifo.push(device);
+        rp2040.fifo.push(messageID);
+        rp2040.fifo.push((uint32_t)&payload);
+#else
+        customDevice[device].set(messageID, output); // send the string to your custom device
+#endif
     }
 
     /* **********************************************************************************
@@ -97,10 +117,68 @@ namespace CustomDevice
     {
         for (uint8_t i = 0; i < customDeviceRegistered; ++i) {
             if (state)
-                customDevice[i].set(MESSAGEID_POWERSAVINGMODE, "1");
+                customDevice[i].set(MESSAGEID_POWERSAVINGMODE, (char*)"1");
             else
-                customDevice[i].set(MESSAGEID_POWERSAVINGMODE, "0");
+                customDevice[i].set(MESSAGEID_POWERSAVINGMODE, (char*)"0");
         }
     }
-
 } // end of namespace
+
+#if defined(USE_2ND_CORE)
+/* **********************************************************************************
+    This will run the set() function from the custom device on the 2nd core
+    Be aware NOT to use the function calls from the Pico SDK!
+    Only use the functions from the used framework from EarlePhilHower
+    If you mix them up it will give undefined behaviour and strange effects
+    see https://arduino-pico.readthedocs.io/en/latest/multicore.html
+********************************************************************************** */
+void setup1()
+{
+    // send "ready" message to 1st core
+    rp2040.fifo.push(true);
+}
+
+void loop1()
+{
+    uint8_t device;
+    int16_t messageID;
+    char   *payload;
+#ifdef MF_CUSTOMDEVICE_POLL_MS
+    uint32_t lastMillis = 0;
+#endif
+
+    while (1) {
+#ifndef MF_CUSTOMDEVICE_POLL_MS
+        // For now I don't know the reason why this is required.
+        // It might be that getting the stop command from the 1st core
+        // needs some idle time. If it is not used the 1st core stops when
+        // writing to the EEPROM which stops the 2nd core
+        delayMicroseconds(1);
+#endif  
+#ifdef MF_CUSTOMDEVICE_POLL_MS
+        if (millis() - lastMillis >= MF_CUSTOMDEVICE_POLL_MS) {
+#endif
+            for (int i = 0; i != CustomDevice::customDeviceRegistered; i++) {
+#if defined(MF_CUSTOMDEVICE_HAS_UPDATE)
+                CustomDevice::customDevice[i].update();
+#endif
+                if (rp2040.fifo.available() == 3) {
+                    // Hmhm, how to get the function pointer to a function from class??
+                    // int32_t (*func)(int16_t, char*) = (int32_t(*)(int16_t, char*)) rp2040.fifo.pop();
+                    device    = (uint8_t)rp2040.fifo.pop();
+                    messageID = (int16_t)rp2040.fifo.pop();
+                    payload   = (char *)rp2040.fifo.pop();
+                    // (*func)(messageID, payload);
+                    CustomDevice::customDevice[device].set(messageID, payload);
+                    // send ready for next message to 1st core
+                    rp2040.fifo.push(true);
+                }
+
+            }
+#ifdef MF_CUSTOMDEVICE_POLL_MS
+            lastMillis = millis();
+        }
+#endif
+    }
+}
+#endif
