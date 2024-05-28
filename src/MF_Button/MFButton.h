@@ -27,6 +27,7 @@ public:
     MFButton();
     static void attachHandler(buttonEvent newHandler);
     void        attach(uint8_t pin, const char *name);
+    void        detach();
     void        update();
     void        trigger(uint8_t state);
     void        triggerOnPress();
@@ -34,10 +35,12 @@ public:
 
 private:
     const char *_name;
-    FASTIO_s _pin;
-    static buttonEvent _handler;
-    bool               _state;
-    bool               _initialized;
+    uint8_t     _pin;
+    bool        _initialized;
+    bool        _state;
+    FASTIO_s    _pin;
+
+    static buttonEvent _inputHandler;
 };
 
 // MFButton.h
