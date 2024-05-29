@@ -24,13 +24,13 @@ public:
            DO_TRIGGER   = 1 };
 
     MFInputShifter();
-    bool        attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t moduleCount, const char *name);
     static void attachHandler(inputShifterEvent newHandler);
-    void        clear();
+    bool        attach(uint8_t latchPin, uint8_t clockPin, uint8_t dataPin, uint8_t moduleCount, const char *name);
     void        detach();
-    void        retrigger();
     void        update();
     void        poll(uint8_t doTrigger);
+    void        triggerOnPress();
+    void        triggerOnRelease();
 
 private:
     const char *_name;
@@ -39,7 +39,11 @@ private:
     uint8_t     _dataPin;     // SDO (data) pin
     uint8_t     _moduleCount; // Number of 8 bit modules in series.
     bool        _initialized = false;
-    uint8_t     *_lastState;
+    uint8_t    *_lastState;
+
+    void poll(uint8_t doTrigger);
+    void detectChanges(uint8_t lastState, uint8_t currentState, uint8_t module);
+    void trigger(uint8_t pin, bool state);
 
     void                     detectChanges(uint8_t lastState, uint8_t currentState, uint8_t module);
     void                     trigger(uint8_t pin, bool state);
