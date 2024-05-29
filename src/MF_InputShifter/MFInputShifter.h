@@ -41,12 +41,8 @@ private:
     bool        _initialized = false;
     uint8_t    *_lastState;
 
-    void poll(uint8_t doTrigger);
     void detectChanges(uint8_t lastState, uint8_t currentState, uint8_t module);
     void trigger(uint8_t pin, bool state);
-
-    void                     detectChanges(uint8_t lastState, uint8_t currentState, uint8_t module);
-    void                     trigger(uint8_t pin, bool state);
     static inputShifterEvent _inputHandler;
 };
 

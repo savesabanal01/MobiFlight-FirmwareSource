@@ -94,15 +94,15 @@ void readConfigFromMemory(bool configFromFlash);
 // reads the EEPROM until NUL terminator and returns the number of characters incl. terminator, starting from given address
 bool readconfigLengthEEPROM()
 {
-    uint16_t addreeprom = MEM_OFFSET_CONFIG;
+    uint16_t addrMem = MEM_OFFSET_CONFIG;
     uint16_t length     = MFeeprom.get_length();
     configLengthEEPROM  = 0;
 
     if (MFeeprom.read_byte(MEM_OFFSET_CONFIG) == 0xFF)
         return false;
-    while (MFeeprom.read_byte(addreeprom++) != 0x00) {
+    while (MFeeprom.read_byte(addrMem++) != 0x00) {
         configLengthEEPROM++;
-        if (addreeprom > length) {
+        if (addrMem > length) {
             cmdMessenger.sendCmd(kStatus, F("Loading config failed")); // text or "-1" like config upload?
             return false;
         }
@@ -559,20 +559,20 @@ void readConfigFromMemory(bool configFromFlash)
 
 #if MF_KEYMATRIX_SUPPORT == 1
         case kTypeKeyMatrix:
-            params[0] = readUintFromEEPROM(&addreeprom); // number of columns
+            params[0] = readUint(&addrMem, configFromFlash); // number of columns
             keyMatrixColumnPins = new (allocateMemory(params[0])) uint8_t;
             for (uint8_t i = 0; i < params[0]; i++) {    // Pins for the columns
-                keyMatrixColumnPins[i] = readUintFromEEPROM(&addreeprom);
+                keyMatrixColumnPins[i] = readUint(&addrMem, configFromFlash);
             }
-            params[1] = readUintFromEEPROM(&addreeprom); // number of rows
+            params[1] = readUint(&addrMem, configFromFlash); // number of rows
             keyMatrixRowPins = new (allocateMemory(params[1])) uint8_t;
             for (uint8_t i = 0; i < params[1]; i++) {    // Pins for the rows
-                keyMatrixRowPins[i] = readUintFromEEPROM(&addreeprom);
+                keyMatrixRowPins[i] = readUint(&addrMem, configFromFlash);
             }
-            Keymatrix::Add(params[0], keyMatrixColumnPins, params[1], keyMatrixRowPins, &nameBuffer[addrbuffer]);
-            copy_success = readNameFromEEPROM(&addreeprom, nameBuffer, &addrbuffer); // copy the NULL terminated name to to nameBuffer and set to next free memory location
+            Keymatrix::Add(params[0], keyMatrixColumnPins, params[1], keyMatrixRowPins, &nameBuffer[addrMem]);
+            copy_success = readName(&addrMem, nameBuffer, &addrMem, configFromFlash); // copy the NULL terminated name to to nameBuffer and set to next free memory location
 
-            // copy_success = readEndCommandFromEEPROM(&addreeprom);                 // once the nameBuffer is not required anymore uncomment this line and delete the line before
+            // copy_success = readEndCommandFromEEPROM(&addrMem);                 // once the nameBuffer is not required anymore uncomment this line and delete the line before
 #endif
 
         default:

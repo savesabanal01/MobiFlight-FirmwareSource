@@ -68,8 +68,8 @@ namespace InputShifter
 
     void poll()
     {
-        for (uint8_t i = 0; i < inputShiftersRegistered; i++) {
-            inputShifters[i].poll(MFInputShifter::DO_TRIGGER);
+        for (uint8_t i = 0; i < inputShifterRegistered; i++) {
+            inputShifter[i].poll(MFInputShifter::DO_TRIGGER);
         }
     }
 

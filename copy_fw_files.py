@@ -15,6 +15,7 @@ build_path_fw = build_path + '/firmware'
 build_path_json = build_path + '/Boards'
 distrubution_path = './_dist'
 board_folder = ['./_Boards/Atmel', './_Boards/RaspberryPi']
+platform = env.BoardConfig().get("platform", {})
 
 def copy_fw_files (source, target, env):
     fw_file_name=str(target[0])
@@ -24,8 +25,11 @@ def copy_fw_files (source, target, env):
     if os.path.exists(build_path_json) == False:
         os.makedirs(build_path_json)
 
-    if fw_file_name[-3:] == "bin":
+    if fw_file_name[-3:] == "bin" and platform == "raspberrypi":
         fw_file_name=fw_file_name[0:-3] + "uf2"
+    
+    if platform == "espressif32":
+        merge_bin(source, target, env)
 
     # Copy build FW file
     shutil.copy(fw_file_name, build_path_fw)
@@ -63,6 +67,42 @@ def createZIP(original_folder_path, zip_file_path, new_folder_name):
                 new_path = os.path.join(new_folder_name, os.path.relpath(os.path.join(root, file), original_folder_path))
                 # Add the file to the ZIP file
                 zipf.write(os.path.join(root, file), new_path)
+
+
+APP_BIN = "$BUILD_DIR/${PROGNAME}.bin"
+MERGED_BIN = "$BUILD_DIR/${PROGNAME}_merged.bin"
+BOARD_CONFIG = env.BoardConfig()
+
+def merge_bin(source, target, env):
+    # The list contains all extra images (bootloader, partitions, eboot) and
+    # the final application binary
+    flash_images = env.Flatten(env.get("FLASH_EXTRA_IMAGES", [])) + ["$ESP32_APP_OFFSET", APP_BIN]
+
+    # Run esptool to merge images into a single binary
+    env.Execute(
+        " ".join(
+            [
+                "$PYTHONEXE",
+                "$OBJCOPY",
+                "--chip",
+                BOARD_CONFIG.get("build.mcu", "esp32"),
+                "merge_bin",
+                "--fill-flash-size",
+                BOARD_CONFIG.get("upload.flash_size", "4MB"),
+                "-o",
+                MERGED_BIN,
+            ]
+            + flash_images
+        )
+    )
+
+# Patch the upload command to flash the merged binary at address 0x0
+#env.Replace(
+#    UPLOADERFLAGS=[
+#        ]
+#        + ["write_flash", "0x0", MERGED_BIN],
+#    UPLOADCMD='"$PYTHONEXE" "$UPLOADER" $UPLOADERFLAGS',
+#)
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.hex", copy_fw_files)
