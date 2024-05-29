@@ -33,6 +33,7 @@ def copy_fw_files (source, target, env):
 
     # Copy build FW file
     shutil.copy(fw_file_name, build_path_fw)
+    # merged bin file from ESP32 is missing!!
 
     # Copy reset/uf2/json files
     file_extension = '.hex'
