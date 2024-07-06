@@ -354,15 +354,13 @@ void readConfig()
     uint8_t numberDevices[kTypeMax] = {0};
     if (configLengthFlash > 0) {
         GetArraySizes(numberDevices, true);
-    }
-    if (configLengthEEPROM > 0) {
+    } else if (configLengthEEPROM > 0) {
         GetArraySizes(numberDevices, false);
     }
     InitArrays(numberDevices);
     if (configLengthFlash > 0) {
         readConfigFromMemory(true);
-    }
-    if (configLengthEEPROM > 0) {
+    } else if (configLengthEEPROM > 0) {
         readConfigFromMemory(false);
     }
 }
@@ -572,8 +570,7 @@ void OnGetConfig()
             cmdMessenger.sendArg((char)pgm_read_byte_near(CustomDeviceConfig + i));
         }
         sentFromFlash = true;
-    }
-    if (configLengthEEPROM > 0) {
+    } else if (configLengthEEPROM > 0) {
         if (sentFromFlash)
             cmdMessenger.sendArg((char)MFeeprom.read_byte(MEM_OFFSET_CONFIG));
         else
